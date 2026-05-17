@@ -1,0 +1,53 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Carrito — Misso{% endblock %}
+
+{% block content %}
+<style>
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; margin-bottom: 50px; letter-spacing: 3px; }
+    .carrito-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 60px; }
+    .item { display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid #e8e4de; }
+    .item img { width: 100px; aspect-ratio: 3/4; object-fit: cover; }
+    .item-nombre { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+    .item-precio { font-size: 14px; color: #888; }
+    .eliminar { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
+    .eliminar:hover { color: #2c2c2c; }
+    .resumen { background: #f5f3f0; padding: 40px; }
+    .resumen h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 30px; letter-spacing: 2px; }
+    .resumen-total { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 30px; }
+    .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: #faf9f7; border: none; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; }
+    .btn:hover { background: #444; }
+    .volver { display: inline-block; margin-bottom: 40px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
+    .vacio { text-align: center; padding: 80px 0; color: #888; font-size: 14px; letter-spacing: 2px; }
+</style>
+
+<a href="/tienda" class="volver">← Seguir comprando</a>
+<h1>CARRITO</h1>
+
+{% if items %}
+<div class="carrito-grid">
+    <div class="items">
+        {% for item in items %}
+        <div class="item">
+            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}">
+            <div>
+                <p class="item-nombre">{{ item.producto.nombre }}</p>
+                <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
+            </div>
+            <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="resumen">
+        <h2>RESUMEN</h2>
+        <div class="resumen-total">
+            <span>Total</span>
+            <span>${{ total }}</span>
+        </div>
+        <a href="/tienda/checkout/" class="btn">Finalizar compra</a>
+    </div>
+</div>
+{% else %}
+<p class="vacio">Tu carrito está vacío</p>
+{% endif %}
+{% endblock %}

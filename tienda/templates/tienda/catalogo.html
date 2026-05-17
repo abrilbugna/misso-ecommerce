@@ -1,0 +1,82 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Tienda — Misso{% endblock %}
+
+{% block extra_css %}
+<style>
+    .catalogo-header { text-align: center; padding: 60px 60px 30px; }
+    .catalogo-header h1 { font-family: 'Playfair Display', serif; font-size: 48px; font-weight: 900; letter-spacing: 6px; margin-bottom: 30px; }
+
+    /* FILTROS */
+    .filtros { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 50px; }
+    .filtro-btn {
+        padding: 10px 24px;
+        border: 1.5px solid var(--rosa-deep);
+        background: transparent;
+        color: var(--texto);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 50px;
+    }
+    .filtro-btn:hover { background: var(--rosa-deep); color: white; }
+    .filtro-btn.activo { background: var(--rosa-deep); color: white; }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding: 0 60px 80px; }
+    .producto a { text-decoration: none; color: inherit; }
+    .producto-img { overflow: hidden; background: var(--rosa-light); border-radius: 16px; border: 2px dashed var(--rosa); }
+    .producto-img img { width: 100%; aspect-ratio: 3/4; object-fit: cover; transition: transform 0.4s ease; }
+    .producto:hover .producto-img img { transform: scale(1.04); }
+    .producto-info { padding: 14px 4px; }
+    .producto-nombre { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .producto-precio { font-size: 16px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); }
+
+    .vacio { text-align: center; padding: 80px; color: var(--gris); font-size: 14px; letter-spacing: 2px; }
+
+    @media (max-width: 768px) {
+        .catalogo-header { padding: 30px 20px 20px; }
+        .catalogo-header h1 { font-size: 28px; }
+        .filtros { gap: 8px; padding: 0 20px; }
+        .filtro-btn { padding: 8px 16px; font-size: 10px; }
+        .grid { grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 20px 40px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="catalogo-header">
+    <h1>TIENDA</h1>
+    <div class="filtros">
+        <a href="/tienda/" class="filtro-btn {% if not categoria_activa %}activo{% endif %}">Todos</a>
+        {% for valor, nombre in categorias %}
+        <a href="/tienda/?categoria={{ valor }}" class="filtro-btn {% if categoria_activa == valor %}activo{% endif %}">{{ nombre }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="grid">
+    {% for producto in productos %}
+    <div class="producto">
+        <a href="/tienda/{{ producto.pk }}/">
+            <div class="producto-img">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            </div>
+            <div class="producto-info">
+                <p class="producto-nombre">{{ producto.nombre }}</p>
+                <p class="producto-precio">${{ producto.precio }}</p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+    {% if not productos %}
+    <p class="vacio">No hay productos en esta categoría todavía.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

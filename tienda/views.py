@@ -1,0 +1,87 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden
+from .forms import CheckoutForm
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS
+
+def inicio(request):
+    productos = Producto.objects.filter(activo=True)[:3]
+    return render(request, 'tienda/inicio.html', {'productos': productos})
+
+def catalogo(request):
+    productos = Producto.objects.filter(activo=True)
+    return render(request, 'tienda/catalogo.html', {'productos': productos})
+
+def detalle(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    return render(request, 'tienda/detalle.html', {'producto': producto})
+
+def agregar_carrito(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if not request.session.session_key:
+        request.session.create()
+    carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
+    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
+    if not creado:
+        item.cantidad += 1
+        item.save()
+    return redirect('ver_carrito')
+
+def ver_carrito(request):
+    if not request.session.session_key:
+        request.session.create()
+    carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
+    items = ItemCarrito.objects.filter(carrito=carrito)
+    total = sum(item.subtotal() for item in items)
+    return render(request, 'tienda/carrito.html', {'items': items, 'total': total})
+
+def eliminar_carrito(request, pk):
+    item = get_object_or_404(ItemCarrito, pk=pk)
+    item.delete()
+    return redirect('ver_carrito')
+
+def checkout(request):
+    if not request.session.session_key:
+        return redirect('catalogo')
+    carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
+    items = ItemCarrito.objects.filter(carrito=carrito)
+    if not items:
+        return redirect('ver_carrito')
+    total = sum(item.subtotal() for item in items)
+    if request.method == 'POST':
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            orden = Orden.objects.create(
+                nombre=form.cleaned_data['nombre'],
+                email=form.cleaned_data['email'],
+                telefono=form.cleaned_data['telefono'],
+                direccion=form.cleaned_data['direccion'],
+                total=total
+            )
+            for item in items:
+                ItemOrden.objects.create(
+                    orden=orden,
+                    producto=item.producto,
+                    cantidad=item.cantidad,
+                    precio=item.producto.precio
+                )
+            items.delete()
+            return redirect('confirmacion', pk=orden.pk)
+    else:
+        form = CheckoutForm()
+    return render(request, 'tienda/checkout.html', {'form': form, 'items': items, 'total': total})
+
+def confirmacion(request, pk):
+    orden = get_object_or_404(Orden, pk=pk)
+    return render(request, 'tienda/confirmacion.html', {'orden': orden})
+
+def catalogo(request):
+    categoria = request.GET.get('categoria', '')
+    if categoria:
+        productos = Producto.objects.filter(activo=True, categoria=categoria)
+    else:
+        productos = Producto.objects.filter(activo=True)
+    return render(request, 'tienda/catalogo.html', {
+        'productos': productos,
+        'categoria_activa': categoria,
+        'categorias': CATEGORIAS,
+    })

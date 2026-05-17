@@ -1,0 +1,52 @@
+{% extends 'tienda/base.html' %}
+
+{% block title %}Checkout — Misso{% endblock %}
+
+{% block content %}
+<style>
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; margin-bottom: 50px; letter-spacing: 3px; }
+    .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
+    .form-group { margin-bottom: 25px; }
+    label { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: #888; }
+    input, textarea { width: 100%; padding: 12px; border: 1px solid #e8e4de; background: transparent; font-family: 'Jost', sans-serif; font-size: 14px; outline: none; }
+    input:focus, textarea:focus { border-color: #2c2c2c; }
+    .resumen { background: #f5f3f0; padding: 40px; }
+    .resumen h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 30px; letter-spacing: 2px; }
+    .resumen-item { display: flex; justify-content: space-between; font-size: 13px; padding: 10px 0; border-bottom: 1px solid #e8e4de; }
+    .resumen-total { display: flex; justify-content: space-between; font-size: 14px; margin-top: 20px; margin-bottom: 30px; }
+    .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: #faf9f7; border: none; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+    .btn:hover { background: #444; }
+    .volver { display: inline-block; margin-bottom: 40px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
+</style>
+
+<a href="/tienda/carrito/" class="volver">← Volver al carrito</a>
+<h1>CHECKOUT</h1>
+
+<div class="checkout-grid">
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn">Confirmar pedido</button>
+        </form>
+    </div>
+    <div class="resumen">
+        <h2>TU PEDIDO</h2>
+        {% for item in items %}
+        <div class="resumen-item">
+            <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
+            <span>${{ item.subtotal }}</span>
+        </div>
+        {% endfor %}
+        <div class="resumen-total">
+            <span>Total</span>
+            <span>${{ total }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
