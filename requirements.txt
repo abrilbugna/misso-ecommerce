@@ -1,0 +1,2 @@
+# TODO: here you should add all the dependencies of your project, for example:
+# Django==3.2.5
