@@ -1,0 +1,64 @@
+{% extends 'tienda/base.html' %}
+{% block title %}Datos de transferencia — Misso{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirmacion { text-align: center; padding: 80px 60px; max-width: 600px; margin: 0 auto; }
+    .check { font-size: 60px; margin-bottom: 30px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 300; margin-bottom: 20px; letter-spacing: 3px; }
+    p { font-size: 14px; color: var(--gris); margin-bottom: 10px; letter-spacing: 1px; line-height: 1.8; }
+    .datos-transferencia {
+        background: var(--rosa-light);
+        border: 2px dashed var(--rosa);
+        border-radius: 16px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    .datos-transferencia h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--rosa-deep); margin-bottom: 20px; }
+    .dato { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); font-size: 14px; }
+    .dato:last-child { border-bottom: none; }
+    .dato-label { color: var(--gris); }
+    .dato-valor { font-weight: bold; color: var(--texto); }
+    .total-transferencia { font-size: 20px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin: 20px 0; }
+    .aviso { background: var(--rosa-section); color: white; padding: 16px 24px; border-radius: 10px; font-size: 13px; margin: 20px 0; }
+    .btn { display: inline-block; padding: 16px 40px; background: var(--texto); color: white; text-decoration: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-top: 20px; }
+    .btn:hover { background: var(--rosa-deep); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirmacion">
+    <div class="check">🏦</div>
+    <h1>¡PEDIDO CONFIRMADO!</h1>
+    <p>Gracias <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
+    <p class="total-transferencia">Total a transferir: ${{ orden.total }}</p>
+
+    <div class="datos-transferencia">
+        <h2>✦ Datos para transferir</h2>
+        <div class="dato">
+            <span class="dato-label">Alias</span>
+            <span class="dato-valor">TU.ALIAS.ACÁ</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">CBU</span>
+            <span class="dato-valor">0000000000000000000000</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">Titular</span>
+            <span class="dato-valor">Tu Nombre Completo</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">Banco</span>
+            <span class="dato-valor">Tu Banco</span>
+        </div>
+    </div>
+
+    <div class="aviso">
+        📩 Una vez realizada la transferencia envianos el comprobante a <strong>tu@email.com</strong> o por Instagram con el número de pedido <strong>#{{ orden.pk }}</strong>
+    </div>
+
+    <p>Te contactaremos a <strong>{{ orden.email }}</strong> para confirmar el pago y coordinar el envío.</p>
+    <a href="/tienda" class="btn">Seguir comprando</a>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'tienda/base.html' %}
+{% block title %}Pagar con MercadoPago — Misso{% endblock %}
+
+{% block extra_css %}
+<style>
+    .pago { text-align: center; padding: 80px 60px; max-width: 600px; margin: 0 auto; }
+    .icono { font-size: 60px; margin-bottom: 30px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 300; margin-bottom: 20px; letter-spacing: 3px; }
+    p { font-size: 14px; color: var(--gris); margin-bottom: 10px; letter-spacing: 1px; line-height: 1.8; }
+    .total { font-size: 24px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin: 20px 0; }
+    .btn-mp {
+        display: inline-block;
+        padding: 18px 50px;
+        background: #009ee3;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border-radius: 8px;
+        margin-top: 20px;
+        transition: background 0.3s;
+    }
+    .btn-mp:hover { background: #007bb5; }
+    .aviso { font-size: 12px; color: var(--gris); margin-top: 20px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pago">
+    <div class="icono">💳</div>
+    <h1>PAGAR CON MERCADOPAGO</h1>
+    <p>Pedido #{{ orden.pk }} — {{ orden.nombre }}</p>
+    <p class="total">Total: ${{ orden.total }}</p>
+    <p>Al tocar el botón vas a ser redirigida a MercadoPago para completar el pago de forma segura.</p>
+    <a href="#" class="btn-mp">Pagar ahora →</a>
+    <p class="aviso">🔒 Pago seguro procesado por MercadoPago</p>
+</div>
+{% endblock %}

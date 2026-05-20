@@ -4,7 +4,7 @@ from .forms import CheckoutForm
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS
 
 def inicio(request):
-    productos = Producto.objects.filter(activo=True)[:3]
+    productos = Producto.objects.filter(activo=True, destacado=True)[:3]
     return render(request, 'tienda/inicio.html', {'productos': productos})
 
 def catalogo(request):
@@ -46,15 +46,23 @@ def checkout(request):
     items = ItemCarrito.objects.filter(carrito=carrito)
     if not items:
         return redirect('ver_carrito')
-    total = sum(item.subtotal() for item in items)
+    
+    subtotal = sum(item.subtotal() for item in items)
+    
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
+            envio = form.cleaned_data['envio']
+            metodo_pago = form.cleaned_data['metodo_pago']
+            total = subtotal + envio.costo
+            
             orden = Orden.objects.create(
                 nombre=form.cleaned_data['nombre'],
                 email=form.cleaned_data['email'],
                 telefono=form.cleaned_data['telefono'],
                 direccion=form.cleaned_data['direccion'],
+                envio=envio,
+                metodo_pago=metodo_pago,
                 total=total
             )
             for item in items:
@@ -65,14 +73,33 @@ def checkout(request):
                     precio=item.producto.precio
                 )
             items.delete()
-            return redirect('confirmacion', pk=orden.pk)
+
+            if metodo_pago == 'efectivo':
+                return redirect('confirmacion', pk=orden.pk)
+            elif metodo_pago == 'transferencia':
+                return redirect('confirmacion_transferencia', pk=orden.pk)
+            elif metodo_pago == 'mercadopago':
+                return redirect('pago_mp', pk=orden.pk)
     else:
         form = CheckoutForm()
-    return render(request, 'tienda/checkout.html', {'form': form, 'items': items, 'total': total})
+    
+    return render(request, 'tienda/checkout.html', {
+        'form': form,
+        'items': items,
+        'subtotal': subtotal,
+    })
 
 def confirmacion(request, pk):
     orden = get_object_or_404(Orden, pk=pk)
     return render(request, 'tienda/confirmacion.html', {'orden': orden})
+
+def confirmacion_transferencia(request, pk):
+    orden = get_object_or_404(Orden, pk=pk)
+    return render(request, 'tienda/confirmacion_transferencia.html', {'orden': orden})
+
+def pago_mp(request, pk):
+    orden = get_object_or_404(Orden, pk=pk)
+    return render(request, 'tienda/pago_mp.html', {'orden': orden})
 
 def catalogo(request):
     categoria = request.GET.get('categoria', '')

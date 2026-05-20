@@ -1,53 +1,88 @@
 {% extends 'tienda/base.html' %}
-
 {% block title %}Carrito — Misso{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; margin-bottom: 50px; letter-spacing: 3px; }
-    .carrito-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 60px; }
-    .item { display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid #e8e4de; }
-    .item img { width: 100px; aspect-ratio: 3/4; object-fit: cover; }
-    .item-nombre { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-    .item-precio { font-size: 14px; color: #888; }
-    .eliminar { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
-    .eliminar:hover { color: #2c2c2c; }
-    .resumen { background: #f5f3f0; padding: 40px; }
-    .resumen h2 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 300; margin-bottom: 30px; letter-spacing: 2px; }
-    .resumen-total { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 30px; }
-    .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: #faf9f7; border: none; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; }
-    .btn:hover { background: #444; }
-    .volver { display: inline-block; margin-bottom: 40px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
-    .vacio { text-align: center; padding: 80px 0; color: #888; font-size: 14px; letter-spacing: 2px; }
+    .carrito-wrap { padding: 50px 60px 80px; }
+    .volver { display: inline-block; margin-bottom: 30px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gris); text-decoration: none; }
+    .volver:hover { color: var(--rosa-deep); }
+    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; letter-spacing: 4px; margin-bottom: 40px; }
+
+    .carrito-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 60px; align-items: start; }
+
+    /* ITEMS */
+    .item { display: grid; grid-template-columns: 90px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--borde); }
+    .item-img { width: 90px; aspect-ratio: 3/4; object-fit: cover; border-radius: 10px; border: 1.5px dashed var(--rosa); }
+    .item-nombre { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; color: var(--texto); }
+    .item-precio { font-size: 14px; color: var(--gris); }
+    .eliminar { font-size: 18px; color: var(--gris); text-decoration: none; transition: color 0.2s; }
+    .eliminar:hover { color: var(--rosa-deep); }
+
+    /* RESUMEN */
+    .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 36px; position: sticky; top: 100px; }
+    .resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }
+    .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-bottom: 30px; }
+    .btn { display: block; width: 100%; padding: 16px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
+    .btn:hover { background: var(--rosa-deep); }
+
+    /* VACIO */
+    .vacio { text-align: center; padding: 100px 0; }
+    .vacio p { font-size: 14px; color: var(--gris); letter-spacing: 2px; margin-bottom: 30px; }
+    .vacio a { display: inline-block; padding: 14px 36px; background: var(--texto); color: white; text-decoration: none; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; border-radius: 8px; }
+
+    @media (max-width: 768px) {
+        .carrito-wrap { padding: 30px 20px 60px; }
+        .carrito-grid { grid-template-columns: 1fr; gap: 30px; }
+        .resumen { position: static; }
+        .item { grid-template-columns: 70px 1fr auto; gap: 14px; }
+        .item-img { width: 70px; }
+        
+           /* Espacio blanco más chico */
+    div[style*="min-height: 300px"] { min-height: 80px !important; }
+    
+    /* Imagen conejos más chica */
+    div[style*="min-height: 300px"] img { max-width: 200px !important; }
+    
+    /* Footer más chico */
+    footer { padding: 24px 20px; }
+    footer .footer-logo { font-size: 36px; margin-bottom: 10px; }
+    }
 </style>
+{% endblock %}
 
-<a href="/tienda" class="volver">← Seguir comprando</a>
-<h1>CARRITO</h1>
+{% block content %}
+<div class="carrito-wrap">
+    <a href="/tienda" class="volver">← Seguir comprando</a>
+    <h1>CARRITO</h1>
 
-{% if items %}
-<div class="carrito-grid">
-    <div class="items">
-        {% for item in items %}
-        <div class="item">
-            <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}">
-            <div>
-                <p class="item-nombre">{{ item.producto.nombre }}</p>
-                <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
+    {% if items %}
+    <div class="carrito-grid">
+        <div class="items">
+            {% for item in items %}
+            <div class="item">
+                <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
+                <div>
+                    <p class="item-nombre">{{ item.producto.nombre }}</p>
+                    <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
+                </div>
+                <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
             </div>
-            <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    <div class="resumen">
-        <h2>RESUMEN</h2>
-        <div class="resumen-total">
-            <span>Total</span>
-            <span>${{ total }}</span>
+        <div class="resumen">
+            <h2>Resumen 🛍</h2>
+            <div class="resumen-total">
+                <span>Total</span>
+                <span>${{ total }}</span>
+            </div>
+            <a href="/tienda/checkout/" class="btn">Finalizar compra →</a>
         </div>
-        <a href="/tienda/checkout/" class="btn">Finalizar compra</a>
     </div>
+    {% else %}
+    <div class="vacio">
+        <p>Tu carrito está vacío 🛍</p>
+        <a href="/tienda">Ver productos</a>
+    </div>
+    {% endif %}
 </div>
-{% else %}
-<p class="vacio">Tu carrito está vacío</p>
-{% endif %}
 {% endblock %}

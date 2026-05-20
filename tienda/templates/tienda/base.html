@@ -21,9 +21,7 @@
            --gris: #888;
            --borde: #d9b0b6;
         }
-        body { font-family: 'DM Sans', sans-serif; background: var(--blanco); color: var(--texto); cursor: none; }
-
-        #cursor-custom { position: fixed; pointer-events: none; z-index: 9999; top: 0; left: 0; will-change: left, top; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--blanco); color: var(--texto); cursor: auto; }
 
         nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; background: white; border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 100; }
         nav a { text-decoration: none; color: var(--texto); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; transition: color 0.2s; }
@@ -41,9 +39,28 @@
         .carrito-mobile { display: none; font-size: 24px; text-decoration: none; }
         .cerrar-menu { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--texto); margin-bottom: 20px; }
 
-        .mobile-menu { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; align-items: center; justify-content: center; gap: 40px; }
+        .mobile-menu {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
         .mobile-menu a { font-size: 22px; letter-spacing: 4px; text-transform: uppercase; text-decoration: none; color: var(--texto); font-family: 'DM Sans', sans-serif; }
-        .mobile-menu.active { display: flex; }
+        .mobile-menu.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         @media (max-width: 768px) {
             .nav-links { display: none; }
@@ -51,13 +68,8 @@
             .carrito-mobile { display: block; }
             .logo { font-size: 20px; letter-spacing: 2px; }
             nav { padding: 16px 20px; }
-            .nav-links { display: none; }
-            .hamburger { display: block; }
-            .carrito-mobile { display: block; }
-            .logo { font-size: 20px; letter-spacing: 2px; }
-            nav { padding: 16px 20px; }
-            body { cursor: auto; }
-            #cursor-custom { display: none; }
+            footer { padding: 24px 20px; }
+            footer .footer-logo { font-size: 36px; margin-bottom: 10px; }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -79,9 +91,9 @@
 
     <div class="mobile-menu" id="mobileMenu">
         <button class="cerrar-menu" onclick="toggleMenu()">✕</button>
-        <a href="/" onclick="toggleMenu()">Inicio</a>
-        <a href="/tienda" onclick="toggleMenu()">Tienda</a>
-        <a href="/tienda/carrito/" onclick="toggleMenu()">Carrito</a>
+        <a href="/">Inicio</a>
+        <a href="/tienda">Tienda</a>
+        <a href="/tienda/carrito/">Carrito</a>
     </div>
 
     <main>
@@ -94,49 +106,9 @@
     </footer>
 
     <script>
-        const cursorDiv = document.createElement('div');
-        cursorDiv.id = 'cursor-custom';
-        cursorDiv.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges">
-                <rect x="0" y="0" width="2" height="2" fill="#5c1e28"/>
-                <rect x="0" y="2" width="2" height="2" fill="#5c1e28"/>
-                <rect x="0" y="4" width="2" height="2" fill="#5c1e28"/>
-                <rect x="0" y="6" width="2" height="2" fill="#5c1e28"/>
-                <rect x="0" y="8" width="2" height="2" fill="#5c1e28"/>
-                <rect x="0" y="10" width="2" height="2" fill="#5c1e28"/>
-                <rect x="2" y="2" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="2" y="4" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="2" y="6" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="2" y="8" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="2" y="10" width="2" height="2" fill="#5c1e28"/>
-                <rect x="4" y="4" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="4" y="6" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="4" y="8" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="4" y="10" width="2" height="2" fill="#5c1e28"/>
-                <rect x="4" y="12" width="2" height="2" fill="#5c1e28"/>
-                <rect x="6" y="6" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="6" y="8" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="6" y="10" width="2" height="2" fill="#5c1e28"/>
-                <rect x="6" y="12" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="6" y="14" width="2" height="2" fill="#5c1e28"/>
-                <rect x="8" y="8" width="2" height="2" fill="#7b2d3a"/>
-                <rect x="8" y="10" width="2" height="2" fill="#5c1e28"/>
-                <rect x="10" y="10" width="2" height="2" fill="#5c1e28"/>
-            </svg>`;
-        document.body.appendChild(cursorDiv);
-
-        document.addEventListener('mousemove', e => {
-            cursorDiv.style.left = e.clientX + 'px';
-            cursorDiv.style.top = e.clientY + 'px';
-        });
-
-        document.querySelectorAll('a, button').forEach(el => {
-            el.addEventListener('mouseenter', () => cursorDiv.style.transform = 'scale(1.4)');
-            el.addEventListener('mouseleave', () => cursorDiv.style.transform = 'scale(1)');
-        });
-
         function toggleMenu() {
-            document.getElementById('mobileMenu').classList.toggle('active');
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('active');
         }
     </script>
 

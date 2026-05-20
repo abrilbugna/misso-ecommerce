@@ -8,6 +8,15 @@ CATEGORIAS = [
     ('otros', 'Otros'),
 ]
 
+class OpcionEnvio(models.Model):
+    nombre = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True)
+    costo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'{self.nombre} — ${self.costo}'
+    
 class Producto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
@@ -17,6 +26,7 @@ class Producto(models.Model):
     activo = models.BooleanField(default=True)
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='otros')
     creado = models.DateTimeField(auto_now_add=True)
+    destacado = models.BooleanField(default=False)
 
     def __str__(self):
         return self.nombre
@@ -33,12 +43,20 @@ class ItemCarrito(models.Model):
     def subtotal(self):
         return self.producto.precio * self.cantidad
 
+METODOS_PAGO = [
+    ('efectivo', 'Efectivo'),
+    ('transferencia', 'Transferencia'),
+    ('mercadopago', 'MercadoPago'),
+]
+
 class Orden(models.Model):
     nombre = models.CharField(max_length=200)
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     direccion = models.TextField()
     total = models.DecimalField(max_digits=10, decimal_places=2)
+    envio = models.ForeignKey(OpcionEnvio, on_delete=models.SET_NULL, null=True)
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='efectivo')
     creado = models.DateTimeField(auto_now_add=True)
     pagado = models.BooleanField(default=False)
 
