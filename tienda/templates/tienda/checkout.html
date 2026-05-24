@@ -107,4 +107,40 @@
         </div>
     </div>
 </div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&loading=async"></script>
+
+<script>
+async function iniciarAutocomplete() {
+    const input = document.querySelector("textarea#direccion");
+    if (!input) return;
+
+    const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
+
+    const autocompleteEl = new PlaceAutocompleteElement({
+        componentRestrictions: { country: "ar" },
+    });
+
+    input.style.display = "none";
+    input.required = false;
+    autocompleteEl.style.cssText = "width: 100%;";
+    input.parentNode.insertBefore(autocompleteEl, input);
+
+    autocompleteEl.addEventListener("gmp-placeselect", async ({ place }) => {
+        await place.fetchFields({ fields: ["formattedAddress"] });
+        input.value = place.formattedAddress;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    document.querySelector("form").addEventListener("submit", () => {
+        const texto = autocompleteEl.value || autocompleteEl.innerText || "";
+        if (!input.value && texto) {
+            input.value = texto;
+        }
+    });
+}
+
+window.addEventListener("load", iniciarAutocomplete);
+</script>
+
 {% endblock %}

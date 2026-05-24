@@ -1,9 +1,15 @@
+
+from dotenv import load_dotenv
+import os
+
 from pathlib import Path
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-^t6&)r*20cmaj-juq-hvueckv82st@v)089g3g9ln4-mf%r3@f'
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True
 
@@ -75,5 +81,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MERCADOPAGO_PUBLIC_KEY = 'APP_USR-664017e4-6ea7-4558-bc82-2d01f6f95fc5'
-MERCADOPAGO_ACCESS_TOKEN = 'APP_USR-5646817822367922-052122-5c7df399123266e32efa8aba43e4bfdd-3419930454'
+MERCADOPAGO_PUBLIC_KEY = os.getenv("MP_PUBLIC_KEY")
+MERCADOPAGO_ACCESS_TOKEN =  os.getenv("MP_ACCESS_TOKEN")
+
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")

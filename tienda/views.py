@@ -96,6 +96,7 @@ def checkout(request):
         'form': form,
         'items': items,
         'subtotal': subtotal,
+        'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
     })
 
 def confirmacion(request, pk):
