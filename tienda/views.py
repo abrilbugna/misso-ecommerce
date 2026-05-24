@@ -1,15 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden
-from .forms import CheckoutForm
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS
+from .forms import CheckoutForm
+import mercadopago
+from django.conf import settings
 
 def inicio(request):
     productos = Producto.objects.filter(activo=True, destacado=True)[:3]
     return render(request, 'tienda/inicio.html', {'productos': productos})
 
 def catalogo(request):
-    productos = Producto.objects.filter(activo=True)
-    return render(request, 'tienda/catalogo.html', {'productos': productos})
+    categoria = request.GET.get('categoria', '')
+    if categoria:
+        productos = Producto.objects.filter(activo=True, categoria=categoria)
+    else:
+        productos = Producto.objects.filter(activo=True)
+    return render(request, 'tienda/catalogo.html', {
+        'productos': productos,
+        'categoria_activa': categoria,
+        'categorias': CATEGORIAS,
+    })
 
 def detalle(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
@@ -99,16 +108,32 @@ def confirmacion_transferencia(request, pk):
 
 def pago_mp(request, pk):
     orden = get_object_or_404(Orden, pk=pk)
-    return render(request, 'tienda/pago_mp.html', {'orden': orden})
-
-def catalogo(request):
-    categoria = request.GET.get('categoria', '')
-    if categoria:
-        productos = Producto.objects.filter(activo=True, categoria=categoria)
-    else:
-        productos = Producto.objects.filter(activo=True)
-    return render(request, 'tienda/catalogo.html', {
-        'productos': productos,
-        'categoria_activa': categoria,
-        'categorias': CATEGORIAS,
+    
+    sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
+    items = ItemOrden.objects.filter(orden=orden)
+    
+    preference_data = {
+    "items": [
+        {
+            "title": item.producto.nombre,
+            "quantity": item.cantidad,
+            "unit_price": float(item.precio),
+        }
+        for item in items
+    ],
+    "back_urls": {
+        "success": "https://www.google.com",
+        "failure": "https://www.google.com",
+        "pending": "https://www.google.com",
+    },
+    "external_reference": str(orden.pk),
+}
+    
+    preference_response = sdk.preference().create(preference_data)
+    print("RESPUESTA MP:", preference_response)
+    preference = preference_response["response"]
+    
+    return render(request, 'tienda/pago_mp.html', {
+        'orden': orden,
+        'mp_url': preference.get("sandbox_init_point") or preference.get("init_point"),
     })

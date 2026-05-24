@@ -5,7 +5,7 @@
 <style>
     .pago { text-align: center; padding: 80px 60px; max-width: 600px; margin: 0 auto; }
     .icono { font-size: 60px; margin-bottom: 30px; }
-    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 300; margin-bottom: 20px; letter-spacing: 3px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; margin-bottom: 20px; letter-spacing: 3px; }
     p { font-size: 14px; color: var(--gris); margin-bottom: 10px; letter-spacing: 1px; line-height: 1.8; }
     .total { font-size: 24px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin: 20px 0; }
     .btn-mp {
@@ -33,7 +33,7 @@
     <p>Pedido #{{ orden.pk }} — {{ orden.nombre }}</p>
     <p class="total">Total: ${{ orden.total }}</p>
     <p>Al tocar el botón vas a ser redirigida a MercadoPago para completar el pago de forma segura.</p>
-    <a href="#" class="btn-mp">Pagar ahora →</a>
+    <a href="{{ mp_url }}" class="btn-mp">Pagar ahora →</a>
     <p class="aviso">🔒 Pago seguro procesado por MercadoPago</p>
 </div>
 {% endblock %}
