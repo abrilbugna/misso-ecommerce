@@ -91,3 +91,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MERCADOPAGO_PUBLIC_KEY = os.getenv("MP_PUBLIC_KEY")
 MERCADOPAGO_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
