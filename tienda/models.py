@@ -1,10 +1,10 @@
 from django.db import models
 
 CATEGORIAS = [
-    ('conjuntos', 'Conjuntos'),
+    ('conjuntos armados', 'Conjuntos armados'),
     ('bralettes', 'Bralettes'),
     ('bombachas', 'Bombachas'),
-    ('accesorios', 'Accesorios'),
+    ('babydoll', 'Babydolls'),
     ('otros', 'Otros'),
 ]
 

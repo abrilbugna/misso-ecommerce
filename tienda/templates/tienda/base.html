@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Misso{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
     <style>
         @font-face {
             font-family: 'Adelia';
@@ -34,6 +34,11 @@
 
         footer { text-align: center; padding: 50px; background: var(--rosa-light); border-top: 1px solid var(--borde); font-size: 11px; letter-spacing: 3px; color: var(--gris); text-transform: uppercase; margin-top: 0; }
         footer .footer-logo { font-family: 'Adelia', serif; font-size: 64px; color: var(--rosa-deep); letter-spacing: 6px; display: block; margin-bottom: 20px; text-transform: none; }
+        .footer-info { display: flex; justify-content: center; gap: 32px; margin-bottom: 12px; font-size: 11px; letter-spacing: 2px; flex-wrap: wrap; }
+        .footer-info a { color: var(--gris); text-decoration: none; transition: color 0.2s; }
+        .footer-info a:hover { color: var(--rosa-deep); }
+        .footer-info span { color: var(--gris); }
+        .footer-copy { font-size: 10px; letter-spacing: 2px; color: var(--gris); }
 
         .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--texto); }
         .carrito-mobile { display: none; font-size: 24px; text-decoration: none; }
@@ -68,8 +73,10 @@
             .carrito-mobile { display: block; }
             .logo { font-size: 20px; letter-spacing: 2px; }
             nav { padding: 16px 20px; }
-            footer { padding: 24px 20px; }
-            footer .footer-logo { font-size: 36px; margin-bottom: 10px; }
+            footer { padding: 16px 20px; font-size: 9px; }
+            footer .footer-logo { font-size: 30px; margin-bottom: 6px; }
+            .footer-info { gap: 12px; font-size: 9px; flex-direction: column; align-items: center; margin-bottom: 8px; }
+            .footer-copy { font-size: 8px; }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -102,7 +109,10 @@
 
     <footer>
         <span class="footer-logo">Misso</span>
-        © 2026 Misso — Argentina
+        <div class="footer-info">
+            <a href="https://instagram.com/misso.cba" target="_blank">@misso.cba</a>
+            <a href="https://wa.me/543517727224" target="_blank">351 772 7224</a>
+        </div>
     </footer>
 
     <script>

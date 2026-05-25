@@ -5,8 +5,16 @@ import mercadopago
 from django.conf import settings
 
 def inicio(request):
-    productos = Producto.objects.filter(activo=True, destacado=True)[:3]
-    return render(request, 'tienda/inicio.html', {'productos': productos})
+    categorias_con_imagen = []
+    for slug, nombre in CATEGORIAS:
+        producto = Producto.objects.filter(activo=True, categoria=slug).first()
+        if producto:
+            categorias_con_imagen.append({
+                'slug': slug,
+                'nombre': nombre,
+                'imagen': producto.imagen.url,
+            })
+    return render(request, 'tienda/inicio.html', {'categorias': categorias_con_imagen})
 
 def catalogo(request):
     categoria = request.GET.get('categoria', '')
