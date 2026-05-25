@@ -24,6 +24,32 @@
     .aviso { background: var(--rosa-section); color: white; padding: 16px 24px; border-radius: 10px; font-size: 13px; margin: 20px 0; }
     .btn { display: inline-block; padding: 16px 40px; background: var(--texto); color: white; text-decoration: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-top: 20px; }
     .btn:hover { background: var(--rosa-deep); }
+
+    @media (max-width: 768px) {
+    .confirmacion {
+        padding: 20px 16px 40px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+
+    .check { font-size: 44px; margin-bottom: 12px; }
+
+    h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 10px; }
+
+    p { font-size: 13px; margin-bottom: 6px; }
+
+    .datos-transferencia { padding: 18px; margin: 16px 0; }
+
+    .dato { font-size: 13px; }
+
+    .total-transferencia { font-size: 18px; margin: 14px 0; }
+
+    .aviso { font-size: 12px; padding: 14px 16px; }
+}
+
 </style>
 {% endblock %}
 
@@ -31,34 +57,33 @@
 <div class="confirmacion">
     <div class="check">🏦</div>
     <h1>¡PEDIDO CONFIRMADO!</h1>
-    <p>Gracias <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
+    <p>Gracias por tu compra <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
     <p class="total-transferencia">Total a transferir: ${{ orden.total }}</p>
 
     <div class="datos-transferencia">
         <h2>✦ Datos para transferir</h2>
         <div class="dato">
             <span class="dato-label">Alias</span>
-            <span class="dato-valor">TU.ALIAS.ACÁ</span>
+            <span class="dato-valor">missocba</span>
         </div>
         <div class="dato">
             <span class="dato-label">CBU</span>
-            <span class="dato-valor">0000000000000000000000</span>
+            <span class="dato-valor">1430001713038905120013</span>
         </div>
         <div class="dato">
             <span class="dato-label">Titular</span>
-            <span class="dato-valor">Tu Nombre Completo</span>
+            <span class="dato-valor">Abril Bugna</span>
         </div>
         <div class="dato">
             <span class="dato-label">Banco</span>
-            <span class="dato-valor">Tu Banco</span>
+            <span class="dato-valor">Brubank</span>
         </div>
     </div>
 
     <div class="aviso">
-        📩 Una vez realizada la transferencia envianos el comprobante a <strong>tu@email.com</strong> o por Instagram con el número de pedido <strong>#{{ orden.pk }}</strong>
+        📩 Una vez realizada la transferencia por favor envianos el comprobante a <a href="https://wa.me/543517727224" target="_blank"> nuestro whatsapp</a> o por <a href="https://instagram.com/misso.cba" target="_blank">instagram</a> con el número de pedido <strong>#{{ orden.pk }}</strong>
     </div>
-
-    <p>Te contactaremos a <strong>{{ orden.email }}</strong> para confirmar el pago y coordinar el envío.</p>
+    
     <a href="/tienda" class="btn">Seguir comprando</a>
 </div>
 {% endblock %}

@@ -3,23 +3,55 @@
 {% block title %}Pedido confirmado — Misso{% endblock %}
 
 {% block content %}
+
 <style>
-    .confirmacion { text-align: center; padding: 80px 0; }
+    .confirmacion { text-align: center; padding: 80px 60px; max-width: 600px; margin: 0 auto; }
+
     .check { font-size: 60px; margin-bottom: 30px; }
+
     h1 { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 300; margin-bottom: 20px; letter-spacing: 3px; }
-    p { font-size: 14px; color: #888; margin-bottom: 10px; letter-spacing: 1px; }
-    .numero { font-size: 13px; color: #2c2c2c; margin: 20px 0 40px; letter-spacing: 2px; }
-    .btn { display: inline-block; padding: 16px 40px; background: #2c2c2c; color: #faf9f7; text-decoration: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+
+    p { font-size: 14px; color: #888; margin-bottom: 10px; letter-spacing: 1px; line-height: 1.6; }
+
+    .numero { font-size: 13px; color: #2c2c2c; margin: 20px 0 30px; letter-spacing: 2px; }
+
+    .info-contacto { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 12px; padding: 18px 20px; margin: 20px 0; font-size: 13px; color: var(--texto); line-height: 1.6; }
+
+    .btn { display: inline-block; padding: 16px 40px; background: #2c2c2c; color: #faf9f7; text-decoration: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px; }
+
     .btn:hover { background: #444; }
+
+    @media (max-width: 768px) {
+        .confirmacion { padding: 20px 16px 40px; max-width: 100%; }
+
+        .check { font-size: 44px; margin-bottom: 12px; }
+
+        h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 10px; }
+
+        p { font-size: 13px; margin-bottom: 6px; }
+
+        .numero { font-size: 12px; margin: 14px 0 18px; }
+
+        .info-contacto { padding: 14px 16px; font-size: 12px; margin: 16px 0; }
+
+        .btn { padding: 14px 30px; font-size: 11px; }
+    }
 </style>
 
 <div class="confirmacion">
     <div class="check">✓</div>
+
     <h1>PEDIDO CONFIRMADO</h1>
-    <p>Gracias {{ orden.nombre }}, recibimos tu pedido.</p>
+
+    <p>Gracias por tu compra {{ orden.nombre }}, recibimos tu pedido :)</p>
+
     <p class="numero">Número de orden: #{{ orden.pk }}</p>
-    <p>Te contactaremos a <strong>{{ orden.email }}</strong> para coordinar el envío.</p>
-    <br><br>
+
+    <div class="info-contacto">
+        En breve te vamos a contactar para coordinar tu envío al <strong>{{ orden.telefono }}</strong> 💌
+    </div>
+
     <a href="/tienda" class="btn">Seguir comprando</a>
 </div>
+
 {% endblock %}

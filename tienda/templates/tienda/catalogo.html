@@ -45,7 +45,7 @@
         .filtro-btn { padding: 8px 16px; font-size: 10px; }
         .grid { grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 20px 40px; }
     }
-    
+
 </style>
 {% endblock %}
 
@@ -66,7 +66,9 @@
     <div class="producto">
         <a href="/tienda/{{ producto.pk }}/">
             <div class="producto-img">
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% if producto.colores.first %}
+               <img src="{{ producto.colores.first.imagen.url }}">
+                {% endif %}
             </div>
             <div class="producto-info">
                 <p class="producto-nombre">{{ producto.nombre }}</p>
