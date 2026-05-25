@@ -10,7 +10,6 @@
 
     .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
 
-    /* FORMULARIO */
     .form-section h2 { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--rosa-deep); margin-bottom: 24px; }
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--gris); }
@@ -21,7 +20,6 @@
     .form-group textarea:focus,
     .form-group select:focus { border-color: var(--rosa-deep); }
 
-    /* RADIO BUTTONS METODO PAGO */
     .metodo-pago-opciones { display: flex; flex-direction: column; gap: 12px; }
     .metodo-pago-opciones label { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--borde); border-radius: 8px; cursor: pointer; font-size: 13px; letter-spacing: 1px; text-transform: none; color: var(--texto); transition: all 0.2s; }
     .metodo-pago-opciones label:hover { border-color: var(--rosa-deep); background: var(--rosa-light); }
@@ -30,7 +28,6 @@
     .btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
     .btn-confirmar:hover { background: var(--rosa-deep); }
 
-    /* RESUMEN */
     .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 36px; position: sticky; top: 100px; }
     .resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }
     .resumen-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); }
@@ -98,11 +95,11 @@
             {% endfor %}
             <div class="resumen-envio">
                 <span>Envío</span>
-                <span>Se calcula al elegir</span>
+                <span id="resumen-envio-costo">Se calcula al elegir</span>
             </div>
             <div class="resumen-total">
-                <span>Subtotal</span>
-                <span>${{ subtotal }}</span>
+                <span>Total</span>
+                <span id="resumen-total-valor">${{ subtotal }}</span>
             </div>
         </div>
     </div>
@@ -111,12 +108,12 @@
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&loading=async"></script>
 
 <script>
+// Autocomplete de dirección
 async function iniciarAutocomplete() {
     const input = document.querySelector("textarea#direccion");
     if (!input) return;
 
     const { PlaceAutocompleteElement } = await google.maps.importLibrary("places");
-
     const autocompleteEl = new PlaceAutocompleteElement({
         componentRestrictions: { country: "ar" },
     });
@@ -134,13 +131,35 @@ async function iniciarAutocomplete() {
 
     document.querySelector("form").addEventListener("submit", () => {
         const texto = autocompleteEl.value || autocompleteEl.innerText || "";
-        if (!input.value && texto) {
-            input.value = texto;
-        }
+        if (!input.value && texto) input.value = texto;
     });
 }
 
 window.addEventListener("load", iniciarAutocomplete);
+
+// Actualizar resumen al elegir envío
+document.addEventListener('DOMContentLoaded', function () {
+    const selectEnvio = document.getElementById('id_envio');
+    const spanEnvio = document.getElementById('resumen-envio-costo');
+    const spanTotal = document.getElementById('resumen-total-valor');
+    const subtotal = parseFloat("{{ subtotal }}".replace(',', '.'));
+
+    function actualizarEnvio() {
+    const texto = selectEnvio.options[selectEnvio.selectedIndex].text;
+    const match = texto.match(/\$([\d.]+)/);
+    const costoEnvio = match ? parseFloat(match[1]) : 0;
+
+    spanEnvio.textContent = costoEnvio > 0
+        ? '$' + costoEnvio.toLocaleString('es-AR')
+        : 'Se calcula al elegir';
+
+    spanTotal.textContent = '$' + (subtotal + costoEnvio).toLocaleString('es-AR');
+}
+
+    if (selectEnvio) {
+        selectEnvio.addEventListener('change', actualizarEnvio);
+    }
+});
 </script>
 
 {% endblock %}
