@@ -36,17 +36,28 @@
         .resumen { position: static; }
         .item { grid-template-columns: 70px 1fr auto; gap: 14px; }
         .item-img { width: 70px; }
-        
-           /* Espacio blanco más chico */
-    div[style*="min-height: 300px"] { min-height: 80px !important; }
-    
-    /* Imagen conejos más chica */
-    div[style*="min-height: 300px"] img { max-width: 200px !important; }
-    
-    /* Footer más chico */
-    footer { padding: 24px 20px; }
-    footer .footer-logo { font-size: 36px; margin-bottom: 10px; }
+
+    .resumen {
+    padding: 24px;
+    border-radius: 12px;
     }
+
+    .resumen h2 {
+    font-size: 18px;
+    margin-bottom: 18px;
+    }
+
+    .resumen-total {
+    font-size: 16px;
+    margin-bottom: 22px;
+    }
+
+   .btn {
+    padding: 13px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    }
+
 </style>
 {% endblock %}
 
@@ -70,7 +81,7 @@
             {% endfor %}
         </div>
         <div class="resumen">
-            <h2>Resumen 🛍</h2>
+            <h2>Resumen ❣︎</h2>
             <div class="resumen-total">
                 <span>Total</span>
                 <span>${{ total }}</span>

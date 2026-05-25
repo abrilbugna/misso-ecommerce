@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto
+
+class ColorProductoInline(admin.TabularInline):
+    model = ColorProducto
+    extra = 1
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
@@ -7,6 +11,7 @@ class ProductoAdmin(admin.ModelAdmin):
     list_editable = ['precio', 'stock', 'activo', 'destacado']
     search_fields = ['nombre']
     list_filter = ['categoria', 'activo', 'destacado']
+    inlines = [ColorProductoInline]
 
 @admin.register(Carrito)
 class CarritoAdmin(admin.ModelAdmin):
@@ -14,7 +19,7 @@ class CarritoAdmin(admin.ModelAdmin):
 
 @admin.register(ItemCarrito)
 class ItemCarritoAdmin(admin.ModelAdmin):
-    list_display = ['carrito', 'producto', 'cantidad']
+    list_display = ['carrito', 'producto', 'cantidad', 'color']
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):

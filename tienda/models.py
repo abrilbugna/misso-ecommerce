@@ -34,11 +34,12 @@ class Producto(models.Model):
 class Carrito(models.Model):
     session_key = models.CharField(max_length=40)
     creado = models.DateTimeField(auto_now_add=True)
-
+    
 class ItemCarrito(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
+    color = models.ForeignKey('ColorProducto', on_delete=models.SET_NULL, null=True, blank=True)
 
     def subtotal(self):
         return self.producto.precio * self.cantidad
@@ -71,3 +72,12 @@ class ItemOrden(models.Model):
 
     def subtotal(self):
         return self.precio * self.cantidad
+    
+class ColorProducto(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='colores')
+    nombre = models.CharField(max_length=50)
+    imagen = models.ImageField(upload_to='productos/colores/')
+    stock = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.producto.nombre} — {self.nombre}'

@@ -2,30 +2,46 @@
 
 {% block title %}{{ producto.nombre }} — Misso{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
+    .detalle-wrap { padding: 40px 60px 80px; }
     .detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
     .detalle img { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
     .detalle-info { padding-top: 20px; }
     .detalle-nombre { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; margin-bottom: 20px; letter-spacing: 2px; }
     .detalle-precio { font-size: 18px; color: #888; margin-bottom: 30px; }
     .detalle-descripcion { font-size: 14px; line-height: 1.8; color: #555; margin-bottom: 40px; }
-    .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: #faf9f7; border: none; font-family: 'Jost', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+    .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: #faf9f7; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-decoration: none; text-align: center; }
     .btn:hover { background: #444; }
     .volver { display: inline-block; margin-bottom: 40px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; text-decoration: none; }
+
+    @media (max-width: 768px) {
+        .detalle-wrap { padding: 20px 16px 40px; }
+        .detalle { grid-template-columns: 1fr; gap: 24px; }
+        .detalle img { aspect-ratio: 4/5; }
+        .detalle-nombre { font-size: 26px; margin-bottom: 12px; }
+        .detalle-precio { font-size: 16px; margin-bottom: 20px; }
+        .detalle-descripcion { font-size: 13px; margin-bottom: 24px; }
+        .btn { padding: 14px; font-size: 11px; }
+        .volver { margin-bottom: 20px; font-size: 11px; }
+        footer {
+    padding: 8px 20px;
+}
+    }
 </style>
+{% endblock %}
 
-<div style="padding: 40px 60px 80px;">
-<a href="/tienda" class="volver">← Volver</a>
-
-<div class="detalle">
-    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-    <div class="detalle-info">
-        <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
-        <p class="detalle-precio">${{ producto.precio }}</p>
-        <p class="detalle-descripcion">{{ producto.descripcion }}</p>
-        <a href="/tienda/agregar/{{ producto.pk }}/" class="btn">Agregar al carrito</a>
+{% block content %}
+<div class="detalle-wrap">
+    <a href="/tienda" class="volver">← Volver</a>
+    <div class="detalle">
+        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+        <div class="detalle-info">
+            <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
+            <p class="detalle-precio">${{ producto.precio }}</p>
+            <p class="detalle-descripcion">{{ producto.descripcion }}</p>
+            <a href="/tienda/agregar/{{ producto.pk }}/" class="btn">Agregar al carrito</a>
+        </div>
     </div>
-</div>
 </div>
 {% endblock %}
