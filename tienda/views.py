@@ -148,6 +148,7 @@ def checkout(request):
                     f"PRODUCTOS:\n{detalle_items}\n"
                     f"Total: ${orden.total}\n"
                     f"Método: {orden.metodo_pago}\n"
+                    f"Método de envio: {orden.envio}\n"
                     
                 ),
                 from_email=settings.EMAIL_HOST_USER,
