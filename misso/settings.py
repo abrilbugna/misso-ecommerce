@@ -14,6 +14,8 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ["misso-ecommerce.onrender.com", "localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
+    'jazzmin',
+    'django.contrib.admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
