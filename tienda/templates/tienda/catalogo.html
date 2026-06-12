@@ -68,6 +68,8 @@
             <div class="producto-img">
                 {% if producto.colores.first %}
                <img src="{{ producto.colores.first.imagen.url }}">
+                {% elif producto.imagen %}
+               <img src="{{ producto.imagen.url }}">
                 {% endif %}
             </div>
             <div class="producto-info">

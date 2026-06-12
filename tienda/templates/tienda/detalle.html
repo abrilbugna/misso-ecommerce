@@ -96,6 +96,8 @@
   <div>
     {% if producto.colores.first %}
     <img id="img" class="imagen-principal" src="{{ producto.colores.first.imagen.url }}">
+    {% elif producto.imagen %}
+    <img id="img" class="imagen-principal" src="{{ producto.imagen.url }}">
     {% endif %}
 
     <div class="miniaturas">

@@ -22,6 +22,7 @@ class ProductoAdmin(admin.ModelAdmin):
     list_editable = ['precio', 'activo', 'destacado']
     search_fields = ['nombre']
     list_filter = ['categoria', 'activo', 'destacado']
+    fields = ['nombre', 'descripcion', 'precio', 'categoria', 'activo', 'destacado', 'imagen']
     inlines = [ColorProductoInline]
 
 @admin.register(Carrito)

@@ -25,6 +25,7 @@ class Producto(models.Model):
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='otros')
     creado = models.DateTimeField(auto_now_add=True)
     destacado = models.BooleanField(default=False)
+    imagen = models.ImageField(upload_to='productos/sin_variante/', null=True, blank=True)
 
     def __str__(self):
         return self.nombre
