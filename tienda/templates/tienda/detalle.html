@@ -111,6 +111,7 @@
     <p class="detalle-precio">${{ producto.precio }}</p>
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
 
+    {% if producto.colores.exists %}
     <div class="cores">
       {% for color in producto.colores.all %}
       <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, '{{ color.imagen.url }}', this)">
@@ -138,6 +139,11 @@
     <a id="addBtn" class="btn disabled" href="#">
       Agregar al carrito
     </a>
+    {% else %}
+    <a class="btn" href="/tienda/agregar/{{ producto.pk }}/">
+      Agregar al carrito
+    </a>
+    {% endif %}
 
   </div>
 
@@ -201,13 +207,14 @@ function setTalle(id, stock, btn){
   document.getElementById('msgStock').classList.remove('visible');
 
   const msgPoco = document.getElementById('msgPocoStock');
+  msgPoco.textContent = '';
+  msgPoco.classList.remove('visible');
+
   if (stock <= 2) {
     msgPoco.textContent = stock === 1
       ? '¡Última unidad disponible!'
       : `¡Quedan solo ${stock} unidades!`;
     msgPoco.classList.add('visible');
-  } else {
-    msgPoco.classList.remove('visible');
   }
 
   const addBtn = document.getElementById('addBtn');
