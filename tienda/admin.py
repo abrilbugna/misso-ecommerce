@@ -5,15 +5,15 @@ class TalleProductoInline(admin.TabularInline):
     model = TalleProducto
     extra = 4
 
-class ColorProductoInline(admin.StackedInline):
+class ColorProductoInline(admin.TabularInline):
     model = ColorProducto
     extra = 1
-    inlines = [TalleProductoInline]
     show_change_link = True
 
 @admin.register(ColorProducto)
 class ColorProductoAdmin(admin.ModelAdmin):
     list_display = ['producto', 'nombre']
+    list_filter = ['producto']
     inlines = [TalleProductoInline]
 
 @admin.register(Producto)
