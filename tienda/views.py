@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto
 from .forms import CheckoutForm
 import mercadopago
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import JsonResponse
 
 
 def inicio(request):
@@ -49,25 +50,59 @@ def detalle(request, pk):
     })
 
 
+def talles_por_color(request, color_id):
+    color = get_object_or_404(ColorProducto, pk=color_id)
+    talles = [
+        {'id': t.id, 'talle': t.talle, 'stock': t.stock}
+        for t in color.talles.all().order_by('talle')
+    ]
+    return JsonResponse({'talles': talles})
+
+
 def agregar_carrito(request, pk):
     producto = get_object_or_404(Producto, pk=pk)
 
     color_id = request.GET.get('color')
-
-    if not color_id:
-        return redirect(f'/tienda/{pk}/?error=color')
+    talle_id = request.GET.get('talle')
 
     if not request.session.session_key:
         request.session.create()
 
     carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
 
+    # Producto sin variantes de color/talle
+    if not producto.colores.exists():
+        item, creado = ItemCarrito.objects.get_or_create(
+            carrito=carrito,
+            producto=producto,
+            color=None,
+            talle=None
+        )
+
+        if not creado:
+            item.cantidad += 1
+            item.save()
+
+        return redirect('ver_carrito')
+
+    # Producto con variantes: validar color y talle
+    if not color_id:
+        return redirect(f'/tienda/{pk}/?error=color')
+
+    if not talle_id:
+        return redirect(f'/tienda/{pk}/?error=talle&color={color_id}')
+
     color = get_object_or_404(ColorProducto, pk=color_id, producto=producto)
+    talle = get_object_or_404(TalleProducto, pk=talle_id, color=color)
+
+    if talle.stock <= 0:
+        return redirect(f'/tienda/{pk}/?error=stock&color={color_id}&talle={talle_id}')
 
     item, creado = ItemCarrito.objects.get_or_create(
         carrito=carrito,
         producto=producto,
-        color=color
+        color=color,
+        talle=talle
     )
 
     if not creado:
@@ -132,9 +167,10 @@ def checkout(request):
 
             for item in items:
                 color_txt = item.color.nombre if item.color else "Sin color"
+                talle_txt = item.talle.talle if item.talle else "Sin talle"
 
                 detalle_items += (
-                    f"- {item.producto.nombre} | Color: {color_txt} | Cant: {item.cantidad} | Precio: ${item.producto.precio}\n"
+                    f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.producto.precio}\n"
                 )
 
             send_mail(
