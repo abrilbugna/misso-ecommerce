@@ -1,14 +1,25 @@
 from django.contrib import admin
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto
 
-class ColorProductoInline(admin.TabularInline):
+class TalleProductoInline(admin.TabularInline):
+    model = TalleProducto
+    extra = 4
+
+class ColorProductoInline(admin.StackedInline):
     model = ColorProducto
     extra = 1
+    inlines = [TalleProductoInline]
+    show_change_link = True
+
+@admin.register(ColorProducto)
+class ColorProductoAdmin(admin.ModelAdmin):
+    list_display = ['producto', 'nombre']
+    inlines = [TalleProductoInline]
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'precio', 'stock', 'activo', 'destacado', 'categoria']
-    list_editable = ['precio', 'stock', 'activo', 'destacado']
+    list_display = ['nombre', 'precio', 'activo', 'destacado', 'categoria']
+    list_editable = ['precio', 'activo', 'destacado']
     search_fields = ['nombre']
     list_filter = ['categoria', 'activo', 'destacado']
     inlines = [ColorProductoInline]
@@ -19,7 +30,7 @@ class CarritoAdmin(admin.ModelAdmin):
 
 @admin.register(ItemCarrito)
 class ItemCarritoAdmin(admin.ModelAdmin):
-    list_display = ['carrito', 'producto', 'cantidad', 'color']
+    list_display = ['carrito', 'producto', 'cantidad', 'color', 'talle']
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):

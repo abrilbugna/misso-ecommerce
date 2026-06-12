@@ -21,7 +21,6 @@ class Producto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.IntegerField(default=0)
     activo = models.BooleanField(default=True)
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='otros')
     creado = models.DateTimeField(auto_now_add=True)
@@ -39,6 +38,7 @@ class ItemCarrito(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
     color = models.ForeignKey('ColorProducto', on_delete=models.SET_NULL, null=True, blank=True)
+    talle = models.ForeignKey('TalleProducto', on_delete=models.SET_NULL, null=True, blank=True)
 
     def subtotal(self):
         return self.producto.precio * self.cantidad
@@ -76,7 +76,25 @@ class ColorProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='colores')
     nombre = models.CharField(max_length=50)
     imagen = models.ImageField(upload_to='productos/colores/')
-    stock = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.producto.nombre} — {self.nombre}'
+
+
+TALLES = [
+    ('85', '85'),
+    ('90', '90'),
+    ('95', '95'),
+    ('100', '100'),
+]
+
+class TalleProducto(models.Model):
+    color = models.ForeignKey(ColorProducto, on_delete=models.CASCADE, related_name='talles')
+    talle = models.CharField(max_length=10, choices=TALLES)
+    stock = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('color', 'talle')
+
+    def __str__(self):
+        return f'{self.color} — Talle {self.talle} ({self.stock} unid.)'

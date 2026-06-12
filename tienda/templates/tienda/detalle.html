@@ -19,8 +19,9 @@
 .detalle-descripcion { font-size: 14px; margin-bottom: 40px; color: #555; }
 
 .cores { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.talles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; min-height: 40px; }
 
-.cor-btn {
+.cor-btn, .talle-btn {
     padding: 10px 14px;
     border: 1px solid #ddd;
     background: white;
@@ -29,21 +30,35 @@
     text-transform: uppercase;
 }
 
-.cor-btn.activo {
+.cor-btn.activo, .talle-btn.activo {
     border-color: #7b2d3a;
     color: #7b2d3a;
 }
 
-.msg-color {
+.talle-btn.sin-stock {
+    opacity: 0.35;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.msg-aviso {
     font-size: 12px;
     color: #7b2d3a;
     margin-bottom: 14px;
     display: none;
 }
 
-.msg-color.visible {
-    display: block;
+.msg-aviso.visible { display: block; }
+
+.msg-poco-stock {
+    font-size: 12px;
+    color: #b8860b;
+    margin-bottom: 14px;
+    font-weight: 600;
+    display: none;
 }
+
+.msg-poco-stock:not(:empty) { display: block; }
 
 .btn {
     display: block;
@@ -98,15 +113,27 @@
 
     <div class="cores">
       {% for color in producto.colores.all %}
-      <button class="cor-btn" onclick="setColor({{ color.id }}, this)">
+      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, '{{ color.imagen.url }}', this)">
         {{ color.nombre }}
       </button>
       {% endfor %}
     </div>
 
-    <p class="msg-color {% if error == 'color' %}visible{% endif %}" id="msgColor">
+    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">
       ⚠ Seleccioná un color antes de continuar.
     </p>
+
+    <div class="talles" id="tallesContainer"></div>
+
+    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">
+      ⚠ Seleccioná un talle antes de continuar.
+    </p>
+
+    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">
+      ⚠ Sin stock para este color y talle. Probá otra combinación.
+    </p>
+
+    <p class="msg-poco-stock" id="msgPocoStock"></p>
 
     <a id="addBtn" class="btn disabled" href="#">
       Agregar al carrito
@@ -121,22 +148,71 @@
 {% block extra_js %}
 <script>
 let selectedColor = null;
+let selectedTalle = null;
 
 function setImg(url){
   document.getElementById('img').src = url;
 }
 
-function setColor(id, btn){
+function setColor(id, imgUrl, btn){
   selectedColor = id;
+  selectedTalle = null;
 
   document.querySelectorAll('.cor-btn').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
-
-  const addBtn = document.getElementById('addBtn');
-  addBtn.href = "/tienda/agregar/{{ producto.pk }}/?color=" + id;
-  addBtn.classList.remove('disabled');
+  setImg(imgUrl);
 
   document.getElementById('msgColor').classList.remove('visible');
+  document.getElementById('msgStock').classList.remove('visible');
+  document.getElementById('msgPocoStock').textContent = '';
+  document.getElementById('addBtn').classList.add('disabled');
+  document.getElementById('addBtn').href = '#';
+
+  // Cargar talles del color seleccionado
+  fetch(`/tienda/talles/${id}/`)
+    .then(r => r.json())
+    .then(data => {
+      const container = document.getElementById('tallesContainer');
+      container.innerHTML = '';
+
+      data.talles.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'talle-btn' + (t.stock <= 0 ? ' sin-stock' : '');
+        btn.textContent = t.talle;
+        btn.dataset.id = t.id;
+        btn.dataset.stock = t.stock;
+
+        if (t.stock > 0) {
+          btn.onclick = () => setTalle(t.id, t.stock, btn);
+        }
+
+        container.appendChild(btn);
+      });
+    });
+}
+
+function setTalle(id, stock, btn){
+  selectedTalle = id;
+
+  document.querySelectorAll('.talle-btn').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+
+  document.getElementById('msgTalle').classList.remove('visible');
+  document.getElementById('msgStock').classList.remove('visible');
+
+  const msgPoco = document.getElementById('msgPocoStock');
+  if (stock <= 2) {
+    msgPoco.textContent = stock === 1
+      ? '¡Última unidad disponible!'
+      : `¡Quedan solo ${stock} unidades!`;
+    msgPoco.classList.add('visible');
+  } else {
+    msgPoco.classList.remove('visible');
+  }
+
+  const addBtn = document.getElementById('addBtn');
+  addBtn.href = `/tienda/agregar/{{ producto.pk }}/?color=${selectedColor}&talle=${id}`;
+  addBtn.classList.remove('disabled');
 }
 </script>
 {% endblock %}
