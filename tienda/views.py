@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto
 from .forms import CheckoutForm
 import mercadopago
+import requests
 from django.conf import settings
-from django.core.mail import send_mail
 from django.http import JsonResponse
 
 
@@ -173,24 +173,35 @@ def checkout(request):
                     f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.producto.precio}\n"
                 )
 
-            send_mail(
-                subject=f"¡Nuevo pedido #{orden.pk}!",
-                message=(
-                    f"Información del pedido\n\n"
-                    f"Cliente: {orden.nombre}\n"
-                    f"Email: {orden.email}\n"
-                    f"Tel: {orden.telefono}\n\n"
-                    f"📍 Dirección de envío: {orden.direccion}\n"
-                    f"PRODUCTOS:\n{detalle_items}\n"
-                    f"Total: ${orden.total}\n"
-                    f"Método: {orden.metodo_pago}\n"
-                    f"Método de envio: {orden.envio}\n"
-                    
-                ),
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[settings.EMAIL_HOST_USER],
-                fail_silently=False,
+            cuerpo_mail = (
+                f"Información del pedido\n\n"
+                f"Cliente: {orden.nombre}\n"
+                f"Email: {orden.email}\n"
+                f"Tel: {orden.telefono}\n\n"
+                f"📍 Dirección de envío: {orden.direccion}\n"
+                f"PRODUCTOS:\n{detalle_items}\n"
+                f"Total: ${orden.total}\n"
+                f"Método: {orden.metodo_pago}\n"
+                f"Método de envio: {orden.envio}\n"
             )
+
+            try:
+                requests.post(
+                    "https://api.resend.com/emails",
+                    headers={
+                        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "from": "Misso <onboarding@resend.dev>",
+                        "to": [settings.NOTIFICACION_EMAIL],
+                        "subject": f"¡Nuevo pedido #{orden.pk}!",
+                        "text": cuerpo_mail,
+                    },
+                    timeout=5,
+                )
+            except requests.RequestException:
+                pass
 
             items.delete()
 
