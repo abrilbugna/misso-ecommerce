@@ -152,6 +152,8 @@ def checkout(request):
             envio = form.cleaned_data['envio']
             metodo_pago = form.cleaned_data['metodo_pago']
             total = subtotal + envio.costo
+            if metodo_pago == 'mercadopago':
+                total = total * 1.10
 
             orden = Orden.objects.create(
                 nombre=form.cleaned_data['nombre'],
@@ -239,15 +241,36 @@ def pago_mp(request, pk):
     sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
     items = ItemOrden.objects.filter(orden=orden)
 
+    mp_items = [
+        {
+            "title": item.producto.nombre,
+            "quantity": item.cantidad,
+            "unit_price": float(item.precio),
+        }
+        for item in items
+    ]
+
+    # Agregar costo de envío como ítem si corresponde
+    if orden.envio and orden.envio.costo > 0:
+        mp_items.append({
+            "title": "Envío",
+            "quantity": 1,
+            "unit_price": float(orden.envio.costo),
+        })
+
+    # Calcular subtotal (productos + envío) y agregar recargo del 10% como ítem separado
+    subtotal_mp = sum(float(item.precio) * item.cantidad for item in items)
+    if orden.envio and orden.envio.costo > 0:
+        subtotal_mp += float(orden.envio.costo)
+    recargo_mp = round(subtotal_mp * 0.10, 2)
+    mp_items.append({
+        "title": "Recargo MercadoPago (10%)",
+        "quantity": 1,
+        "unit_price": recargo_mp,
+    })
+
     preference_data = {
-        "items": [
-            {
-                "title": item.producto.nombre,
-                "quantity": item.cantidad,
-                "unit_price": float(item.precio),
-            }
-            for item in items
-        ],
+        "items": mp_items,
         "back_urls": {
             "success": "https://www.google.com",
             "failure": "https://www.google.com",

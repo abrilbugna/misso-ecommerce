@@ -21,7 +21,7 @@ class CheckoutForm(forms.Form):
         choices=[
             ('efectivo', 'Efectivo — abonás al retirar'),
             ('transferencia', 'Transferencia bancaria'),
-            ('mercadopago', 'MercadoPago'),
+            ('mercadopago', 'MercadoPago — (recargo del 10%)'),
         ],
         label='Método de pago',
         widget=forms.RadioSelect

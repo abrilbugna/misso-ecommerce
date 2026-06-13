@@ -23,6 +23,8 @@
     .metodo-pago-opciones { display: flex; flex-direction: column; gap: 12px; }
     .metodo-pago-opciones label { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--borde); border-radius: 8px; cursor: pointer; font-size: 13px; letter-spacing: 1px; text-transform: none; color: var(--texto); transition: all 0.2s; }
     .metodo-pago-opciones label:hover { border-color: var(--rosa-deep); background: var(--rosa-light); }
+    .recargo-mp { display: none; justify-content: space-between; font-size: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); color: #c0392b; }
+    .recargo-mp.visible { display: flex; }
     .metodo-pago-opciones input[type="radio"] { width: auto; margin: 0; accent-color: var(--rosa-deep); }
 
     .btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
@@ -97,6 +99,10 @@
                 <span>Envío</span>
                 <span id="resumen-envio-costo">Se calcula al elegir</span>
             </div>
+            <div class="recargo-mp" id="resumen-recargo-mp">
+                <span>⚠️ Recargo MercadoPago (10%)</span>
+                <span id="resumen-recargo-valor">$0</span>
+            </div>
             <div class="resumen-total">
                 <span>Total</span>
                 <span id="resumen-total-valor">${{ subtotal }}</span>
@@ -142,23 +148,67 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectEnvio = document.getElementById('id_envio');
     const spanEnvio = document.getElementById('resumen-envio-costo');
     const spanTotal = document.getElementById('resumen-total-valor');
+    const divRecargo = document.getElementById('resumen-recargo-mp');
+    const spanRecargo = document.getElementById('resumen-recargo-valor');
     const subtotal = parseFloat("{{ subtotal }}".replace(',', '.'));
 
-    function actualizarEnvio() {
-    const texto = selectEnvio.options[selectEnvio.selectedIndex].text;
-    const match = texto.match(/\$([\d.]+)/);
-    const costoEnvio = match ? parseFloat(match[1]) : 0;
+    // Si el nombre de la opción de envío contiene "correo argentino" → no se puede pagar en efectivo
+    const ES_CORREO = /correo\s*argentino/i;
 
-    spanEnvio.textContent = costoEnvio > 0
-        ? '$' + costoEnvio.toLocaleString('es-AR')
-        : 'Se calcula al elegir';
+    function filtrarPagoSegunEnvio() {
+        const textoEnvioElegido = selectEnvio.options[selectEnvio.selectedIndex]?.text || '';
+        const esCorreo = ES_CORREO.test(textoEnvioElegido);
 
-    spanTotal.textContent = '$' + (subtotal + costoEnvio).toLocaleString('es-AR');
-}
+        document.querySelectorAll('input[name="metodo_pago"]').forEach(radio => {
+            const labelEl = radio.closest('label') || radio.parentElement;
+            if (radio.value === 'efectivo') {
+                radio.disabled = esCorreo;
+                if (labelEl) {
+                    labelEl.style.opacity = esCorreo ? '0.35' : '';
+                    labelEl.style.pointerEvents = esCorreo ? 'none' : '';
+                    labelEl.title = esCorreo ? 'No disponible para envíos por Correo Argentino' : '';
+                }
+                // Si estaba seleccionado y ahora se deshabilita, desmarcar
+                if (esCorreo && radio.checked) {
+                    radio.checked = false;
+                }
+            }
+        });
+    }
+
+    function actualizarResumen() {
+        const textoEnvio = selectEnvio.options[selectEnvio.selectedIndex]?.text || '';
+        const matchEnvio = textoEnvio.match(/\$([\d.]+)/);
+        const costoEnvio = matchEnvio ? parseFloat(matchEnvio[1]) : 0;
+
+        spanEnvio.textContent = costoEnvio > 0
+            ? '$' + costoEnvio.toLocaleString('es-AR')
+            : 'Se calcula al elegir';
+
+        const mpSeleccionado = document.querySelector('input[name="metodo_pago"]:checked')?.value === 'mercadopago';
+        const baseTotal = subtotal + costoEnvio;
+        const recargo = mpSeleccionado ? Math.round(baseTotal * 0.10 * 100) / 100 : 0;
+
+        divRecargo.classList.toggle('visible', mpSeleccionado);
+        spanRecargo.textContent = '$' + recargo.toLocaleString('es-AR');
+
+        spanTotal.textContent = '$' + (baseTotal + recargo).toLocaleString('es-AR');
+    }
 
     if (selectEnvio) {
-        selectEnvio.addEventListener('change', actualizarEnvio);
+        selectEnvio.addEventListener('change', function () {
+            filtrarPagoSegunEnvio();
+            actualizarResumen();
+        });
     }
+
+    document.querySelectorAll('input[name="metodo_pago"]').forEach(radio => {
+        radio.addEventListener('change', actualizarResumen);
+    });
+
+    // Aplicar al cargar por si el browser recuerda una selección previa
+    filtrarPagoSegunEnvio();
+    actualizarResumen();
 });
 </script>
 
