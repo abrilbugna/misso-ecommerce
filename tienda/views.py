@@ -10,17 +10,34 @@ from django.http import JsonResponse
 def inicio(request):
     categorias_con_imagen = []
 
+    productos_por_categoria = (
+        Producto.objects
+        .filter(activo=True)
+        .prefetch_related('colores')
+        .order_by('categoria')
+    )
+
+    productos_dict = {}
+    for p in productos_por_categoria:
+        if p.categoria not in productos_dict:
+            productos_dict[p.categoria] = p
+
     for slug, nombre in CATEGORIAS:
-        producto = Producto.objects.filter(activo=True, categoria=slug).first()
-
+        producto = productos_dict.get(slug)
         if producto:
-            color = producto.colores.first()
-
+            colores = list(producto.colores.all())
+            color = colores[0] if colores else None
             if color and color.imagen:
                 categorias_con_imagen.append({
                     'slug': slug,
                     'nombre': nombre,
                     'imagen': color.imagen.url,
+                })
+            elif producto.imagen:
+                categorias_con_imagen.append({
+                    'slug': slug,
+                    'nombre': nombre,
+                    'imagen': producto.imagen.url,
                 })
 
     return render(request, 'tienda/inicio.html', {'categorias': categorias_con_imagen})
@@ -30,9 +47,9 @@ def catalogo(request):
     categoria = request.GET.get('categoria', '')
 
     if categoria:
-        productos = Producto.objects.filter(activo=True, categoria=categoria)
+        productos = Producto.objects.filter(activo=True, categoria=categoria).prefetch_related('colores')
     else:
-        productos = Producto.objects.filter(activo=True)
+        productos = Producto.objects.filter(activo=True).prefetch_related('colores')
 
     return render(request, 'tienda/catalogo.html', {
         'productos': productos,
@@ -42,7 +59,10 @@ def catalogo(request):
 
 
 def detalle(request, pk):
-    producto = get_object_or_404(Producto, pk=pk)
+    producto = get_object_or_404(
+        Producto.objects.prefetch_related('colores', 'colores__talles'),
+        pk=pk
+    )
     error = request.GET.get('error', '')
     return render(request, 'tienda/detalle.html', {
         'producto': producto,
@@ -152,8 +172,6 @@ def checkout(request):
             envio = form.cleaned_data['envio']
             metodo_pago = form.cleaned_data['metodo_pago']
             total = subtotal + envio.costo
-            if metodo_pago == 'mercadopago':
-                total = total * 1.10
 
             orden = Orden.objects.create(
                 nombre=form.cleaned_data['nombre'],
@@ -241,36 +259,15 @@ def pago_mp(request, pk):
     sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
     items = ItemOrden.objects.filter(orden=orden)
 
-    mp_items = [
-        {
-            "title": item.producto.nombre,
-            "quantity": item.cantidad,
-            "unit_price": float(item.precio),
-        }
-        for item in items
-    ]
-
-    # Agregar costo de envío como ítem si corresponde
-    if orden.envio and orden.envio.costo > 0:
-        mp_items.append({
-            "title": "Envío",
-            "quantity": 1,
-            "unit_price": float(orden.envio.costo),
-        })
-
-    # Calcular subtotal (productos + envío) y agregar recargo del 10% como ítem separado
-    subtotal_mp = sum(float(item.precio) * item.cantidad for item in items)
-    if orden.envio and orden.envio.costo > 0:
-        subtotal_mp += float(orden.envio.costo)
-    recargo_mp = round(subtotal_mp * 0.10, 2)
-    mp_items.append({
-        "title": "Recargo MercadoPago (10%)",
-        "quantity": 1,
-        "unit_price": recargo_mp,
-    })
-
     preference_data = {
-        "items": mp_items,
+        "items": [
+            {
+                "title": item.producto.nombre,
+                "quantity": item.cantidad,
+                "unit_price": float(item.precio),
+            }
+            for item in items
+        ],
         "back_urls": {
             "success": "https://www.google.com",
             "failure": "https://www.google.com",
