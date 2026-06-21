@@ -10,11 +10,21 @@
             font-family: 'Adelia';
             src: url('/static/fonts/ADELIA.otf') format('opentype');
         }
+        @font-face {
+            font-family: 'Romantic';
+            src: url('/static/fonts/ROMANTIC.TTF');
+        }
+        
+        @font-face {
+            font-family: 'Eternalo';
+            src: url('/static/fonts/Eternalo.ttf');
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
            --rosa: #7b2d3a;
            --rosa-deep: #5c1e28;
-           --rosa-light: #f5eaec;
+           --rosa-light: #ffdae1;
            --rosa-section: #6b2535;
            --blanco: #ffffff;
            --texto: #1a1a1a;
@@ -26,14 +36,14 @@
         nav { display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; background: white; border-bottom: 1px solid var(--borde); position: sticky; top: 0; z-index: 100; }
         nav a { text-decoration: none; color: var(--texto); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; transition: color 0.2s; }
         nav a:hover { color: var(--rosa-deep); }
-        .logo { font-family: 'Adelia', serif; font-size: 32px; letter-spacing: 4px; color: var(--texto); text-transform: none; }
+        .logo { font-family: 'Romantic', serif; font-size: 35px; letter-spacing: 4px; color: var(--texto); text-transform: none; }
         .nav-links { display: flex; gap: 40px; }
         .nav-carrito { position: relative; }
 
         main { min-height: 60vh; }
 
         footer { text-align: center; padding: 20px 50px; background: var(--rosa-light); border-top: 1px solid var(--borde); font-size: 10px; letter-spacing: 2px; color: var(--gris); text-transform: uppercase; margin-top: 0; }
-        footer .footer-logo { font-family: 'Adelia', serif; font-size: 36px; color: var(--rosa); letter-spacing: 4px; display: block; margin-bottom: 12px; text-transform: none; }
+        footer .footer-logo { font-family: 'Romantic', serif; font-size: 36px; color: var(--rosa); letter-spacing: 4px; display: block; margin-bottom: 12px; text-transform: none; }
         .footer-info { display: flex; justify-content: center; gap: 24px; margin-bottom: 8px; font-size: 10px; letter-spacing: 2px; flex-wrap: wrap; }
         .footer-info a { color: var(--rosa); text-decoration: none; transition: color 0.2s; }
         .footer-info a:hover { color: var(--rosa-deep); }
@@ -73,9 +83,9 @@
             .carrito-mobile { display: block; }
             .logo { font-size: 20px; letter-spacing: 2px; }
             nav { padding: 16px 20px; }
-            footer { padding: 16px 20px; font-size: 9px; }
-            footer .footer-logo { font-size: 30px; margin-bottom: 6px; }
-            .footer-info { gap: 12px; font-size: 9px; flex-direction: column; align-items: center; margin-bottom: 8px; }
+            footer { padding: 6px 20px; font-size: 9px; }
+            footer .footer-logo { font-size: 24px; margin-bottom: 6px; }
+            .footer-info { gap: 12px; font-size: 9px; flex-direction: column; align-items: center; margin-bottom: 8px; flex-direction: row;}
             .footer-copy { font-size: 8px; }
         }
 
@@ -116,8 +126,9 @@
     <footer>
         <span class="footer-logo">Misso</span>
         <div class="footer-info">
-            <a href="https://instagram.com/misso.cba" target="_blank">@misso.cba</a>
-            <a href="https://wa.me/543517727224" target="_blank">+54 351 772 7224</a>
+            <a href="https://instagram.com/misso.cba" target="_blank">➤ @misso.cba</a>
+            <a href="https://wa.me/543517727224" target="_blank">✆ +54 351 772 7224</a>
+           
         </div>
     </footer>
 
