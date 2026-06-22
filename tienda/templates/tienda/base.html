@@ -37,8 +37,66 @@
         nav a { text-decoration: none; color: var(--texto); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; transition: color 0.2s; }
         nav a:hover { color: var(--rosa-deep); }
         .logo { font-family: 'Romantic', serif; font-size: 35px; letter-spacing: 4px; color: var(--texto); text-transform: none; }
-        .nav-links { display: flex; gap: 40px; }
-        .nav-carrito { position: relative; }
+        .nav-links { display: flex; gap: 40px; align-items: center; }
+
+        /* Carrito con ícono SVG + badge */
+        .nav-carrito {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-carrito svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--texto);
+            fill: none;
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.2s;
+        }
+        .nav-carrito:hover svg {
+            stroke: var(--rosa-deep);
+        }
+        .cart-badge {
+            position: absolute;
+            top: -7px;
+            right: -9px;
+            font-size: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            color: var(--texto);
+            min-width: 14px;
+            text-align: center;
+            letter-spacing: 0;
+        }
+
+        /* Carrito mobile */
+        .carrito-mobile {
+            display: none;
+            position: relative;
+        }
+        .carrito-mobile svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--texto);
+            fill: none;
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .cart-badge-mobile {
+            position: absolute;
+            top: -7px;
+            right: -9px;
+            font-size: 9px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            color: var(--texto);
+            min-width: 14px;
+            text-align: center;
+            letter-spacing: 0;
+        }
 
         main { min-height: 60vh; }
 
@@ -51,7 +109,6 @@
         .footer-copy { font-size: 9px; letter-spacing: 2px; color: var(--gris); }
 
         .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--texto); }
-        .carrito-mobile { display: none; font-size: 24px; text-decoration: none; }
         .cerrar-menu { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--texto); margin-bottom: 20px; }
 
         .mobile-menu {
@@ -80,7 +137,7 @@
         @media (max-width: 768px) {
             .nav-links { display: none; }
             .hamburger { display: block; }
-            .carrito-mobile { display: block; }
+            .carrito-mobile { display: inline-flex; }
             .logo { font-size: 20px; letter-spacing: 2px; }
             nav { padding: 16px 20px; }
             footer { padding: 6px 20px; font-size: 9px; }
@@ -107,9 +164,23 @@
         <button class="hamburger" onclick="toggleMenu()">☰</button>
         <a href="/" class="logo">Misso</a>
         <div class="nav-links">
-            <a href="/tienda/carrito/" class="nav-carrito">Carrito</a>
+            <a href="/tienda/carrito/" class="nav-carrito">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+                <span class="cart-badge" id="cart-count">{{ cart_count|default:0 }}</span>
+            </a>
         </div>
-        <a href="/tienda/carrito/" class="carrito-mobile">🛍</a>
+        <a href="/tienda/carrito/" class="carrito-mobile">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            <span class="cart-badge-mobile" id="cart-count-mobile">{{ cart_count|default:0 }}</span>
+        </a>
     </nav>
 
     <div class="mobile-menu" id="mobileMenu">
@@ -128,7 +199,6 @@
         <div class="footer-info">
             <a href="https://instagram.com/misso.cba" target="_blank">➤ @misso.cba</a>
             <a href="https://wa.me/543517727224" target="_blank">✆ +54 351 772 7224</a>
-           
         </div>
     </footer>
 
