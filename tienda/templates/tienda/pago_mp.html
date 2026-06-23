@@ -44,7 +44,7 @@
     @media (max-width: 768px) {
         .pago { padding: 20px 16px 40px; max-width: 100%; }
 
-        .icono { font-size: 44px; margin-bottom: 12px; }
+        .icono { margin-bottom: 30px; display: flex; justify-content: center; }
 
         h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 10px; }
 
@@ -61,7 +61,12 @@
 
 {% block content %}
 <div class="pago">
-    <div class="icono">💳</div>
+    <div class="icono">
+    <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="var(--rosa)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+        <line x1="1" y1="10" x2="23" y2="10"/>
+    </svg>
+    </div>
 
     <h1>PAGAR CON MERCADOPAGO</h1>
 
@@ -69,7 +74,7 @@
 
     <p class="total">Total: ${{ orden.total }}</p>
 
-    <p>Cuando toques el botón vas a ser redirigida a MercadoPago para terminar el pago de forma segura.</p>
+    <p>Cuando toques el botón vas a ser redirigido/a a MercadoPago para terminar el pago de forma segura.</p>
 
     <a href="{{ mp_url }}" class="btn-mp">Pagar ahora →</a>
 

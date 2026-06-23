@@ -272,10 +272,11 @@ def pago_mp(request, pk):
             for item in items
         ],
         "back_urls": {
-            "success": "https://www.google.com",
-            "failure": "https://www.google.com",
-            "pending": "https://www.google.com",
+          "success": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
+          "failure": f"https://misso.ar/tienda/carrito/",
+          "pending": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
         },
+        "auto_return": "approved",
         "external_reference": str(orden.pk),
     }
 
