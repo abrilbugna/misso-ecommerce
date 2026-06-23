@@ -45,18 +45,21 @@ def inicio(request):
 
 def catalogo(request):
     categoria = request.GET.get('categoria', '')
+    busqueda = request.GET.get('q', '')
+
+    productos = Producto.objects.filter(activo=True).prefetch_related('colores')
 
     if categoria:
-        productos = Producto.objects.filter(activo=True, categoria=categoria).prefetch_related('colores')
-    else:
-        productos = Producto.objects.filter(activo=True).prefetch_related('colores')
+        productos = productos.filter(categoria=categoria)
+    if busqueda:
+        productos = productos.filter(nombre__icontains=busqueda)
 
     return render(request, 'tienda/catalogo.html', {
         'productos': productos,
         'categoria_activa': categoria,
         'categorias': CATEGORIAS,
+        'busqueda': busqueda,
     })
-
 
 def detalle(request, pk):
     producto = get_object_or_404(
