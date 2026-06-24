@@ -87,13 +87,13 @@ def agregar_carrito(request, pk):
 
     color_id = request.GET.get('color')
     talle_id = request.GET.get('talle')
+    cantidad = int(request.GET.get('cantidad', 1))
 
     if not request.session.session_key:
         request.session.create()
 
     carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
 
-    # Producto sin variantes de color/talle
     if not producto.colores.exists():
         item, creado = ItemCarrito.objects.get_or_create(
             carrito=carrito,
@@ -101,14 +101,13 @@ def agregar_carrito(request, pk):
             color=None,
             talle=None
         )
-
         if not creado:
-            item.cantidad += 1
-            item.save()
-
+            item.cantidad += cantidad
+        else:
+            item.cantidad = cantidad
+        item.save()
         return redirect('ver_carrito')
 
-    # Producto con variantes: validar color y talle
     if not color_id:
         return redirect(f'/tienda/{pk}/?error=color')
 
@@ -127,12 +126,13 @@ def agregar_carrito(request, pk):
         color=color,
         talle=talle
     )
-
     if not creado:
-        item.cantidad += 1
-        item.save()
+        item.cantidad += cantidad
+    else:
+        item.cantidad = cantidad
+    item.save()
 
-    return redirect('ver_carrito')
+    return redirect(f'/tienda/{pk}/?agregado=1')
 
 
 def ver_carrito(request):

@@ -6,149 +6,96 @@
 <style>
 .detalle-wrap { padding: 40px 60px 80px; }
 .detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-
 .imagen-principal { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
-
 .miniaturas { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .miniaturas img { width: 70px; aspect-ratio: 3/4; object-fit: cover; cursor: pointer; border: 1px solid #ddd; }
-
 .detalle-info { padding-top: 20px; }
-
 .detalle-nombre { font-size: 36px; margin-bottom: 20px; }
 .detalle-precio { font-size: 18px; color: #888; margin-bottom: 30px; }
 .detalle-descripcion { font-size: 14px; margin-bottom: 40px; color: #555; }
-
 .cores { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .talles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; min-height: 40px; }
-
-.cor-btn, .talle-btn {
-    padding: 10px 14px;
-    border: 1px solid #ddd;
-    background: white;
-    cursor: pointer;
-    font-size: 11px;
-    text-transform: uppercase;
-}
-
-.cor-btn.activo, .talle-btn.activo {
-    border-color: #7b2d3a;
-    color: #7b2d3a;
-}
-
-.talle-btn.sin-stock {
-    opacity: 0.35;
-    cursor: not-allowed;
-    text-decoration: line-through;
-}
-
-.msg-aviso {
-    font-size: 12px;
-    color: #7b2d3a;
-    margin-bottom: 14px;
-    display: none;
-}
-
+.cor-btn, .talle-btn { padding: 10px 14px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 11px; text-transform: uppercase; }
+.cor-btn.activo, .talle-btn.activo { border-color: #7b2d3a; color: #7b2d3a; }
+.talle-btn.sin-stock { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
+.talle-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.msg-aviso { font-size: 12px; color: #7b2d3a; margin-bottom: 14px; display: none; }
 .msg-aviso.visible { display: block; }
-
-.msg-poco-stock {
-    font-size: 12px;
-    color: #b8860b;
-    margin-bottom: 14px;
-    font-weight: 600;
-    display: none;
-}
-
-.msg-poco-stock:not(:empty) { display: block; }
-
-.btn {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    background: #2c2c2c;
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    font-size: 12px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-}
-
-.btn.disabled {
-    background: #aaa;
-    cursor: not-allowed;
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-@media (max-width: 768px){
-.detalle-wrap { padding: 20px 16px 40px; }
-.detalle { grid-template-columns: 1fr; gap: 24px; }
-}
+.msg-poco-stock { font-size: 12px; color: #b8860b; margin-bottom: 14px; font-weight: 600; display: none; }
+.msg-poco-stock.visible { display: block; }
+.cantidad-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.cantidad-wrap label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+.cantidad-controles { display: flex; align-items: center; border: 1px solid #ddd; }
+.cantidad-btn { width: 36px; height: 36px; background: white; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1a1a1a; }
+.cantidad-btn:hover { background: #f5f5f5; }
+.cantidad-num { width: 40px; text-align: center; font-size: 14px; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0; height: 36px; outline: none; font-family: 'DM Sans', sans-serif; }
+.btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: white; text-decoration: none; text-align: center; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+.btn.disabled { background: #aaa; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
+.msg-agregado { display: block; font-size: 11px; color: #7b2d3a; background: var(--rosa-light); border-radius: 6px; padding: 6px 12px; margin-top: 8px; margin-bottom: 14px; letter-spacing: 1px; }
+@media (max-width: 768px){ .detalle-wrap { padding: 20px 16px 40px; } .detalle { grid-template-columns: 1fr; gap: 24px; } }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="detalle-wrap">
+{% if request.GET.agregado %}
+<p class="msg-agregado">¡Producto agregado al carrito!    ˖⁺‧₊˚♡˚₊‧⁺˖</p>
+{% endif %}
 <a href="/tienda" class="volver">← Volver</a>
-
 <div class="detalle">
-
   <div>
     {% if producto.colores.first %}
     <img id="img" class="imagen-principal" src="{{ producto.colores.first.imagen.url }}">
     {% elif producto.imagen %}
     <img id="img" class="imagen-principal" src="{{ producto.imagen.url }}">
     {% endif %}
-
     <div class="miniaturas">
       {% for color in producto.colores.all %}
       <img src="{{ color.imagen.url }}" onclick="setImg('{{ color.imagen.url }}')">
       {% endfor %}
     </div>
   </div>
-
   <div class="detalle-info">
-
     <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
     <p class="detalle-precio">${{ producto.precio }}</p>
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
-
     {% if producto.colores.exists %}
     <div class="cores">
       {% for color in producto.colores.all %}
-      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, '{{ color.imagen.url }}', this)">
-        {{ color.nombre }}
-      </button>
+      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, '{{ color.imagen.url }}', this)">{{ color.nombre }}</button>
       {% endfor %}
     </div>
-
-    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">
-      ⚠ Seleccioná un color antes de continuar.
-    </p>
-
-    <div class="talles" id="tallesContainer"></div>
-
-    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">
-      ⚠ Seleccioná un talle antes de continuar.
-    </p>
-
-    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">
-      ⚠ Sin stock para este color y talle. Probá otra combinación.
-    </p>
-
+    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">⚠ Seleccioná un color antes de continuar.</p>
+    <div class="talles" id="tallesContainer">
+      <button class="talle-btn" data-talle="85" disabled>85</button>
+      <button class="talle-btn" data-talle="90" disabled>90</button>
+      <button class="talle-btn" data-talle="95" disabled>95</button>
+      <button class="talle-btn" data-talle="100" disabled>100</button>
+    </div>
+    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">⚠ Seleccioná un talle antes de continuar.</p>
+    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">⚠ Sin stock para este color y talle. Probá otra combinación.</p>
     <p class="msg-poco-stock" id="msgPocoStock"></p>
-
-    <a id="addBtn" class="btn disabled" href="#">
-      Agregar al carrito
-    </a>
+    <div class="cantidad-wrap">
+      <label>Cantidad</label>
+      <div class="cantidad-controles">
+        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
+        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+      </div>
+    </div>
+    <a id="addBtn" class="btn disabled" href="#">Agregar al carrito</a>
     {% else %}
-    <a class="btn" href="/tienda/agregar/{{ producto.pk }}/">
-      Agregar al carrito
-    </a>
+    <div class="cantidad-wrap">
+      <label>Cantidad</label>
+      <div class="cantidad-controles">
+        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
+        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+      </div>
+    </div>
+    <a id="addBtnSimple" class="btn" href="/tienda/agregar/{{ producto.pk }}/?cantidad=1">Agregar al carrito</a>
     {% endif %}
-
   </div>
-
 </div>
 </div>
 {% endblock %}
@@ -157,70 +104,82 @@
 <script>
 let selectedColor = null;
 let selectedTalle = null;
+let tallesData = [];
 
-function setImg(url){
-  document.getElementById('img').src = url;
+function setImg(url){ document.getElementById('img').src = url; }
+
+function cambiarCantidad(delta){
+  const input = document.getElementById('cantidad');
+  const nueva = Math.max(1, parseInt(input.value) + delta);
+  input.value = nueva;
+  actualizarHrefCarrito();
+}
+
+function actualizarHrefCarrito(){
+  const cantidad = document.getElementById('cantidad').value;
+  const addBtn = document.getElementById('addBtn');
+  const addBtnSimple = document.getElementById('addBtnSimple');
+  if (addBtn && !addBtn.classList.contains('disabled') && selectedColor && selectedTalle) {
+    addBtn.href = `/tienda/agregar/{{ producto.pk }}/?color=${selectedColor}&talle=${selectedTalle}&cantidad=${cantidad}`;
+  }
+  if (addBtnSimple) {
+    addBtnSimple.href = `/tienda/agregar/{{ producto.pk }}/?cantidad=${cantidad}`;
+  }
+}
+
+function renderTalles(){
+  const container = document.getElementById('tallesContainer');
+  const tallesOrden = [85, 90, 95, 100];
+  container.innerHTML = '';
+  tallesOrden.forEach(nombre => {
+    const btn = document.createElement('button');
+    btn.className = 'talle-btn';
+    btn.textContent = nombre;
+    btn.dataset.talle = nombre;
+    if (!selectedColor) { btn.disabled = true; container.appendChild(btn); return; }
+    const encontrado = tallesData.find(t => String(t.talle) === String(nombre));
+    if (!encontrado || encontrado.stock <= 0) {
+      btn.classList.add('sin-stock');
+    } else {
+      btn.dataset.id = encontrado.id;
+      btn.dataset.stock = encontrado.stock;
+      btn.onclick = () => setTalle(encontrado.id, encontrado.stock, btn);
+    }
+    container.appendChild(btn);
+  });
 }
 
 function setColor(id, imgUrl, btn){
   selectedColor = id;
   selectedTalle = null;
-
   document.querySelectorAll('.cor-btn').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
   setImg(imgUrl);
-
   document.getElementById('msgColor').classList.remove('visible');
   document.getElementById('msgStock').classList.remove('visible');
   document.getElementById('msgPocoStock').textContent = '';
+  document.getElementById('msgPocoStock').classList.remove('visible');
   document.getElementById('addBtn').classList.add('disabled');
   document.getElementById('addBtn').href = '#';
-
-  // Cargar talles del color seleccionado
-  fetch(`/tienda/talles/${id}/`)
-    .then(r => r.json())
-    .then(data => {
-      const container = document.getElementById('tallesContainer');
-      container.innerHTML = '';
-
-      data.talles.forEach(t => {
-        const btn = document.createElement('button');
-        btn.className = 'talle-btn' + (t.stock <= 0 ? ' sin-stock' : '');
-        btn.textContent = t.talle;
-        btn.dataset.id = t.id;
-        btn.dataset.stock = t.stock;
-
-        if (t.stock > 0) {
-          btn.onclick = () => setTalle(t.id, t.stock, btn);
-        }
-
-        container.appendChild(btn);
-      });
-    });
+  fetch(`/tienda/talles/${id}/`).then(r => r.json()).then(data => { tallesData = data.talles; renderTalles(); });
 }
 
 function setTalle(id, stock, btn){
   selectedTalle = id;
-
   document.querySelectorAll('.talle-btn').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
-
   document.getElementById('msgTalle').classList.remove('visible');
   document.getElementById('msgStock').classList.remove('visible');
-
   const msgPoco = document.getElementById('msgPocoStock');
   msgPoco.textContent = '';
   msgPoco.classList.remove('visible');
-
   if (stock <= 2) {
-    msgPoco.textContent = stock === 1
-      ? '¡Última unidad disponible!'
-      : `¡Quedan solo ${stock} unidades!`;
+    msgPoco.textContent = stock === 1 ? '¡Última unidad disponible!' : `¡Quedan solo ${stock} unidades!`;
     msgPoco.classList.add('visible');
   }
-
   const addBtn = document.getElementById('addBtn');
-  addBtn.href = `/tienda/agregar/{{ producto.pk }}/?color=${selectedColor}&talle=${id}`;
+  const cantidad = document.getElementById('cantidad').value;
+  addBtn.href = `/tienda/agregar/{{ producto.pk }}/?color=${selectedColor}&talle=${id}&cantidad=${cantidad}`;
   addBtn.classList.remove('disabled');
 }
 </script>

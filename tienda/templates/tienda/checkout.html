@@ -30,12 +30,14 @@
     .btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
     .btn-confirmar:hover { background: var(--rosa-deep); }
 
-    .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 36px; position: sticky; top: 100px; }
+    .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 20px 36px; position: sticky; top: 100px; }
     .resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }
     .resumen-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); }
     .resumen-item span:first-child { color: var(--gris); }
     .resumen-envio { display: flex; justify-content: space-between; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); color: var(--gris); }
     .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-top: 20px; }
+
+    .form-error { font-size: 11px; color: #c0392b; margin-top: 6px; }
 
     @media (max-width: 768px) {
         .checkout-wrap { padding: 30px 20px 60px; }
@@ -60,8 +62,11 @@
                     {{ form.nombre }}
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
-                    {{ form.email }}
+                  <label>Email</label>
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                <p class="form-error">{{ form.email.errors.0 }}</p>
+                  {% endif %}
                 </div>
                 <div class="form-group">
                     <label>Teléfono</label>
@@ -88,7 +93,7 @@
         </div>
 
         <div class="resumen">
-            <h2>Tu pedido 🛍</h2>
+            <h2>Tu pedido ♡</h2>
             {% for item in items %}
             <div class="resumen-item">
                 <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
@@ -114,7 +119,6 @@
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&loading=async"></script>
 
 <script>
-// Autocomplete de dirección
 async function iniciarAutocomplete() {
     const input = document.querySelector("textarea#direccion");
     if (!input) return;
@@ -143,7 +147,7 @@ async function iniciarAutocomplete() {
 
 window.addEventListener("load", iniciarAutocomplete);
 
-// Actualizar resumen al elegir envío
+// actualizar resumen al elegir envío
 document.addEventListener('DOMContentLoaded', function () {
     const selectEnvio = document.getElementById('id_envio');
     const spanEnvio = document.getElementById('resumen-envio-costo');
@@ -152,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const spanRecargo = document.getElementById('resumen-recargo-valor');
     const subtotal = parseFloat("{{ subtotal }}".replace(',', '.'));
 
-    // Si el nombre de la opción de envío contiene "correo argentino" → no se puede pagar en efectivo
+    // no se puede pagar con efectivo y realizar envios con correo arg (no make sense)
     const ES_CORREO = /correo\s*argentino/i;
 
     function filtrarPagoSegunEnvio() {
@@ -168,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     labelEl.style.pointerEvents = esCorreo ? 'none' : '';
                     labelEl.title = esCorreo ? 'No disponible para envíos por Correo Argentino' : '';
                 }
-                // Si estaba seleccionado y ahora se deshabilita, desmarcar
+
                 if (esCorreo && radio.checked) {
                     radio.checked = false;
                 }
@@ -206,10 +210,23 @@ document.addEventListener('DOMContentLoaded', function () {
         radio.addEventListener('change', actualizarResumen);
     });
 
-    // Aplicar al cargar por si el browser recuerda una selección previa
     filtrarPagoSegunEnvio();
     actualizarResumen();
 });
+
+document.getElementById('id_email').addEventListener('input', function () {
+    const val = this.value;
+    const esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    let error = document.getElementById('email-error');
+    if (!error) {
+        error = document.createElement('p');
+        error.id = 'email-error';
+        error.className = 'form-error';
+        this.parentNode.appendChild(error);
+    }
+    error.textContent = val && !esValido ? 'Ingresá un email válido.' : '';
+});
+
 </script>
 
 {% endblock %}
