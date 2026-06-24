@@ -36,3 +36,9 @@ class CheckoutForm(forms.Form):
         except Exception:
             raise forms.ValidationError('Ingresá un email válido.')
         return email
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data['telefono']
+        if not telefono.replace('+', '').replace('-', '').replace(' ', '').isdigit():
+            raise forms.ValidationError('Ingresá solo números.')
+        return telefono
