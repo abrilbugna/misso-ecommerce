@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.conf import settings
-import requests
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto
+from .email_utils import enviar_comprobante_cliente
 
 class TalleProductoInline(admin.TabularInline):
     model = TalleProducto
@@ -40,42 +39,6 @@ class CarritoAdmin(admin.ModelAdmin):
 @admin.register(ItemCarrito)
 class ItemCarritoAdmin(admin.ModelAdmin):
     list_display = ['carrito', 'producto', 'cantidad', 'color', 'talle']
-
-def enviar_comprobante_cliente(orden):
-    items = orden.itemorden_set.all()
-    detalle_items = ""
-    for item in items:
-        color_txt = item.color.nombre if item.color else "Sin color"
-        talle_txt = item.talle.talle if item.talle else "Sin talle"
-        detalle_items += (
-            f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.precio}\n"
-        )
-
-    cuerpo = (
-        f"¡Hola {orden.nombre}! 🛍\n\n"
-        f"Tu pedido #{orden.pk} fue confirmado. Acá está tu comprobante:\n\n"
-        f"{detalle_items}\n"
-        f"Envío: {orden.envio}\n"
-        f"Método de pago: {orden.metodo_pago}\n"
-        f"Total: ${orden.total}\n\n"
-        f"¡Gracias por tu compra!\n\n"
-        f"— Misso ♡"
-    )
-
-    requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": "Misso <hola@misso.ar>",
-            "to": [orden.email],
-            "subject": f"Tu pedido #{orden.pk} fue confirmado — Misso",
-            "text": cuerpo,
-        },
-        timeout=5,
-    )
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):

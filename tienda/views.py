@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto
 from .forms import CheckoutForm
+from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
 import mercadopago
-import requests
 from django.conf import settings
 from django.http import JsonResponse
 
@@ -187,8 +187,9 @@ def checkout(request):
                 estado='en_proceso',
             )
 
+            items_guardados = []
             for item in items:
-                ItemOrden.objects.create(
+                item_orden = ItemOrden.objects.create(
                     orden=orden,
                     producto=item.producto,
                     cantidad=item.cantidad,
@@ -196,72 +197,16 @@ def checkout(request):
                     color=item.color,
                     talle=item.talle,
                 )
+                items_guardados.append(item_orden)
                 if item.talle:
                     item.talle.stock = max(0, item.talle.stock - item.cantidad)
                     item.talle.save()
 
-            detalle_items = ""
-            for item in items:
-                color_txt = item.color.nombre if item.color else "Sin color"
-                talle_txt = item.talle.talle if item.talle else "Sin talle"
-                detalle_items += (
-                    f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.producto.precio}\n"
-                )
-
-            cuerpo_mail = (
-                f"Información del pedido\n\n"
-                f"Cliente: {orden.nombre}\n"
-                f"Email: {orden.email}\n"
-                f"Tel: {orden.telefono}\n\n"
-                f"📍 Dirección de envío: {orden.direccion}\n"
-                f"PRODUCTOS:\n{detalle_items}\n"
-                f"Total: ${orden.total}\n"
-                f"Método: {orden.metodo_pago}\n"
-                f"Método de envío: {orden.envio}\n"
-            )
-
-            cuerpo_cliente = (
-                f"¡Hola {orden.nombre}! 🛍\n\n"
-                f"Recibimos tu pedido correctamente. Te confirmamos los detalles:\n\n"
-                f"{detalle_items}\n"
-                f"Envío: {orden.envio}\n"
-                f"Método de pago: {orden.metodo_pago}\n"
-                f"Total: ${orden.total}\n\n"
-                f"En breve nos ponemos en contacto. ¡Gracias por tu compra!\n\n"
-                f"— Misso ♡"
-            )
-
             try:
-                requests.post(
-                    "https://api.resend.com/emails",
-                    headers={
-                        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "from": "Misso <hola@misso.ar>",
-                        "to": [settings.NOTIFICACION_EMAIL],
-                        "subject": f"¡Nuevo pedido #{orden.pk}!",
-                        "text": cuerpo_mail,
-                    },
-                    timeout=5,
-                )
+                enviar_notificacion_tienda(orden, items_guardados)
                 if metodo_pago != 'mercadopago':
-                    requests.post(
-                        "https://api.resend.com/emails",
-                        headers={
-                            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-                            "Content-Type": "application/json",
-                        },
-                        json={
-                            "from": "Misso <hola@misso.ar>",
-                            "to": [orden.email],
-                            "subject": f"Confirmación de tu pedido #{orden.pk} — Misso",
-                            "text": cuerpo_cliente,
-                        },
-                        timeout=5,
-                    )
-            except requests.RequestException:
+                    enviar_comprobante_cliente(orden)
+            except Exception:
                 pass
 
             items.delete()
