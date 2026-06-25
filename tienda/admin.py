@@ -10,6 +10,12 @@ class ColorProductoInline(admin.TabularInline):
     extra = 1
     show_change_link = True
 
+class ItemOrdenInline(admin.TabularInline):
+    model = ItemOrden
+    extra = 0
+    readonly_fields = ['producto', 'color', 'talle', 'cantidad', 'precio']
+    can_delete = False
+
 @admin.register(ColorProducto)
 class ColorProductoAdmin(admin.ModelAdmin):
     list_display = ['producto', 'nombre']
@@ -35,8 +41,11 @@ class ItemCarritoAdmin(admin.ModelAdmin):
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'nombre', 'email', 'total', 'pagado', 'creado']
-    list_filter = ['pagado']
+    list_display = ['pk', 'nombre', 'email', 'total', 'metodo_pago', 'estado', 'pagado', 'creado']
+    list_filter = ['estado', 'metodo_pago', 'pagado']
+    list_editable = ['estado']
+    readonly_fields = ['nombre', 'email', 'telefono', 'direccion', 'total', 'envio', 'metodo_pago', 'creado', 'pagado']
+    inlines = [ItemOrdenInline]
 
 @admin.register(OpcionEnvio)
 class OpcionEnvioAdmin(admin.ModelAdmin):
