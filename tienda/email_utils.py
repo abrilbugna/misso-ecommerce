@@ -8,22 +8,51 @@ def _logo():
 
 def _bloque_pago_envio(orden):
     metodo_pago = orden.metodo_pago
-    label_pago = {
-        "transferencia": "Transferencia bancaria",
-        "efectivo": "Efectivo",
-        "mercadopago": "MercadoPago",
-    }.get(metodo_pago, metodo_pago)
-
-    nota_pago = ""
-    if metodo_pago == "transferencia":
-        nota_pago = '<br><span style="font-size:13px;color:#888;">(Recordá enviarnos el comprobante una vez realizada la transferencia)</span>'
-
     envio_nombre = str(orden.envio) if orden.envio else "A confirmar"
 
+    if metodo_pago == "transferencia":
+        bloque_pago = '''
+      <p style="margin:0 0 14px 0;font-size:15px;"><strong>Medio de pago:</strong> Transferencia bancaria</p>
+      <div style="border:2px dashed #c0768a;border-radius:12px;padding:20px 24px;background:#fdf5f6;margin-bottom:14px;">
+        <p style="margin:0 0 14px 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8b2035;font-weight:bold;">✦ Datos para transferir</p>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;color:#888;">Alias</td>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;font-weight:bold;text-align:right;">missocba</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;color:#888;">CBU</td>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;font-weight:bold;text-align:right;">1430001713038905120013</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;color:#888;">Titular</td>
+            <td style="padding:8px 0;border-bottom:1px solid #e8cdd4;font-size:14px;font-weight:bold;text-align:right;">Abril Bugna</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 0;font-size:14px;color:#888;">Banco</td>
+            <td style="padding:8px 0;font-size:14px;font-weight:bold;text-align:right;">Brubank</td>
+          </tr>
+        </table>
+      </div>
+      <p style="margin:0;font-size:13px;color:#888;">📩 Una vez realizada la transferencia envianos el comprobante por <a href="https://wa.me/543517727224" style="color:#6b0f1a;">WhatsApp</a> o <a href="https://instagram.com/misso.cba" style="color:#6b0f1a;">Instagram</a> con el número de pedido.</p>
+'''
+    elif metodo_pago == "efectivo":
+        bloque_pago = '''
+      <p style="margin:0;font-size:15px;"><strong>Medio de pago:</strong> Efectivo — el pago se abona al momento de recibir el pedido.</p>
+'''
+    elif metodo_pago == "mercadopago":
+        bloque_pago = '''
+      <p style="margin:0;font-size:15px;"><strong>Medio de pago:</strong> MercadoPago ✅ — tu pago fue procesado correctamente.</p>
+'''
+    else:
+        bloque_pago = f'''
+      <p style="margin:0;font-size:15px;"><strong>Medio de pago:</strong> {metodo_pago}</p>
+'''
+
     return f'''
-    <div style="border:1px solid #f0d6da;padding:16px 20px;box-sizing:border-box;margin:20px 0;background:#fdf5f6;border-radius:4px;">
-      <p style="margin:0 0 10px 0;font-size:15px;"><strong>Medio de pago:</strong> {label_pago}{nota_pago}</p>
-      <p style="margin:0;font-size:15px;"><strong>Medio de envío:</strong> {envio_nombre}</p>
+    <div style="border:1px solid #f0d6da;padding:20px 24px;box-sizing:border-box;margin:20px 0;background:#fff8f9;border-radius:8px;">
+      {bloque_pago}
+      <p style="margin:14px 0 0 0;font-size:15px;"><strong>Medio de envío:</strong> {envio_nombre}</p>
     </div>'''
 
 def _filas_items(items):
@@ -88,7 +117,7 @@ def html_comprobante_cliente(orden, items):
     </div>
 
     <div style="border-top:1px solid #f0d6da;margin-top:40px;padding-top:20px;text-align:center;">
-      <p style="font-size:13px;color:#888;">Cualquier duda comunicate a <a href="mailto:hola@misso.ar" style="color:#6b0f1a;">hola@misso.ar</a> o respondé este email.</p>
+      <p style="font-size:13px;color:#888;">Cualquier duda comunicate a <a href="mailto:missocba@gmail.com" style="color:#6b0f1a;">missocba@gmail.com</a> o respondé este email.</p>
       <p style="font-size:13px;color:#888;"><a href="https://misso.ar" style="color:#6b0f1a;">www.misso.ar</a></p>
     </div>
 
