@@ -43,7 +43,7 @@
     <div class="checkout-grid">
         <div class="form-section">
             <h2>✦ Tus datos</h2>
-            <form method="post">
+            <form method="post" id="checkout-form">
                 {% csrf_token %}
                 <div class="form-group">
                     <label>Nombre completo</label>
@@ -79,7 +79,7 @@
                         {% endfor %}
                     </div>
                 </div>
-                <button type="submit" class="btn-confirmar">Confirmar pedido →</button>
+                <button type="button" class="btn-confirmar" onclick="confirmarPedido()">Confirmar pedido →</button>
             </form>
         </div>
 
@@ -128,10 +128,30 @@ async function iniciarAutocomplete() {
         input.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
-    document.querySelector("form").addEventListener("submit", () => {
-        const texto = autocompleteEl.value || autocompleteEl.innerText || "";
-        if (!input.value && texto) input.value = texto;
-    });
+    window._autocompleteEl = autocompleteEl;
+}
+
+function confirmarPedido() {
+    const form = document.getElementById('checkout-form');
+    const input = document.querySelector('textarea#direccion');
+    const ac = window._autocompleteEl;
+
+    if (!input.value.trim() && ac) {
+        const valor = ac.value || '';
+        if (valor.trim()) {
+            input.value = valor.trim();
+        } else {
+            alert('Por favor ingresá tu dirección.');
+            return;
+        }
+    }
+
+    if (!input.value.trim()) {
+        alert('Por favor ingresá tu dirección.');
+        return;
+    }
+
+    form.requestSubmit();
 }
 
 window.addEventListener("load", iniciarAutocomplete);
@@ -203,18 +223,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('id_telefono').addEventListener('input', function () {
-    const antes = this.value;
-    this.value = this.value.replace(/[^0-9+\-\s]/g, '');
-    let error = document.getElementById('telefono-error');
-    if (!error) {
-        error = document.createElement('p');
-        error.id = 'telefono-error';
-        error.className = 'form-error';
-        this.parentNode.appendChild(error);
-    }
-    error.textContent = antes !== this.value ? 'Solo se permiten números.' : '';
-});
-
+        const antes = this.value;
+        this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+        let error = document.getElementById('telefono-error');
+        if (!error) {
+            error = document.createElement('p');
+            error.id = 'telefono-error';
+            error.className = 'form-error';
+            this.parentNode.appendChild(error);
+        }
+        error.textContent = antes !== this.value ? 'Solo se permiten números.' : '';
+    });
 });
 </script>
 
