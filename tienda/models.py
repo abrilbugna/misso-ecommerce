@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 CATEGORIAS = [
     ('conjuntos armados', 'Conjuntos armados'),
@@ -16,7 +18,7 @@ class OpcionEnvio(models.Model):
 
     def __str__(self):
         return f'{self.nombre} — ${self.costo}'
-    
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField()
@@ -33,7 +35,7 @@ class Producto(models.Model):
 class Carrito(models.Model):
     session_key = models.CharField(max_length=40)
     creado = models.DateTimeField(auto_now_add=True)
-    
+
 class ItemCarrito(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
@@ -50,6 +52,12 @@ METODOS_PAGO = [
     ('mercadopago', 'MercadoPago'),
 ]
 
+ESTADOS_ORDEN = [
+    ('en_proceso', 'En proceso'),
+    ('finalizado', 'Finalizado'),
+    ('cancelado', 'Cancelado'),
+]
+
 class Orden(models.Model):
     nombre = models.CharField(max_length=200)
     email = models.EmailField()
@@ -60,6 +68,7 @@ class Orden(models.Model):
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='efectivo')
     creado = models.DateTimeField(auto_now_add=True)
     pagado = models.BooleanField(default=False)
+    estado = models.CharField(max_length=20, choices=ESTADOS_ORDEN, default='en_proceso')
 
     def __str__(self):
         return f'Orden {self.pk} - {self.nombre}'
@@ -69,10 +78,12 @@ class ItemOrden(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
+    color = models.ForeignKey('ColorProducto', on_delete=models.SET_NULL, null=True, blank=True)
+    talle = models.ForeignKey('TalleProducto', on_delete=models.SET_NULL, null=True, blank=True)
 
     def subtotal(self):
         return self.precio * self.cantidad
-    
+
 class ColorProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='colores')
     nombre = models.CharField(max_length=50)
@@ -80,7 +91,6 @@ class ColorProducto(models.Model):
 
     def __str__(self):
         return f'{self.producto.nombre} — {self.nombre}'
-
 
 TALLES = [
     ('85', '85'),
@@ -99,3 +109,31 @@ class TalleProducto(models.Model):
 
     def __str__(self):
         return f'{self.color} — Talle {self.talle} ({self.stock} unid.)'
+
+
+@receiver(pre_save, sender=Orden)
+def manejar_stock_por_estado(sender, instance, **kwargs):
+    if not instance.pk:
+        return
+
+    try:
+        anterior = Orden.objects.get(pk=instance.pk)
+    except Orden.DoesNotExist:
+        return
+
+    if anterior.estado == instance.estado:
+        return
+
+    items = instance.itemorden_set.all()
+
+    if instance.estado == 'cancelado' and anterior.estado != 'cancelado':
+        for item in items:
+            if item.talle:
+                item.talle.stock += item.cantidad
+                item.talle.save()
+
+    if anterior.estado == 'cancelado' and instance.estado == 'en_proceso':
+        for item in items:
+            if item.talle:
+                item.talle.stock = max(0, item.talle.stock - item.cantidad)
+                item.talle.save()

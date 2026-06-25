@@ -183,7 +183,8 @@ def checkout(request):
                 direccion=form.cleaned_data['direccion'],
                 envio=envio,
                 metodo_pago=metodo_pago,
-                total=total
+                total=total,
+                estado='en_proceso',
             )
 
             for item in items:
@@ -192,14 +193,17 @@ def checkout(request):
                     producto=item.producto,
                     cantidad=item.cantidad,
                     precio=item.producto.precio,
+                    color=item.color,
+                    talle=item.talle,
                 )
+                if item.talle:
+                    item.talle.stock = max(0, item.talle.stock - item.cantidad)
+                    item.talle.save()
 
             detalle_items = ""
-
             for item in items:
                 color_txt = item.color.nombre if item.color else "Sin color"
                 talle_txt = item.talle.talle if item.talle else "Sin talle"
-
                 detalle_items += (
                     f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.producto.precio}\n"
                 )
@@ -213,7 +217,7 @@ def checkout(request):
                 f"PRODUCTOS:\n{detalle_items}\n"
                 f"Total: ${orden.total}\n"
                 f"Método: {orden.metodo_pago}\n"
-                f"Método de envio: {orden.envio}\n"
+                f"Método de envío: {orden.envio}\n"
             )
 
             cuerpo_cliente = (
@@ -242,20 +246,21 @@ def checkout(request):
                     },
                     timeout=5,
                 )
-                requests.post(
-                    "https://api.resend.com/emails",
-                    headers={
-                        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "from": "Misso <onboarding@resend.dev>",
-                        "to": [orden.email],
-                        "subject": f"Confirmación de tu pedido #{orden.pk} — Misso",
-                        "text": cuerpo_cliente,
-                    },
-                    timeout=5,
-                )
+                if metodo_pago != 'mercadopago':
+                    requests.post(
+                        "https://api.resend.com/emails",
+                        headers={
+                            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                            "Content-Type": "application/json",
+                        },
+                        json={
+                            "from": "Misso <onboarding@resend.dev>",
+                            "to": [orden.email],
+                            "subject": f"Confirmación de tu pedido #{orden.pk} — Misso",
+                            "text": cuerpo_cliente,
+                        },
+                        timeout=5,
+                    )
             except requests.RequestException:
                 pass
 
