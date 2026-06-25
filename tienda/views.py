@@ -186,6 +186,14 @@ def checkout(request):
                 total=total
             )
 
+            for item in items:
+                ItemOrden.objects.create(
+                    orden=orden,
+                    producto=item.producto,
+                    cantidad=item.cantidad,
+                    precio=item.producto.precio,
+                )
+
             detalle_items = ""
 
             for item in items:
@@ -208,6 +216,17 @@ def checkout(request):
                 f"Método de envio: {orden.envio}\n"
             )
 
+            cuerpo_cliente = (
+                f"¡Hola {orden.nombre}! 🛍\n\n"
+                f"Recibimos tu pedido correctamente. Te confirmamos los detalles:\n\n"
+                f"{detalle_items}\n"
+                f"Envío: {orden.envio}\n"
+                f"Método de pago: {orden.metodo_pago}\n"
+                f"Total: ${orden.total}\n\n"
+                f"En breve nos ponemos en contacto. ¡Gracias por tu compra!\n\n"
+                f"— Misso ♡"
+            )
+
             try:
                 requests.post(
                     "https://api.resend.com/emails",
@@ -220,6 +239,20 @@ def checkout(request):
                         "to": [settings.NOTIFICACION_EMAIL],
                         "subject": f"¡Nuevo pedido #{orden.pk}!",
                         "text": cuerpo_mail,
+                    },
+                    timeout=5,
+                )
+                requests.post(
+                    "https://api.resend.com/emails",
+                    headers={
+                        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "from": "Misso <onboarding@resend.dev>",
+                        "to": [orden.email],
+                        "subject": f"Confirmación de tu pedido #{orden.pk} — Misso",
+                        "text": cuerpo_cliente,
                     },
                     timeout=5,
                 )
@@ -272,9 +305,9 @@ def pago_mp(request, pk):
             for item in items
         ],
         "back_urls": {
-          "success": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
-          "failure": f"https://misso.ar/tienda/carrito/",
-          "pending": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
+            "success": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
+            "failure": f"https://misso.ar/tienda/carrito/",
+            "pending": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
         },
         "auto_return": "approved",
         "external_reference": str(orden.pk),
@@ -282,8 +315,9 @@ def pago_mp(request, pk):
 
     preference_response = sdk.preference().create(preference_data)
     preference = preference_response["response"]
+    mp_url = preference.get("init_point")
 
-    return render(request, 'tienda/pago_mp.html', {
-        'orden': orden,
-        'mp_url': preference.get("sandbox_init_point") or preference.get("init_point"),
-    })
+    if not mp_url:
+        return redirect('ver_carrito')
+
+    return redirect(mp_url)
