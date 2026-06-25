@@ -1,6 +1,4 @@
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
 CATEGORIAS = [
     ('conjuntos armados', 'Conjuntos armados'),
@@ -109,71 +107,3 @@ class TalleProducto(models.Model):
 
     def __str__(self):
         return f'{self.color} — Talle {self.talle} ({self.stock} unid.)'
-
-
-@receiver(pre_save, sender=Orden)
-def manejar_stock_por_estado(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-
-    try:
-        anterior = Orden.objects.get(pk=instance.pk)
-    except Orden.DoesNotExist:
-        return
-
-    if anterior.estado == instance.estado:
-        return
-
-    items = instance.itemorden_set.all()
-
-    if instance.estado == 'cancelado' and anterior.estado != 'cancelado':
-        for item in items:
-            if item.talle:
-                item.talle.stock += item.cantidad
-                item.talle.save()
-
-    if anterior.estado == 'cancelado' and instance.estado == 'en_proceso':
-        for item in items:
-            if item.talle:
-                item.talle.stock = max(0, item.talle.stock - item.cantidad)
-                item.talle.save()
-
-    if instance.estado == 'finalizado' and anterior.estado != 'finalizado':
-        detalle_items = ""
-        for item in items:
-            color_txt = item.color.nombre if item.color else "Sin color"
-            talle_txt = item.talle.talle if item.talle else "Sin talle"
-            detalle_items += (
-                f"- {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | Cant: {item.cantidad} | Precio: ${item.precio}\n"
-            )
-
-        cuerpo = (
-            f"¡Hola {instance.nombre}! 🛍\n\n"
-            f"Tu pedido #{instance.pk} fue confirmado. Acá está tu comprobante:\n\n"
-            f"{detalle_items}\n"
-            f"Envío: {instance.envio}\n"
-            f"Método de pago: {instance.metodo_pago}\n"
-            f"Total: ${instance.total}\n\n"
-            f"¡Gracias por tu compra!\n\n"
-            f"— Misso ♡"
-        )
-
-        try:
-            import requests
-            from django.conf import settings
-            requests.post(
-                "https://api.resend.com/emails",
-                headers={
-                    "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "from": "Misso <onboarding@resend.dev>",
-                    "to": [instance.email],
-                    "subject": f"Tu pedido #{instance.pk} fue confirmado — Misso",
-                    "text": cuerpo,
-                },
-                timeout=5,
-            )
-        except Exception:
-            pass

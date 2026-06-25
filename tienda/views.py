@@ -239,7 +239,7 @@ def checkout(request):
                         "Content-Type": "application/json",
                     },
                     json={
-                        "from": "Misso <onboarding@resend.dev>",
+                        "from": "Misso <hola@misso.ar>",
                         "to": [settings.NOTIFICACION_EMAIL],
                         "subject": f"¡Nuevo pedido #{orden.pk}!",
                         "text": cuerpo_mail,
@@ -254,7 +254,7 @@ def checkout(request):
                             "Content-Type": "application/json",
                         },
                         json={
-                            "from": "Misso <onboarding@resend.dev>",
+                            "from": "Misso <hola@misso.ar>",
                             "to": [orden.email],
                             "subject": f"Confirmación de tu pedido #{orden.pk} — Misso",
                             "text": cuerpo_cliente,
