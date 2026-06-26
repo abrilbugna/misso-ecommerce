@@ -1,15 +1,27 @@
 from django.contrib import admin
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto
 from .email_utils import enviar_comprobante_cliente
 
 class TalleProductoInline(admin.TabularInline):
     model = TalleProducto
     extra = 4
+    fields = ['talle', 'stock']
 
 class ColorProductoInline(admin.TabularInline):
     model = ColorProducto
     extra = 1
+    fields = ['nombre']
     show_change_link = True
+
+class ImagenProductoInline(admin.TabularInline):
+    model = ImagenProducto
+    extra = 1
+    fields = ['imagen', 'color', 'orden']
+
+class VideoProductoInline(admin.TabularInline):
+    model = VideoProducto
+    extra = 1
+    fields = ['video', 'orden']
 
 class ItemOrdenInline(admin.TabularInline):
     model = ItemOrden
@@ -29,8 +41,8 @@ class ProductoAdmin(admin.ModelAdmin):
     list_editable = ['precio', 'activo', 'destacado']
     search_fields = ['nombre']
     list_filter = ['categoria', 'activo', 'destacado']
-    fields = ['nombre', 'descripcion', 'precio', 'categoria', 'activo', 'destacado', 'imagen']
-    inlines = [ColorProductoInline]
+    fields = ['nombre', 'descripcion', 'precio', 'categoria', 'activo', 'destacado']
+    inlines = [ColorProductoInline, ImagenProductoInline, VideoProductoInline]
 
 @admin.register(Carrito)
 class CarritoAdmin(admin.ModelAdmin):

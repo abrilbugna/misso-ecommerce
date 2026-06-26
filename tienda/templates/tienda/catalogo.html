@@ -66,11 +66,9 @@
     <div class="producto">
         <a href="/tienda/{{ producto.pk }}/">
             <div class="producto-img">
-                {% if producto.colores.first %}
-               <img src="{{ producto.colores.first.imagen.url }}">
-                {% elif producto.imagen %}
-               <img src="{{ producto.imagen.url }}">
-                {% endif %}
+                {% with url=producto.get_imagen_url %}
+                {% if url %}<img src="{{ url }}">{% endif %}
+                {% endwith %}
             </div>
             <div class="producto-info">
                 <p class="producto-nombre">{{ producto.nombre }}</p>

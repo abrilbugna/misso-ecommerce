@@ -13,7 +13,7 @@ def inicio(request):
     productos_por_categoria = (
         Producto.objects
         .filter(activo=True)
-        .prefetch_related('colores')
+        .prefetch_related('imagenes')
         .order_by('categoria')
     )
 
@@ -25,19 +25,12 @@ def inicio(request):
     for slug, nombre in CATEGORIAS:
         producto = productos_dict.get(slug)
         if producto:
-            colores = list(producto.colores.all())
-            color = colores[0] if colores else None
-            if color and color.imagen:
+            imagen_url = producto.get_imagen_url()
+            if imagen_url:
                 categorias_con_imagen.append({
                     'slug': slug,
                     'nombre': nombre,
-                    'imagen': color.imagen.url,
-                })
-            elif producto.imagen:
-                categorias_con_imagen.append({
-                    'slug': slug,
-                    'nombre': nombre,
-                    'imagen': producto.imagen.url,
+                    'imagen': imagen_url,
                 })
 
     return render(request, 'tienda/inicio.html', {'categorias': categorias_con_imagen})
@@ -47,7 +40,7 @@ def catalogo(request):
     categoria = request.GET.get('categoria', '')
     busqueda = request.GET.get('q', '')
 
-    productos = Producto.objects.filter(activo=True).prefetch_related('colores')
+    productos = Producto.objects.filter(activo=True).prefetch_related('imagenes')
 
     if categoria:
         productos = productos.filter(categoria=categoria)
@@ -61,9 +54,10 @@ def catalogo(request):
         'busqueda': busqueda,
     })
 
+
 def detalle(request, pk):
     producto = get_object_or_404(
-        Producto.objects.prefetch_related('colores', 'colores__talles'),
+        Producto.objects.prefetch_related('colores', 'colores__talles', 'imagenes', 'videos'),
         pk=pk
     )
     error = request.GET.get('error', '')

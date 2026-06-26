@@ -9,6 +9,7 @@
 .imagen-principal { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
 .miniaturas { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .miniaturas img { width: 70px; aspect-ratio: 3/4; object-fit: cover; cursor: pointer; border: 1px solid #ddd; }
+.miniaturas img.activa { border-color: #7b2d3a; }
 .detalle-info { padding-top: 20px; }
 .detalle-nombre { font-size: 36px; margin-bottom: 20px; }
 .detalle-precio { font-size: 18px; color: #888; margin-bottom: 30px; }
@@ -44,33 +45,35 @@
 <a href="/tienda" class="volver">← Volver</a>
 <div class="detalle">
   <div>
-    {% if producto.colores.first %}
-    <img id="img" class="imagen-principal" src="{{ producto.colores.first.imagen.url }}">
-    {% elif producto.imagen %}
-    <img id="img" class="imagen-principal" src="{{ producto.imagen.url }}">
+    {% with primera=producto.imagenes.first %}
+    {% if primera %}
+    <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}">
     {% endif %}
+    {% endwith %}
     <div class="miniaturas">
-      {% for color in producto.colores.all %}
-      <img src="{{ color.imagen.url }}" onclick="setImg('{{ color.imagen.url }}')">
+      {% for img in producto.imagenes.all %}
+      <img src="{{ img.imagen.url }}" data-color="{{ img.color_id|default:'' }}" onclick="setImg('{{ img.imagen.url }}', this)">
       {% endfor %}
     </div>
   </div>
   <div class="detalle-info">
     <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
     <p class="detalle-precio">${{ producto.precio }}</p>
+    {% if producto.descripcion %}
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
+    {% endif %}
     {% if producto.colores.exists %}
     <div class="cores">
       {% for color in producto.colores.all %}
-      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, '{{ color.imagen.url }}', this)">{{ color.nombre }}</button>
+      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, this)">{{ color.nombre }}</button>
       {% endfor %}
     </div>
     <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">⚠ Seleccioná un color antes de continuar.</p>
     <div class="talles" id="tallesContainer">
-      <button class="talle-btn" data-talle="85" disabled>85</button>
-      <button class="talle-btn" data-talle="90" disabled>90</button>
-      <button class="talle-btn" data-talle="95" disabled>95</button>
-      <button class="talle-btn" data-talle="100" disabled>100</button>
+      <button class="talle-btn" disabled>85</button>
+      <button class="talle-btn" disabled>90</button>
+      <button class="talle-btn" disabled>95</button>
+      <button class="talle-btn" disabled>100</button>
     </div>
     <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">⚠ Seleccioná un talle antes de continuar.</p>
     <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">⚠ Sin stock para este color y talle. Probá otra combinación.</p>
@@ -106,7 +109,11 @@ let selectedColor = null;
 let selectedTalle = null;
 let tallesData = [];
 
-function setImg(url){ document.getElementById('img').src = url; }
+function setImg(url, el){
+  document.getElementById('img').src = url;
+  document.querySelectorAll('.miniaturas img').forEach(i => i.classList.remove('activa'));
+  if (el) el.classList.add('activa');
+}
 
 function cambiarCantidad(delta){
   const input = document.getElementById('cantidad');
@@ -149,18 +156,21 @@ function renderTalles(){
   });
 }
 
-function setColor(id, imgUrl, btn){
+function setColor(id, btn){
   selectedColor = id;
   selectedTalle = null;
   document.querySelectorAll('.cor-btn').forEach(b => b.classList.remove('activo'));
   btn.classList.add('activo');
-  setImg(imgUrl);
   document.getElementById('msgColor').classList.remove('visible');
   document.getElementById('msgStock').classList.remove('visible');
   document.getElementById('msgPocoStock').textContent = '';
   document.getElementById('msgPocoStock').classList.remove('visible');
   document.getElementById('addBtn').classList.add('disabled');
   document.getElementById('addBtn').href = '#';
+
+  const imgAsociada = document.querySelector(`.miniaturas img[data-color="${id}"]`);
+  if (imgAsociada) setImg(imgAsociada.src, imgAsociada);
+
   fetch(`/tienda/talles/${id}/`).then(r => r.json()).then(data => { tallesData = data.talles; renderTalles(); });
 }
 
