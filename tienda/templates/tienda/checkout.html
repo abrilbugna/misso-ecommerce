@@ -26,8 +26,10 @@
     .resumen-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); }
     .resumen-item span:first-child { color: var(--gris); }
     .resumen-envio { display: flex; justify-content: space-between; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); color: var(--gris); }
+    .resumen-descuento { display: flex; justify-content: space-between; font-size: 13px; padding: 10px 0; border-bottom: 1px solid var(--borde); color: #c0768a; }
     .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-top: 20px; }
     .form-error { font-size: 11px; color: #c0392b; margin-top: 6px; }
+    .codigo-badge { font-size: 11px; color: #c0768a; background: #fdf5f6; padding: 6px 10px; border-radius: 6px; margin-bottom: 12px; display: inline-block; }
     @media (max-width: 768px) {
         .checkout-wrap { padding: 30px 20px 60px; }
         .checkout-grid { grid-template-columns: 1fr; gap: 30px; }
@@ -95,13 +97,19 @@
                 <span>Envío</span>
                 <span id="resumen-envio-costo">Se calcula al elegir</span>
             </div>
+            {% if codigo_aplicado %}
+            <div class="resumen-descuento">
+                <span>Descuento ({{ codigo_aplicado }})</span>
+                <span>− ${{ descuento }}</span>
+            </div>
+            {% endif %}
             <div class="recargo-mp" id="resumen-recargo-mp">
                 <span>Recargo MercadoPago (10%)</span>
                 <span id="resumen-recargo-valor">$0</span>
             </div>
             <div class="resumen-total">
                 <span>Total</span>
-                <span id="resumen-total-valor">${{ subtotal }}</span>
+                <span id="resumen-total-valor">${{ total_con_descuento }}</span>
             </div>
         </div>
     </div>
@@ -162,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const spanTotal = document.getElementById('resumen-total-valor');
     const divRecargo = document.getElementById('resumen-recargo-mp');
     const spanRecargo = document.getElementById('resumen-recargo-valor');
-    const subtotal = parseFloat("{{ subtotal }}".replace(',', '.'));
+    const subtotalConDescuento = parseFloat("{{ total_con_descuento }}".replace(',', '.'));
     const ES_CORREO = /correo\s*argentino/i;
 
     function filtrarPagoSegunEnvio() {
@@ -188,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const costoEnvio = matchEnvio ? parseFloat(matchEnvio[1]) : 0;
         spanEnvio.textContent = costoEnvio > 0 ? '$' + costoEnvio.toLocaleString('es-AR') : 'Se calcula al elegir';
         const mpSeleccionado = document.querySelector('input[name="metodo_pago"]:checked')?.value === 'mercadopago';
-        const baseTotal = subtotal + costoEnvio;
+        const baseTotal = subtotalConDescuento + costoEnvio;
         const recargo = mpSeleccionado ? Math.round(baseTotal * 0.10 * 100) / 100 : 0;
         divRecargo.classList.toggle('visible', mpSeleccionado);
         spanRecargo.textContent = '$' + recargo.toLocaleString('es-AR');

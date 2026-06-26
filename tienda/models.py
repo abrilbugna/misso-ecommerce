@@ -18,6 +18,41 @@ class OpcionEnvio(models.Model):
     def __str__(self):
         return f'{self.nombre} — ${self.costo}'
 
+class CodigoPromocional(models.Model):
+    codigo = models.CharField(max_length=50, unique=True)
+    descuento_porcentaje = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text='Ej: 15 para 15% de descuento')
+    descuento_fijo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text='Monto fijo en pesos')
+    activo = models.BooleanField(default=True)
+    usos_maximos = models.PositiveIntegerField(null=True, blank=True, help_text='Dejar vacío para usos ilimitados')
+    usos_actuales = models.PositiveIntegerField(default=0)
+    fecha_expiracion = models.DateField(null=True, blank=True, help_text='Dejar vacío si no expira')
+
+    class Meta:
+        verbose_name = 'Código promocional'
+        verbose_name_plural = 'Códigos promocionales'
+
+    def __str__(self):
+        if self.descuento_porcentaje:
+            return f'{self.codigo} ({self.descuento_porcentaje}% off)'
+        return f'{self.codigo} (${self.descuento_fijo} off)'
+
+    def es_valido(self):
+        from django.utils import timezone
+        if not self.activo:
+            return False
+        if self.usos_maximos and self.usos_actuales >= self.usos_maximos:
+            return False
+        if self.fecha_expiracion and self.fecha_expiracion < timezone.now().date():
+            return False
+        return True
+
+    def calcular_descuento(self, total):
+        if self.descuento_porcentaje:
+            return round(total * self.descuento_porcentaje / 100, 2)
+        if self.descuento_fijo:
+            return min(self.descuento_fijo, total)
+        return 0
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
@@ -117,6 +152,9 @@ class Orden(models.Model):
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     direccion = models.TextField()
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    codigo_promo = models.ForeignKey(CodigoPromocional, on_delete=models.SET_NULL, null=True, blank=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     envio = models.ForeignKey(OpcionEnvio, on_delete=models.SET_NULL, null=True)
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='efectivo')

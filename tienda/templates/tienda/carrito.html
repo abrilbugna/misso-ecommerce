@@ -10,7 +10,6 @@
 
     .carrito-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 60px; align-items: start; }
 
-    /* ITEMS */
     .item { display: grid; grid-template-columns: 90px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--borde); }
     .item-img { width: 90px; aspect-ratio: 3/4; object-fit: cover; border-radius: 10px; border: 1.5px dashed var(--rosa); }
     .item-nombre { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; color: var(--texto); }
@@ -18,14 +17,28 @@
     .eliminar { font-size: 18px; color: var(--gris); text-decoration: none; transition: color 0.2s; }
     .eliminar:hover { color: var(--rosa-deep); }
 
-    /* RESUMEN */
-    .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 36px; position: sticky; top: 100px; }
+    .resumen { background: var(--rosa-light); box-shadow: 0 4px 20px rgba(0,0,0,0.07); border-radius: 16px; padding: 36px; position: sticky; top: 100px; }
     .resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }
-    .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-bottom: 30px; }
+    .resumen-linea { display: flex; justify-content: space-between; font-size: 14px; color: var(--gris); margin-bottom: 10px; }
+    .resumen-descuento { display: flex; justify-content: space-between; font-size: 14px; color: #c0768a; margin-bottom: 10px; }
+    .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-top: 16px; margin-bottom: 30px; border-top: 1px solid var(--borde); padding-top: 16px; }
     .btn { display: block; width: 100%; padding: 16px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
     .btn:hover { background: var(--rosa-deep); }
 
-    /* VACIO */
+    .codigo-wrap { margin-bottom: 20px; }
+    .codigo-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gris); margin-bottom: 8px; display: block; }
+    .codigo-input-row { display: flex; gap: 8px; }
+    .codigo-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--borde); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border 0.2s; background: white; }
+    .codigo-input:focus { border-color: var(--rosa-deep); }
+    .codigo-btn { padding: 10px 16px; background: white; border: 1.5px solid var(--texto); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .codigo-btn:hover { background: var(--texto); color: white; }
+    .codigo-msg { font-size: 12px; margin-top: 6px; }
+    .codigo-msg.ok { color: #c0768a; }
+    .codigo-msg.error { color: #c0392b; }
+    .codigo-aplicado { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #c0768a; padding: 8px 12px; background: #fdf5f6; border-radius: 8px; margin-bottom: 10px; }
+    .codigo-quitar { background: none; border: none; color: var(--gris); cursor: pointer; font-size: 14px; padding: 0; line-height: 1; }
+    .codigo-quitar:hover { color: var(--rosa-deep); }
+
     .vacio { text-align: center; padding: 100px 0; }
     .vacio p { font-size: 14px; color: var(--gris); letter-spacing: 2px; margin-bottom: 30px; }
     .vacio a { display: inline-block; padding: 14px 36px; background: var(--texto); color: white; text-decoration: none; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; border-radius: 8px; }
@@ -33,31 +46,13 @@
     @media (max-width: 768px) {
         .carrito-wrap { padding: 30px 20px 60px; }
         .carrito-grid { grid-template-columns: 1fr; gap: 30px; }
-        .resumen { position: static; }
+        .resumen { position: static; padding: 24px; border-radius: 12px; }
+        .resumen h2 { font-size: 18px; margin-bottom: 18px; }
+        .resumen-total { font-size: 16px; }
+        .btn { padding: 13px; font-size: 10px; letter-spacing: 2px; }
         .item { grid-template-columns: 70px 1fr auto; gap: 14px; }
         .item-img { width: 70px; }
-
-    .resumen {
-    padding: 24px;
-    border-radius: 12px;
     }
-
-    .resumen h2 {
-    font-size: 18px;
-    margin-bottom: 18px;
-    }
-
-    .resumen-total {
-    font-size: 16px;
-    margin-bottom: 22px;
-    }
-
-   .btn {
-    padding: 13px;
-    font-size: 10px;
-    letter-spacing: 2px;
-    }
-
 </style>
 {% endblock %}
 
@@ -71,23 +66,18 @@
         <div class="items">
             {% for item in items %}
             <div class="item">
-
                 {% if item.color %}
                    <img src="{{ item.color.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
                 {% else %}
                    <img src="{{ item.producto.colores.first.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
                 {% endif %}
-
                 <div>
                     <p class="item-nombre">{{ item.producto.nombre }}</p>
-
                     {% if item.color %}
                         <p class="item-precio">Color: {{ item.color.nombre }}</p>
                     {% endif %}
-
                     <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
                 </div>
-
                 <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
             </div>
             {% endfor %}
@@ -95,9 +85,36 @@
 
         <div class="resumen">
             <h2>Resumen ❣︎</h2>
+
+            <div class="codigo-wrap">
+                <span class="codigo-label">Ingresar código promocional</span>
+                {% if codigo_aplicado %}
+                <div class="codigo-aplicado">
+                    <span>✓ {{ codigo_aplicado }}</span>
+                    <a href="/tienda/carrito/eliminar-codigo/" class="codigo-quitar">✕</a>
+                </div>
+                {% else %}
+                <div class="codigo-input-row">
+                    <input type="text" id="input-codigo" class="codigo-input" placeholder="CODIGO">
+                    <button class="codigo-btn" onclick="aplicarCodigo()">Aplicar</button>
+                </div>
+                <p class="codigo-msg" id="codigo-msg"></p>
+                {% endif %}
+            </div>
+
+            <div class="resumen-linea">
+                <span>Subtotal</span>
+                <span>${{ total }}</span>
+            </div>
+            {% if descuento %}
+            <div class="resumen-descuento">
+                <span>Descuento</span>
+                <span>− ${{ descuento }}</span>
+            </div>
+            {% endif %}
             <div class="resumen-total">
                 <span>Total</span>
-                <span>${{ total }}</span>
+                <span>${{ total_con_descuento }}</span>
             </div>
             <a href="/tienda/checkout/" class="btn">Finalizar compra →</a>
         </div>
@@ -110,4 +127,32 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+function aplicarCodigo() {
+    const codigo = document.getElementById('input-codigo').value.trim();
+    const msg = document.getElementById('codigo-msg');
+    if (!codigo) return;
+    fetch('/tienda/carrito/aplicar-codigo/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ codigo })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.valido) {
+            location.reload();
+        } else {
+            msg.textContent = data.mensaje;
+            msg.className = 'codigo-msg error';
+        }
+    });
+}
+document.getElementById('input-codigo')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') aplicarCodigo();
+});
+</script>
 {% endblock %}

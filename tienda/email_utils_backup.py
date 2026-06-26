@@ -76,14 +76,6 @@ def _filas_items(items):
 def html_comprobante_cliente(orden, items):
     filas, subtotal = _filas_items(items)
     envio_costo = orden.envio.costo if orden.envio else 0
-    if orden.descuento:
-        fila_descuento = f'''
-        <tr>
-          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;color:#c0768a;">Descuento ({orden.codigo_promo.codigo if orden.codigo_promo else 'Promo'})</td>
-          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;color:#c0768a;">− ${orden.descuento:,.2f}</td>
-        </tr>'''
-    else:
-        fila_descuento = ''
 
     return f'''<!DOCTYPE html>
 <html>
@@ -113,7 +105,6 @@ def html_comprobante_cliente(orden, items):
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;">Subtotal</td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${subtotal:,.2f}</td>
         </tr>
-        {fila_descuento}
         <tr>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;">Envío</td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${envio_costo:,.2f}</td>

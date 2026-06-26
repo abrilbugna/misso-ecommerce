@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
 from .forms import CheckoutForm
 from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
 import mercadopago
 from django.conf import settings
 from django.http import JsonResponse
+import json
 
 
 def inicio(request):
@@ -138,10 +139,65 @@ def ver_carrito(request):
 
     total = sum(item.subtotal() for item in items)
 
+    codigo_aplicado = request.session.get('codigo_promo')
+    descuento = 0
+    if codigo_aplicado:
+        try:
+            codigo = CodigoPromocional.objects.get(codigo=codigo_aplicado)
+            if codigo.es_valido():
+                descuento = codigo.calcular_descuento(total)
+            else:
+                del request.session['codigo_promo']
+                codigo_aplicado = None
+        except CodigoPromocional.DoesNotExist:
+            del request.session['codigo_promo']
+            codigo_aplicado = None
+
     return render(request, 'tienda/carrito.html', {
         'items': items,
-        'total': total
+        'total': total,
+        'descuento': descuento,
+        'total_con_descuento': total - descuento,
+        'codigo_aplicado': codigo_aplicado,
     })
+
+
+def aplicar_codigo(request):
+    if request.method != 'POST':
+        return JsonResponse({'valido': False, 'mensaje': 'Método no permitido'})
+
+    data = json.loads(request.body)
+    codigo_str = data.get('codigo', '').strip().upper()
+
+    try:
+        codigo = CodigoPromocional.objects.get(codigo__iexact=codigo_str)
+        if not codigo.es_valido():
+            return JsonResponse({'valido': False, 'mensaje': 'Código inválido o expirado'})
+
+        if not request.session.session_key:
+            request.session.create()
+        carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
+        items = ItemCarrito.objects.filter(carrito=carrito)
+        subtotal = sum(item.subtotal() for item in items)
+        descuento = codigo.calcular_descuento(subtotal)
+
+        request.session['codigo_promo'] = codigo.codigo
+
+        return JsonResponse({
+            'valido': True,
+            'codigo': codigo.codigo,
+            'descuento': float(descuento),
+            'total_con_descuento': float(subtotal - descuento),
+            'mensaje': str(codigo),
+        })
+    except CodigoPromocional.DoesNotExist:
+        return JsonResponse({'valido': False, 'mensaje': 'Código no encontrado'})
+
+
+def eliminar_codigo(request):
+    if 'codigo_promo' in request.session:
+        del request.session['codigo_promo']
+    return redirect('ver_carrito')
 
 
 def eliminar_carrito(request, pk):
@@ -162,13 +218,27 @@ def checkout(request):
 
     subtotal = sum(item.subtotal() for item in items)
 
+    codigo_aplicado = request.session.get('codigo_promo')
+    descuento = 0
+    codigo_obj = None
+    if codigo_aplicado:
+        try:
+            codigo_obj = CodigoPromocional.objects.get(codigo=codigo_aplicado)
+            if codigo_obj.es_valido():
+                descuento = codigo_obj.calcular_descuento(subtotal)
+            else:
+                del request.session['codigo_promo']
+                codigo_obj = None
+        except CodigoPromocional.DoesNotExist:
+            del request.session['codigo_promo']
+
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
 
         if form.is_valid():
             envio = form.cleaned_data['envio']
             metodo_pago = form.cleaned_data['metodo_pago']
-            total = subtotal + envio.costo
+            total = subtotal - descuento + envio.costo
 
             orden = Orden.objects.create(
                 nombre=form.cleaned_data['nombre'],
@@ -177,9 +247,17 @@ def checkout(request):
                 direccion=form.cleaned_data['direccion'],
                 envio=envio,
                 metodo_pago=metodo_pago,
+                subtotal=subtotal,
+                descuento=descuento,
+                codigo_promo=codigo_obj,
                 total=total,
                 estado='en_proceso',
             )
+
+            if codigo_obj:
+                codigo_obj.usos_actuales += 1
+                codigo_obj.save()
+                del request.session['codigo_promo']
 
             items_guardados = []
             for item in items:
@@ -219,6 +297,9 @@ def checkout(request):
         'form': form,
         'items': items,
         'subtotal': subtotal,
+        'descuento': descuento,
+        'total_con_descuento': subtotal - descuento,
+        'codigo_aplicado': codigo_aplicado,
         'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
     })
 

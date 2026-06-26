@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto, CodigoPromocional
 from .email_utils import enviar_comprobante_cliente
 
 class TalleProductoInline(admin.TabularInline):
@@ -52,12 +52,20 @@ class CarritoAdmin(admin.ModelAdmin):
 class ItemCarritoAdmin(admin.ModelAdmin):
     list_display = ['carrito', 'producto', 'cantidad', 'color', 'talle']
 
+@admin.register(CodigoPromocional)
+class CodigoPromocionalAdmin(admin.ModelAdmin):
+    list_display = ['codigo', 'descuento_porcentaje', 'descuento_fijo', 'activo', 'usos_actuales', 'usos_maximos', 'fecha_expiracion']
+    list_editable = ['activo']
+    search_fields = ['codigo']
+    fields = ['codigo', 'descuento_porcentaje', 'descuento_fijo', 'activo', 'usos_maximos', 'usos_actuales', 'fecha_expiracion']
+    readonly_fields = ['usos_actuales']
+
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'nombre', 'email', 'total', 'metodo_pago', 'estado', 'pagado', 'creado']
+    list_display = ['pk', 'nombre', 'email', 'subtotal', 'descuento', 'total', 'codigo_promo', 'metodo_pago', 'estado', 'pagado', 'creado']
     list_filter = ['estado', 'metodo_pago', 'pagado']
     list_editable = ['estado', 'pagado']
-    readonly_fields = ['nombre', 'email', 'telefono', 'direccion', 'total', 'envio', 'metodo_pago', 'creado']
+    readonly_fields = ['nombre', 'email', 'telefono', 'direccion', 'subtotal', 'descuento', 'codigo_promo', 'total', 'envio', 'metodo_pago', 'creado']
     inlines = [ItemOrdenInline]
 
     def save_model(self, request, obj, form, change):
