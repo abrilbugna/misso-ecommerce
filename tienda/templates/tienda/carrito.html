@@ -66,11 +66,11 @@
         <div class="items">
             {% for item in items %}
             <div class="item">
-                {% if item.color %}
-                   <img src="{{ item.color.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
-                {% else %}
-                   <img src="{{ item.producto.colores.first.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
+                {% with img=item.imagen_mostrar %}
+                {% if img %}
+                   <img src="{{ img.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
                 {% endif %}
+                {% endwith %}
                 <div>
                     <p class="item-nombre">{{ item.producto.nombre }}</p>
                     {% if item.color %}

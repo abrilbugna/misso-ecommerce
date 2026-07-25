@@ -135,6 +135,13 @@ class ItemCarrito(models.Model):
     def subtotal(self):
         return self.producto.precio * self.cantidad
 
+    def imagen_mostrar(self):
+        if self.color:
+            img = self.producto.imagenes.filter(color=self.color).first()
+            if img:
+                return img
+        return self.producto.imagenes.first()
+
 METODOS_PAGO = [
     ('efectivo', 'Efectivo'),
     ('transferencia', 'Transferencia'),
@@ -175,3 +182,10 @@ class ItemOrden(models.Model):
 
     def subtotal(self):
         return self.precio * self.cantidad
+
+    def imagen_mostrar(self):
+        if self.color:
+            img = self.producto.imagenes.filter(color=self.color).first()
+            if img:
+                return img
+        return self.producto.imagenes.first()
