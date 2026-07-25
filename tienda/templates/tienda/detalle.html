@@ -6,7 +6,12 @@
 <style>
 .detalle-wrap { padding: 40px 60px 80px; }
 .detalle { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-.imagen-principal { width: 100%; aspect-ratio: 3/4; object-fit: cover; }
+.imagen-container { position: relative; }
+.imagen-principal { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+.flecha-img { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border: none; border-radius: 50%; background: rgba(255,255,255,0.85); color: #2c2c2c; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.2); z-index: 2; }
+.flecha-img.prev { left: 12px; }
+.flecha-img.next { right: 12px; }
+.flecha-img:hover { background: white; }
 .miniaturas { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .miniaturas img { width: 70px; aspect-ratio: 3/4; object-fit: cover; cursor: pointer; border: 1px solid #ddd; }
 .miniaturas img.activa { border-color: #7b2d3a; }
@@ -33,7 +38,15 @@
 .btn { display: block; width: 100%; padding: 16px; background: #2c2c2c; color: white; text-decoration: none; text-align: center; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
 .btn.disabled { background: #aaa; cursor: not-allowed; pointer-events: none; opacity: 0.6; }
 .msg-agregado { display: block; font-size: 11px; color: #7b2d3a; background: var(--rosa-light); border-radius: 6px; padding: 6px 12px; margin-top: 8px; margin-bottom: 14px; letter-spacing: 1px; }
-@media (max-width: 768px){ .detalle-wrap { padding: 20px 16px 40px; } .detalle { grid-template-columns: 1fr; gap: 24px; } }
+@media (max-width: 768px){
+  .detalle-wrap { padding: 20px 16px 40px; }
+  .detalle { grid-template-columns: 1fr; gap: 24px; }
+  .miniaturas { gap: 6px; }
+  .miniaturas img { width: 42px; border-width: 1px; }
+  .flecha-img { width: 32px; height: 32px; font-size: 16px; }
+  .flecha-img.prev { left: 8px; }
+  .flecha-img.next { right: 8px; }
+}
 </style>
 {% endblock %}
 
@@ -45,14 +58,20 @@
 <a href="/tienda" class="volver">← Volver</a>
 <div class="detalle">
   <div>
-    {% with primera=producto.imagenes.first %}
-    {% if primera %}
-    <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}">
-    {% endif %}
-    {% endwith %}
+    <div class="imagen-container">
+      {% with primera=producto.imagenes.first %}
+      {% if primera %}
+      <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}">
+      {% endif %}
+      {% endwith %}
+      {% if producto.imagenes.count > 1 %}
+      <button type="button" class="flecha-img prev" onclick="moverImg(-1)" aria-label="Foto anterior">‹</button>
+      <button type="button" class="flecha-img next" onclick="moverImg(1)" aria-label="Foto siguiente">›</button>
+      {% endif %}
+    </div>
     <div class="miniaturas">
       {% for img in producto.imagenes.all %}
-      <img src="{{ img.imagen.url }}" data-color="{{ img.color_id|default:'' }}" onclick="setImg('{{ img.imagen.url }}', this)">
+      <img src="{{ img.imagen.url }}" data-color="{{ img.color_id|default:'' }}" data-index="{{ forloop.counter0 }}" class="{% if forloop.first %}activa{% endif %}" onclick="setImg('{{ img.imagen.url }}', this)">
       {% endfor %}
     </div>
   </div>
@@ -108,11 +127,23 @@
 let selectedColor = null;
 let selectedTalle = null;
 let tallesData = [];
+let currentImgIndex = 0;
 
 function setImg(url, el){
   document.getElementById('img').src = url;
   document.querySelectorAll('.miniaturas img').forEach(i => i.classList.remove('activa'));
-  if (el) el.classList.add('activa');
+  if (el) {
+    el.classList.add('activa');
+    if (el.dataset.index !== undefined) currentImgIndex = parseInt(el.dataset.index);
+  }
+}
+
+function moverImg(delta){
+  const miniaturas = document.querySelectorAll('.miniaturas img');
+  if (!miniaturas.length) return;
+  currentImgIndex = (currentImgIndex + delta + miniaturas.length) % miniaturas.length;
+  const el = miniaturas[currentImgIndex];
+  setImg(el.src, el);
 }
 
 function cambiarCantidad(delta){
