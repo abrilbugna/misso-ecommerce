@@ -1,0 +1,42 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+{% block title %}Datos de transferencia — Misso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/confirmacion_transferencia.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="confirmacion">
+    <div class="check">🏦</div>
+    <h1>¡PEDIDO CONFIRMADO!</h1>
+    <p>Gracias por tu compra <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
+    <p class="total-transferencia">Total a transferir: ${{ orden.total }}</p>
+
+    <div class="datos-transferencia">
+        <h2>✦ Datos para transferir</h2>
+        <div class="dato">
+            <span class="dato-label">Alias</span>
+            <span class="dato-valor">missocba</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">CBU</span>
+            <span class="dato-valor">1430001713038905120013</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">Titular</span>
+            <span class="dato-valor">Abril Bugna</span>
+        </div>
+        <div class="dato">
+            <span class="dato-label">Banco</span>
+            <span class="dato-valor">Brubank</span>
+        </div>
+    </div>
+
+    <div class="aviso">
+        📩 Una vez realizada la transferencia por favor envianos el comprobante a <a href="https://wa.me/543517727224" target="_blank"> nuestro whatsapp</a> o por <a href="https://instagram.com/misso.cba" target="_blank">instagram</a> con el número de pedido <strong>#{{ orden.pk }}</strong>
+    </div>
+    
+    <a href="/tienda" class="btn">Seguir comprando</a>
+</div>
+{% endblock %}

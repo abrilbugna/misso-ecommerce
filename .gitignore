@@ -9,3 +9,11 @@ media/
 # Entornos
 venv/
 .env
+.venv/
+staticfiles/
+.pytest_cache/
+*.sqlite3
+.env.*
+!.env.example
+# Metadatos de descargas de Windows
+*Zone.Identifier*

@@ -1,0 +1,46 @@
+.confirmacion { text-align: center; padding: 80px 60px; max-width: 600px; margin: 0 auto; }
+    .check { font-size: 60px; margin-bottom: 30px; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 300; margin-bottom: 20px; letter-spacing: 3px; }
+    p { font-size: 14px; color: var(--gris); margin-bottom: 10px; letter-spacing: 1px; line-height: 1.8; }
+    .datos-transferencia {
+        background: var(--rosa-light);
+        border: 2px dashed var(--rosa);
+        border-radius: 16px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    .datos-transferencia h2 { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--rosa-deep); margin-bottom: 20px; }
+    .dato { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--borde); font-size: 14px; }
+    .dato:last-child { border-bottom: none; }
+    .dato-label { color: var(--gris); }
+    .dato-valor { font-weight: bold; color: var(--texto); }
+    .total-transferencia { font-size: 20px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin: 20px 0; }
+    .aviso { background: var(--rosa-section); color: white; padding: 16px 24px; border-radius: 10px; font-size: 13px; margin: 20px 0; }
+    .btn { display: inline-block; padding: 16px 40px; background: var(--texto); color: white; text-decoration: none; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-top: 20px; }
+    .btn:hover { background: var(--rosa-deep); }
+
+    @media (max-width: 768px) {
+    .confirmacion {
+        padding: 20px 16px 40px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        box-sizing: border-box;
+    }
+
+    .check { font-size: 44px; margin-bottom: 12px; }
+
+    h1 { font-size: 26px; letter-spacing: 2px; margin-bottom: 10px; }
+
+    p { font-size: 13px; margin-bottom: 6px; }
+
+    .datos-transferencia { padding: 18px; margin: 16px 0; }
+
+    .dato { font-size: 13px; }
+
+    .total-transferencia { font-size: 18px; margin: 14px 0; }
+
+    .aviso { font-size: 12px; padding: 14px 16px; }
+}

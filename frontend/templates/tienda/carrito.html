@@ -1,0 +1,82 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+{% block title %}Carrito — Misso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="carrito-wrap">
+    <a href="/tienda" class="volver">← Seguir comprando</a>
+    <h1>CARRITO</h1>
+
+    {% if items %}
+    <div class="carrito-grid">
+        <div class="items">
+            {% for item in items %}
+            <div class="item">
+                {% with img=item.imagen_mostrar %}
+                {% if img %}
+                   <img src="{{ img.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
+                {% endif %}
+                {% endwith %}
+                <div>
+                    <p class="item-nombre">{{ item.producto.nombre }}</p>
+                    {% if item.color %}
+                        <p class="item-precio">Color: {{ item.color.nombre }}</p>
+                    {% endif %}
+                    <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
+                </div>
+                <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="resumen">
+            <h2>Resumen ❣︎</h2>
+
+            <div class="codigo-wrap">
+                <span class="codigo-label">Ingresar código promocional</span>
+                {% if codigo_aplicado %}
+                <div class="codigo-aplicado">
+                    <span>✓ {{ codigo_aplicado }}</span>
+                    <a href="/tienda/carrito/eliminar-codigo/" class="codigo-quitar">✕</a>
+                </div>
+                {% else %}
+                <div class="codigo-input-row">
+                    <input type="text" id="input-codigo" class="codigo-input" placeholder="CODIGO">
+                    <button class="codigo-btn" onclick="aplicarCodigo()">Aplicar</button>
+                </div>
+                <p class="codigo-msg" id="codigo-msg"></p>
+                {% endif %}
+            </div>
+
+            <div class="resumen-linea">
+                <span>Subtotal</span>
+                <span>${{ total }}</span>
+            </div>
+            {% if descuento %}
+            <div class="resumen-descuento">
+                <span>Descuento</span>
+                <span>− ${{ descuento }}</span>
+            </div>
+            {% endif %}
+            <div class="resumen-total">
+                <span>Total</span>
+                <span>${{ total_con_descuento }}</span>
+            </div>
+            <a href="/tienda/checkout/" class="btn">Finalizar compra →</a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="vacio">
+        <p>Tu carrito está vacío 🛍</p>
+        <a href="/tienda">Ver productos</a>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{% static 'js/carrito.js' %}" data-csrf-token="{{ csrf_token }}"></script>
+{% endblock %}

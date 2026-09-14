@@ -1,0 +1,43 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}Tienda — Misso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="catalogo-header">
+    <h1>TIENDA</h1>
+    <div class="filtros">
+        <a href="/tienda/" class="filtro-btn {% if not categoria_activa %}activo{% endif %}">Todos</a>
+        {% for valor, nombre in categorias %}
+        <a href="/tienda/?categoria={{ valor }}" class="filtro-btn {% if categoria_activa == valor %}activo{% endif %}">{{ nombre }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="grid">
+    {% for producto in productos %}
+    <div class="producto">
+        <a href="/tienda/{{ producto.pk }}/">
+            <div class="producto-img">
+                {% with url=producto.get_imagen_url %}
+                {% if url %}<img src="{{ url }}">{% endif %}
+                {% endwith %}
+            </div>
+            <div class="producto-info">
+                <p class="producto-nombre">{{ producto.nombre }}</p>
+                <p class="producto-precio">${{ producto.precio }}</p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+    {% if not productos %}
+    <p class="vacio">No hay productos en esta categoría todavía.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}{{ producto.nombre }} — Misso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/detalle.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="detalle-wrap">
+{% if request.GET.agregado %}
+<p class="msg-agregado">¡Producto agregado al carrito!    ˖⁺‧₊˚♡˚₊‧⁺˖</p>
+{% endif %}
+<a href="/tienda" class="volver">← Volver</a>
+<div class="detalle">
+  <div>
+    <div class="imagen-container">
+      {% with primera=producto.imagenes.first %}
+      {% if primera %}
+      <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}">
+      {% endif %}
+      {% endwith %}
+      {% if producto.imagenes.count > 1 %}
+      <button type="button" class="flecha-img prev" onclick="moverImg(-1)" aria-label="Foto anterior">‹</button>
+      <button type="button" class="flecha-img next" onclick="moverImg(1)" aria-label="Foto siguiente">›</button>
+      {% endif %}
+    </div>
+    <div class="miniaturas">
+      {% for img in producto.imagenes.all %}
+      <img src="{{ img.imagen.url }}" data-color="{{ img.color_id|default:'' }}" data-index="{{ forloop.counter0 }}" class="{% if forloop.first %}activa{% endif %}" onclick="setImg('{{ img.imagen.url }}', this)">
+      {% endfor %}
+    </div>
+  </div>
+  <div class="detalle-info">
+    <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
+    <p class="detalle-precio">${{ producto.precio }}</p>
+    {% if producto.descripcion %}
+    <p class="detalle-descripcion">{{ producto.descripcion }}</p>
+    {% endif %}
+    {% if producto.colores.exists %}
+    <div class="cores">
+      {% for color in producto.colores.all %}
+      <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, this)">{{ color.nombre }}</button>
+      {% endfor %}
+    </div>
+    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">⚠ Seleccioná un color antes de continuar.</p>
+    <div class="talles" id="tallesContainer">
+      <button class="talle-btn" disabled>85</button>
+      <button class="talle-btn" disabled>90</button>
+      <button class="talle-btn" disabled>95</button>
+      <button class="talle-btn" disabled>100</button>
+    </div>
+    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">⚠ Seleccioná un talle antes de continuar.</p>
+    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">⚠ Sin stock para este color y talle. Probá otra combinación.</p>
+    <p class="msg-poco-stock" id="msgPocoStock"></p>
+    <div class="cantidad-wrap">
+      <label>Cantidad</label>
+      <div class="cantidad-controles">
+        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
+        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+      </div>
+    </div>
+    <a id="addBtn" class="btn disabled" href="#">Agregar al carrito</a>
+    {% else %}
+    <div class="cantidad-wrap">
+      <label>Cantidad</label>
+      <div class="cantidad-controles">
+        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
+        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+      </div>
+    </div>
+    <a id="addBtnSimple" class="btn" href="/tienda/agregar/{{ producto.pk }}/?cantidad=1">Agregar al carrito</a>
+    {% endif %}
+  </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/detalle.js' %}" data-producto-id="{{ producto.pk }}"></script>
+{% endblock %}

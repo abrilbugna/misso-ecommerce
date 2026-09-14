@@ -1,0 +1,101 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+{% block title %}Misso — Tienda{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/inicio.css' %}">{% endblock %}
+{% block content %}
+<div class="home-page">
+  <section class="campaign-hero" id="suscripcion" aria-labelledby="hero-title">
+    <nav class="hero-nav" aria-label="Navegación de inicio">
+      <div class="hero-socials" aria-label="Redes de Misso">
+        <a class="hero-social" href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.7" cy="6.4" r=".8" fill="currentColor" stroke="none"/></svg></span></a>
+        <a class="hero-social" href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.5-4.9A8.5 8.5 0 1 1 20.5 11.6Z"/><path d="M8.4 7.8c-.3-.3-.8-.3-1.1 0-.5.5-.7 1.2-.5 1.9.8 2.8 3.2 5.2 6 6 .7.2 1.5 0 1.9-.5.3-.3.3-.8 0-1.1l-1.1-1c-.3-.3-.7-.3-1.1-.1l-.7.5c-1.2-.6-2.2-1.6-2.8-2.8l.5-.7c.2-.4.2-.8-.1-1.1Z"/></svg></span></a>
+      </div>
+      <div class="hero-nav-pills">
+        <a class="hero-nav-wordmark" href="#suscripcion" aria-label="Misso, volver al inicio"><span class="hero-nav-wordmark-text">Misso</span></a>
+      </div>
+      <div class="hero-nav-actions">
+        <a class="hero-cart" href="{% url 'ver_carrito' %}" aria-label="Ver carrito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="hero-cart-count">{{ cart_count|default:0 }}</span></a>
+        <a class="hero-shop misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="hero-shop-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span><span class="misso-pill-label">Tienda</span></a>
+      </div>
+    </nav>
+    <div class="hero-brand-mask"><h1 id="hero-title" class="hero-wordmark">MISSO</h1></div>
+    <div class="mobile-product-stage" id="beneficios" aria-label="La suscripción Misso">
+      <div class="hero-product-ring" aria-hidden="true"></div>
+      <div class="hero-badges">
+        <div class="hero-badge hero-badge-one"><strong>$25K</strong><span>por mes</span></div>
+        <div class="hero-badge hero-badge-two hero-badge-delivery"><span>Directo a tu</span><strong>domicilio</strong></div>
+        <div class="hero-badge hero-badge-three"><strong>Elegido</strong><span>para vos</span></div>
+      </div>
+      <div class="hero-product" data-product-motion>
+        {% for cat in categorias %}{% if forloop.first %}
+        <a href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" class="hero-product-link" aria-label="Explorar {{ cat.nombre }}"><img src="{{ cat.imagen }}" alt="Producto de la línea {{ cat.nombre }}" fetchpriority="high"></a>
+        {% endif %}{% empty %}
+        <a href="{% url 'catalogo' %}" class="hero-product-link hero-product-fallback" aria-label="Explorar la tienda"><img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1782074350/copy_of_hero_sin_texto_tgmmko.png" alt="Campaña Misso" fetchpriority="high"></a>
+        {% endfor %}
+      </div>
+      <div class="hero-handwritten"><span>una sorpresa para vos,<br>todos los meses</span><svg viewBox="0 0 150 90" fill="none" aria-hidden="true"><path d="M6 7c31 4 30 36 66 34 30-2 36-21 67-7m0 0-21-3m21 3-13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="hero-message" id="como-funciona">
+      <span class="hero-message-kicker">La suscripción mensual de Misso ✦</span>
+      <h2><span>Tu Misso</span><span>cada</span><span><em>mes.</em></span></h2>
+      <p>Un conjunto distinto cada mes, elegido según tus preferencias y enviado a tu casa cada día 15. La elección final es sorpresa.</p>
+      <div class="hero-price"><strong>$25.000</strong><span>/ mes</span></div>
+      <a class="hero-subscribe misso-pill-button misso-pill-right" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20por%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer" aria-label="Consultar por la suscripción mensual de Misso en WhatsApp"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
+    </div>
+    <div class="hero-bottomline"><span>Misso / Córdoba</span><a href="#universo">Deslizá para descubrir <span class="scroll-arrow" aria-hidden="true">↓</span></a></div>
+  </section>
+
+  <section class="brand-intro" id="universo" aria-labelledby="intro-title">
+    <div class="intro-kicker"><span>El universo Misso</span><span>✳ 01 / 03</span></div>
+    <div class="intro-marquee" aria-hidden="true"><span>MISSO · MISSO · MISSO · </span></div>
+    <div class="intro-grid">
+      <div class="intro-copy"><p class="eyebrow">Una invitación a ser vos</p><h2 id="intro-title">Cada día,<br><em>más vos.</em></h2><p>Explorá las líneas de Misso y encontrá las piezas que acompañan tu manera de sentirte.</p><a class="pill-link" href="{% url 'catalogo' %}">Explorar la tienda <span aria-hidden="true">↗</span></a></div>
+      <div class="intro-image-wrap">{% for cat in categorias %}{% if forloop.last %}<img src="{{ cat.imagen }}" alt="Línea {{ cat.nombre }} de Misso" loading="lazy">{% endif %}{% empty %}<img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1782074350/copy_of_hero_sin_texto_tgmmko.png" alt="Campaña Misso" loading="lazy">{% endfor %}<span class="intro-image-tag">Misso / colección</span></div>
+    </div>
+  </section>
+
+  {% if categorias %}
+  <section class="benefits-scroll" id="lineas" aria-labelledby="benefits-title">
+    <div class="benefits-sticky">
+      <div class="benefits-heading"><span class="eyebrow">Elegí tu forma de sentir</span><h2 id="benefits-title">Un mundo<br><em>para vos.</em></h2></div>
+      <svg class="benefits-doodle" viewBox="0 0 1000 700" fill="none" aria-hidden="true"><path d="M-60 495 C190 80 275 830 535 400 S780 100 1070 390" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+      <div class="benefits-counter" aria-hidden="true"><span data-card-count>01</span> / {{ categorias|length|stringformat:'02d' }}</div>
+      <div class="benefits-cards">
+        {% for cat in categorias %}
+        <a class="benefit-card benefit-card-{{ forloop.counter0|add:'1' }}" href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" data-card-index="{{ forloop.counter0 }}">
+          <span class="card-top"><span>Misso / {{ forloop.counter|stringformat:'02d' }}</span><span class="card-star" aria-hidden="true">✳</span></span>
+          <div class="card-image"><img src="{{ cat.imagen }}" alt="" loading="lazy"></div>
+          <span class="card-bottom"><strong>{{ cat.nombre }}</strong><span class="card-arrow" aria-hidden="true">↗</span></span>
+          <span class="card-discover">Explorar línea</span>
+        </a>
+        {% endfor %}
+      </div>
+      <div class="benefits-footer"><span>Deslizá para explorar</span><span>Misso ©</span></div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="home-outro" aria-labelledby="outro-title">
+    <span class="eyebrow">Tu próximo favorito te espera</span>
+    <h2 id="outro-title">Encontrá<br><em>el tuyo.</em></h2>
+    <div class="outro-products" aria-label="Explorá las líneas de Misso">
+      <div class="outro-products-track">
+        <div class="outro-products-group">
+          {% for cat in categorias %}
+          <a class="outro-product" href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" aria-label="Explorar {{ cat.nombre }}"><img src="{{ cat.imagen }}" alt="{{ cat.nombre }}" loading="lazy"><span>{{ cat.nombre }} <span aria-hidden="true">↗</span></span></a>
+          {% empty %}
+          <a class="outro-product" href="{% url 'catalogo' %}" aria-label="Explorar la tienda Misso"><img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1782074350/copy_of_hero_sin_texto_tgmmko.png" alt="Campaña Misso" loading="lazy"><span>Misso <span aria-hidden="true">↗</span></span></a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <a class="pill-link pill-link-light" href="{% url 'catalogo' %}">Ver todos los productos <span aria-hidden="true">↗</span></a>
+    <img src="{% static 'images/conejos.svg' %}" alt="" class="outro-mark">
+  </section>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
+<script src="{% static 'js/inicio.js' %}" defer></script>
+{% endblock %}

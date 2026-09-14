@@ -1,0 +1,32 @@
+.checkout-wrap { padding: 50px 60px 80px; }
+.volver { display: inline-block; margin-bottom: 30px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--gris); text-decoration: none; }
+.volver:hover { color: var(--rosa-deep); }
+h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; letter-spacing: 4px; margin-bottom: 40px; }
+.checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.form-section h2 { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--rosa-deep); margin-bottom: 24px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--gris); }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--borde); background: white; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; border-radius: 8px; transition: border 0.2s; color: var(--texto); }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--rosa-deep); }
+.metodo-pago-opciones { display: flex; flex-direction: column; gap: 12px; }
+.metodo-pago-opciones label { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--borde); border-radius: 8px; cursor: pointer; font-size: 13px; letter-spacing: 1px; text-transform: none; color: var(--texto); transition: all 0.2s; }
+.metodo-pago-opciones label:hover { border-color: var(--rosa-deep); background: var(--rosa-light); }
+.recargo-mp { display: none; justify-content: space-between; font-size: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); color: #c0392b; }
+.recargo-mp.visible { display: flex; }
+.metodo-pago-opciones input[type="radio"] { width: auto; margin: 0; accent-color: var(--rosa-deep); }
+.btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
+.btn-confirmar:hover { background: var(--rosa-deep); }
+.resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 20px 36px; position: sticky; top: 100px; }
+.resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }
+.resumen-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); }
+.resumen-item span:first-child { color: var(--gris); }
+.resumen-envio { display: flex; justify-content: space-between; font-size: 13px; padding: 12px 0; border-bottom: 1px solid var(--borde); color: var(--gris); }
+.resumen-descuento { display: flex; justify-content: space-between; font-size: 13px; padding: 10px 0; border-bottom: 1px solid var(--borde); color: #c0768a; }
+.resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-top: 20px; }
+.form-error { font-size: 11px; color: #c0392b; margin-top: 6px; }
+.codigo-badge { font-size: 11px; color: #c0768a; background: #fdf5f6; padding: 6px 10px; border-radius: 6px; margin-bottom: 12px; display: inline-block; }
+@media (max-width: 768px) {
+    .checkout-wrap { padding: 30px 20px 60px; }
+    .checkout-grid { grid-template-columns: 1fr; gap: 30px; }
+    .resumen { position: static; }
+}

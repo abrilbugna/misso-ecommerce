@@ -1,0 +1,90 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+{% block title %}Checkout — Misso{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-wrap">
+    <a href="/tienda/carrito/" class="volver">← Volver al carrito</a>
+    <h1>CHECKOUT</h1>
+    <div class="checkout-grid">
+        <div class="form-section">
+            <h2>✦ Tus datos</h2>
+            <form method="post" id="checkout-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    {{ form.nombre }}
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <p class="form-error">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    {{ form.telefono }}
+                    {% if form.telefono.errors %}
+                    <p class="form-error">{{ form.telefono.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    {{ form.direccion }}
+                </div>
+                <div class="form-group">
+                    <label>Opción de envío</label>
+                    {{ form.envio }}
+                </div>
+                <div class="form-group">
+                    <label>Método de pago</label>
+                    <div class="metodo-pago-opciones">
+                        {% for radio in form.metodo_pago %}
+                        {{ radio }}
+                        {% endfor %}
+                    </div>
+                </div>
+                <button type="button" class="btn-confirmar" onclick="confirmarPedido()">Confirmar pedido →</button>
+            </form>
+        </div>
+
+        <div class="resumen">
+            <h2>Tu pedido ♡</h2>
+            {% for item in items %}
+            <div class="resumen-item">
+                <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
+                <span>${{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+            <div class="resumen-envio">
+                <span>Envío</span>
+                <span id="resumen-envio-costo">Se calcula al elegir</span>
+            </div>
+            {% if codigo_aplicado %}
+            <div class="resumen-descuento">
+                <span>Descuento ({{ codigo_aplicado }})</span>
+                <span>− ${{ descuento }}</span>
+            </div>
+            {% endif %}
+            <div class="recargo-mp" id="resumen-recargo-mp">
+                <span>Recargo MercadoPago (10%)</span>
+                <span id="resumen-recargo-valor">$0</span>
+            </div>
+            <div class="resumen-total">
+                <span>Total</span>
+                <span id="resumen-total-valor">${{ total_con_descuento }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&loading=async"></script>
+
+<script src="{% static 'js/checkout.js' %}" data-total="{{ total_con_descuento }}"></script>
+
+{% endblock %}

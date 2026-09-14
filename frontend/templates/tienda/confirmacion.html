@@ -1,0 +1,26 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}Pedido confirmado — Misso{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/confirmacion.css' %}">
+
+<div class="confirmacion">
+    <div class="check">✓</div>
+
+    <h1>PEDIDO CONFIRMADO</h1>
+
+    <p>Gracias por tu compra {{ orden.nombre }}, recibimos tu pedido :)</p>
+
+    <p class="numero">Número de orden: #{{ orden.pk }}</p>
+
+    <div class="info-contacto">
+        En breve te vamos a contactar para coordinar tu envío al <strong>{{ orden.telefono }}</strong> 💌
+    </div>
+
+    <a href="/tienda" class="btn">Seguir comprando</a>
+</div>
+
+{% endblock %}
