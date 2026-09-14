@@ -14,18 +14,18 @@
     {% include "tienda/includes/bubble_nav.html" with nav_class="subscription-nav" nav_label="Navegación de suscripción" %}
   </div>
 
-  <section class="subscription-form-layout" aria-label="Tus preferencias de suscripción">
-    <div class="subscription-form-intro">
-      <span class="subscription-kicker">Tu suscripción / Paso 01</span>
-      <h1>Hecha<br><em>para vos.</em></h1>
-      <p>Elegí tu talle y contanos qué te gustaría recibir. Con tus respuestas preparadas, seguimos la charla para coordinar el pago y el envío.</p>
-      <div class="subscription-form-mark" aria-hidden="true">Misso<br><span>✳</span></div>
-      <a href="{% url 'informacion_suscripcion' %}#preguntas" class="subscription-form-help">¿Tenés dudas? Leé las preguntas frecuentes <span aria-hidden="true">↗</span></a>
-    </div>
-
+  <section class="subscription-form-layout" aria-labelledby="subscription-form-title">
+    <header class="subscription-form-heading">
+      <h1 id="subscription-form-title">Suscripción <em>mensual.</em></h1>
+      <div class="subscription-help-links" aria-label="Información sobre la suscripción">
+        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#preguntas">Preguntas frecuentes <span aria-hidden="true">↗</span></a>
+        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#terminos">Términos y condiciones <span aria-hidden="true">↗</span></a>
+        <a class="subscription-help-link subscription-help-whatsapp" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20tengo%20una%20duda%20sobre%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer">Dudas por WhatsApp <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
     <form class="subscription-preferences-form" method="post" novalidate>
       {% csrf_token %}
-      <div class="subscription-form-header"><span>01 / Tus preferencias</span><p>Los campos con * son necesarios para continuar.</p></div>
+      <div class="subscription-form-header"><span>Tus preferencias</span><p>Los campos con * son necesarios para continuar.</p></div>
       {% if form.non_field_errors %}<div class="subscription-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 
       <fieldset class="subscription-form-group">
