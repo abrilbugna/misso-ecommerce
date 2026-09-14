@@ -8,6 +8,19 @@
     const cards = [...root.querySelectorAll('[data-catalog-card]')];
     const promo = root.querySelector('[data-catalog-promo]');
     const initialOrder = new Map(cards.map((card, index) => [card, index]));
+    const activeCategory = root.querySelector('.catalog-filter.is-active');
+    const categoryScroller = root.querySelector('.catalog-filters');
+
+    // Keep a category selected after navigation without moving the page vertically.
+    if (activeCategory && categoryScroller && window.matchMedia('(max-width: 767px)').matches) {
+      window.requestAnimationFrame(() => {
+        const maxScroll = categoryScroller.scrollWidth - categoryScroller.clientWidth;
+        const target = categoryScroller.scrollLeft + activeCategory.getBoundingClientRect().left
+          - categoryScroller.getBoundingClientRect().left
+          - (categoryScroller.clientWidth - activeCategory.offsetWidth) / 2;
+        categoryScroller.scrollLeft = Math.max(0, Math.min(maxScroll, target));
+      });
+    }
 
     // Category links still navigate through Django; only the local order changes here.
     sort?.addEventListener('change', () => {
@@ -28,7 +41,11 @@
       window.ScrollTrigger?.refresh();
     });
 
-    if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const releasePanel = () => document.documentElement.classList.remove('catalog-panel-pending');
+    if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      releasePanel();
+      return;
+    }
     const { gsap } = window;
     const nav = root.querySelector('.hero-nav');
     const socials = [...root.querySelectorAll('.hero-social')];
@@ -38,8 +55,7 @@
     const eyebrow = root.querySelector('.catalog-eyebrow');
     const lines = [...root.querySelectorAll('.catalog-title-line')];
     const lineText = lines.map(line => line.firstElementChild).filter(Boolean);
-    const toolbarTop = root.querySelector('.catalog-toolbar-top');
-    const filters = [...root.querySelectorAll('.catalog-filter')];
+    const toolbar = root.querySelector('.catalog-toolbar');
     const empty = root.querySelector('.catalog-empty');
 
     // The nav uses Home's classes, SVGs and reveal durations.
@@ -58,8 +74,39 @@
     if (cart) intro.to(cart, { autoAlpha: 1, y: 0, duration: .34 }, .11);
     if (eyebrow) intro.from(eyebrow, { autoAlpha: 0, y: 12, duration: .35 }, .27);
     if (lineText.length) intro.to(lineText, { autoAlpha: 1, yPercent: 0, stagger: .09, duration: .55, ease: 'power4.out', onComplete: () => { lines.forEach(line => line.classList.add('reveal-complete')); gsap.set(lines, { overflow: 'visible' }); } }, .38);
-    if (toolbarTop) intro.from(toolbarTop, { autoAlpha: 0, y: 12, duration: .42 }, .8);
-    if (filters.length) intro.from(filters, { autoAlpha: 0, y: 12, stagger: .05, duration: .42 }, .88);
+    if (toolbar) {
+      const mobile = window.matchMedia('(max-width: 767px)').matches;
+      const children = [root.querySelector('.catalog-sort'), root.querySelector('.catalog-count'), categoryScroller].filter(Boolean);
+      gsap.set(toolbar, { autoAlpha: 0, y: mobile ? 16 : 28, scale: mobile ? .992 : .985 });
+      releasePanel();
+      // Only this timeline owns the initial panel reveal. Scroll callbacks start afterwards.
+      const panelIntro = gsap.timeline({ onComplete: () => {
+        if (!window.ScrollTrigger) return;
+        gsap.registerPlugin(window.ScrollTrigger);
+        const show = () => {
+          gsap.killTweensOf(toolbar);
+          gsap.to(toolbar, { autoAlpha: 1, y: 0, scale: 1, duration: mobile ? .55 : .7,
+            ease: 'power3.out', clearProps: 'transform,opacity,visibility' });
+        };
+        const hide = y => {
+          gsap.killTweensOf(toolbar);
+          gsap.to(toolbar, { autoAlpha: 0, y, scale: .99, duration: .35, ease: 'power3.out' });
+        };
+        window.ScrollTrigger.create({
+          trigger: toolbar,
+          start: 'top bottom',
+          end: 'bottom top',
+          onEnter: show,
+          onLeave: () => hide(-14),
+          onEnterBack: show,
+          onLeaveBack: () => hide(12)
+        });
+      }});
+      panelIntro.to(toolbar, { autoAlpha: 1, y: 0, scale: 1, duration: mobile ? .65 : .7,
+        ease: 'power3.out', clearProps: 'transform,opacity,visibility' }, 0);
+      panelIntro.fromTo(children, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0,
+        duration: .45, stagger: .06, ease: 'power3.out', clearProps: 'transform,opacity,visibility' }, .12);
+    } else releasePanel();
     if (empty) intro.from(empty, { autoAlpha: 0, y: 24, duration: .6 }, 1.03);
     if (shopBrand) intro.eventCallback('onComplete', () => shopBrand.classList.add('is-shimmering'));
 
@@ -74,6 +121,7 @@
         });
       }
       if (promo) gsap.fromTo(promo, { autoAlpha: 0, scale: .97 }, { autoAlpha: 1, scale: 1, duration: .8, ease: 'power3.out', clearProps: 'transform,opacity,visibility', scrollTrigger: { trigger: promo, start: 'top 85%', once: true } });
+
     }
 
     // Match the magnetic social bubbles in Home; only fine pointers receive it.

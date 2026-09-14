@@ -9,6 +9,9 @@
 }
 
 /* Remove the base layout's white separator behind the shop header. */
+body:has(.catalog-page) {
+  background: var(--cream);
+}
 body:has(.catalog-page) > nav {
   background: var(--cream);
   border-bottom-color: var(--cream);
@@ -341,16 +344,23 @@ body:has(.catalog-page) > nav {
   .catalog-count { font-size: 9px; letter-spacing: .08em; }
   .catalog-sort select { width: 140px; min-height: 34px; padding: 5px 23px 5px 9px; font-size: 11px; }
   .catalog-filters {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
     flex-wrap: nowrap;
     gap: 7px;
     overflow-x: auto;
-    overflow-y: hidden;
-    padding-block: 3px 6px;
+    overflow-y: visible;
+    padding: 7px 12px 9px;
+    align-items: center;
+    scroll-padding-inline: 12px;
+    touch-action: pan-x pan-y;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
   }
   .catalog-filters::-webkit-scrollbar { display: none; }
-  .catalog-filter { min-height: 34px; padding: 7px 12px; font-size: 9px; }
+  .catalog-filter { flex: 0 0 auto; width: max-content; white-space: nowrap; min-height: 34px; padding: 7px 12px; font-size: 9px; }
   .catalog-grid { gap: 30px 12px; padding-block: 22px 70px; }
   .catalog-product-media,
   .catalog-subscription { border-radius: 18px; }
@@ -384,4 +394,15 @@ body:has(.catalog-page) > nav {
   .catalog-promo-link span,
   .catalog-empty-link span { transform: none !important; transition: none !important; }
   .catalog-filters { scroll-behavior: auto; }
+}
+
+/* Reserve the initial reveal before paint, with a CSS-only failure fallback. */
+@media (prefers-reduced-motion: no-preference) {
+  html.catalog-panel-pending .catalog-toolbar {
+    animation: catalog-panel-fallback 2s step-end forwards;
+  }
+}
+@keyframes catalog-panel-fallback {
+  from { opacity: 0; visibility: hidden; }
+  to { opacity: 1; visibility: visible; }
 }

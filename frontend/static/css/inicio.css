@@ -282,3 +282,13 @@ html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);
   display: block;
   flex: 0 0 auto;
 }
+@media (min-width: 768px) {
+  /* Center the second line under the headline, rather than the wider copy column. */
+  .home-page .hero-message h2 {
+    width: max-content;
+    max-width: 100%;
+  }
+  .home-page .hero-message h2 .hero-copy-line-inline {
+    transform: translateX(-.12em);
+  }
+}

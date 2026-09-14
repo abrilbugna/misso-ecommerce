@@ -2,9 +2,14 @@
 {% load static l10n %}
 {% block title %}Tienda — Misso{% endblock %}
 {% block extra_css %}
+<script>
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('catalog-panel-pending');
+  }
+</script>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
-<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=filters-20260914-2">
 {% endblock %}
 {% block content %}
 <div class="home-page catalog-page">
@@ -55,4 +60,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}" defer></script>{% endblock %}
+{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=filters-20260914-2" defer></script>{% endblock %}
