@@ -1,10 +1,28 @@
 {% extends 'tienda/base.html' %}
 {% load static %}
 {% block title %}Misso — Tienda{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/inicio.css' %}">{% endblock %}
+{% block extra_css %}
+<script>
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('misso-intro-pending');
+    window.missoIntroFallback = window.setTimeout(() => {
+      if (!document.documentElement.classList.contains('misso-intro-pending') && !document.documentElement.classList.contains('misso-intro-running')) return;
+      document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running');
+      document.querySelectorAll('.campaign-hero [style]').forEach((element) => {
+        ['opacity', 'visibility', 'transform', 'clip-path', 'stroke-dasharray', 'stroke-dashoffset'].forEach((property) => element.style.removeProperty(property));
+      });
+    }, 4000);
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!document.documentElement.classList.contains('misso-intro-running')) document.documentElement.classList.remove('misso-intro-pending');
+    }, { once: true });
+  }
+</script>
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+{% endblock %}
 {% block content %}
 <div class="home-page">
   <section class="campaign-hero" id="suscripcion" aria-labelledby="hero-title">
+    <div class="hero-intro-mark" aria-hidden="true"><div class="hero-intro-window"><span class="hero-intro-word">MISSO</span></div></div>
     <nav class="hero-nav" aria-label="Navegación de inicio">
       <div class="hero-socials" aria-label="Redes de Misso">
         <a class="hero-social" href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.7" cy="6.4" r=".8" fill="currentColor" stroke="none"/></svg></span></a>
@@ -37,7 +55,7 @@
     </div>
     <div class="hero-message" id="como-funciona">
       <span class="hero-message-kicker">La suscripción mensual de Misso ✦</span>
-      <h2><span>Tu Misso</span><span>cada</span><span><em>mes.</em></span></h2>
+      <h2><span class="hero-copy-line"><span>Tu Misso</span></span><span class="hero-copy-line"><span>cada</span></span><span class="hero-copy-line"><span><em>mes.</em></span></span></h2>
       <p>Un conjunto distinto cada mes, elegido según tus preferencias y enviado a tu casa cada día 15. La elección final es sorpresa.</p>
       <div class="hero-price"><strong>$25.000</strong><span>/ mes</span></div>
       <a class="hero-subscribe misso-pill-button misso-pill-right" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20por%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer" aria-label="Consultar por la suscripción mensual de Misso en WhatsApp"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>

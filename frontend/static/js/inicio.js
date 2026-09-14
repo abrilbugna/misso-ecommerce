@@ -1,10 +1,16 @@
 (() => {
   const root = document.querySelector('.home-page');
-  if (!root || !window.gsap || !window.ScrollTrigger) return;
+  if (!root || !window.gsap || !window.ScrollTrigger) {
+    document.documentElement.classList.remove('misso-intro-pending');
+    return;
+  }
   const { gsap, ScrollTrigger } = window;
   gsap.registerPlugin(ScrollTrigger);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reducedMotion) return;
+  if (reducedMotion) {
+    document.documentElement.classList.remove('misso-intro-pending');
+    return;
+  }
   root.classList.add('motion-ready');
 
   const mm = gsap.matchMedia();
@@ -12,22 +18,88 @@
   const cardCount = document.querySelector('[data-card-count]');
   const product = document.querySelector('[data-product-motion]');
 
+  let introStarted = false;
+  let introComplete = false;
+  let scrollArrowMotion;
+
   function initHeroAnimation(mobile) {
-    const distance = mobile ? 24 : 60;
-    const entrance = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    entrance
-      .from('.hero-social', { opacity: 0, stagger: .07, duration: .34 })
-      .from('.hero-nav-actions a', { opacity: 0, stagger: .05, duration: .35 }, .13)
-      .from('.hero-message-kicker', { y: 15, opacity: 0, duration: .3 }, .63)
-      .from('.hero-message h2 > span', { y: mobile ? 23 : 40, opacity: 0, stagger: .075, duration: .42 }, .72)
-      .from('.hero-message p', { y: 15, opacity: 0, duration: .35 }, 1.04)
-      .from('.hero-price', { y: 13, opacity: 0, duration: .32 }, 1.2)
-      .from('.hero-subscribe', { y: 14, opacity: 0, duration: .35 }, 1.34)
-      .from('.hero-product-ring', { scale: .84, opacity: 0, duration: .48 }, 1.49)
-      .from(product, { y: distance, rotation: mobile ? -2 : -5, opacity: 0, duration: .56 }, 1.54)
-      .from('.hero-badge', { y: mobile ? 13 : 24, scale: .86, opacity: 0, stagger: .08, duration: .4, ease: 'back.out(1.25)' }, 1.72)
-      .from('.hero-handwritten, .hero-bottomline', { y: 12, opacity: 0, stagger: .05, duration: .3 }, 1.88);
-    if (!mobile) entrance.fromTo('.hero-nav-wordmark', { autoAlpha: 0, y: 7, scale: .94 }, { autoAlpha: 1, y: 0, scale: 1, duration: .6, clearProps: 'transform,opacity,visibility' }, .14);
+    const html = document.documentElement;
+    const overlay = document.querySelector('.hero-intro-mark');
+    const word = overlay?.querySelector('.hero-intro-word');
+    const target = document.querySelector(mobile ? '.hero-wordmark' : '.hero-nav-wordmark-text');
+    const headlineLines = gsap.utils.toArray('.hero-copy-line > span');
+    const badges = gsap.utils.toArray('.hero-badge');
+    const handwritten = document.querySelector('.hero-handwritten');
+    const arrowPath = handwritten?.querySelector('path');
+    const photo = document.querySelector('.hero-product-link');
+    if (!overlay || !word || !target || !photo || !product) {
+      html.classList.remove('misso-intro-pending');
+      return;
+    }
+
+    html.classList.add('misso-intro-running');
+    gsap.set(word, { yPercent: 0, autoAlpha: 0, x: 0, y: 0, scale: 1 });
+    const start = word.getBoundingClientRect();
+    const end = target.getBoundingClientRect();
+    const travelX = end.left + end.width / 2 - start.left - start.width / 2;
+    const travelY = end.top + end.height / 2 - start.top - start.height / 2;
+    const finalScale = Math.min(1, end.width / start.width);
+
+    gsap.set(word, { yPercent: 110, autoAlpha: 0 });
+    gsap.set('.hero-nav', { autoAlpha: 0 });
+    gsap.set('.hero-social, .hero-nav-actions a', { autoAlpha: 0, y: -12 });
+    gsap.set(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 0 });
+    gsap.set('.hero-message-kicker', { autoAlpha: 0, y: mobile ? 10 : 15 });
+    gsap.set(headlineLines, { autoAlpha: 0, yPercent: 110 });
+    gsap.set('.hero-message p, .hero-price, .hero-subscribe', { autoAlpha: 0, y: mobile ? 10 : 15 });
+    gsap.set('.hero-product-ring', { autoAlpha: 0, scale: .82 });
+    gsap.set(product, { autoAlpha: 0, y: mobile ? 26 : 58, scale: .97 });
+    gsap.set(photo, { clipPath: 'inset(100% 0 0 0)' });
+    badges.forEach((badge, index) => gsap.set(badge, { autoAlpha: 0, scale: .78, rotation: index % 2 ? 5 : -5 }));
+    gsap.set(handwritten, { autoAlpha: 0, y: 10, rotation: -12 });
+    if (arrowPath) {
+      const length = arrowPath.getTotalLength();
+      gsap.set(arrowPath, { strokeDasharray: length, strokeDashoffset: length });
+    }
+    gsap.set('.hero-bottomline', { autoAlpha: 0, y: 10 });
+    html.classList.remove('misso-intro-pending');
+
+    const finish = () => {
+      if (introComplete) return;
+      introComplete = true;
+      window.clearTimeout(window.missoIntroFallback);
+      html.classList.remove('misso-intro-running');
+      gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-handwritten, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
+      if (arrowPath) gsap.set(arrowPath, { clearProps: 'strokeDasharray,strokeDashoffset' });
+      scrollArrowMotion?.play();
+      initProductMotion(mobile);
+      ScrollTrigger.refresh();
+    };
+
+    const intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish });
+    intro
+      .to(word, { yPercent: 0, autoAlpha: 1, duration: .76, ease: 'power4.out' }, 0)
+      .to(word, { x: travelX, y: travelY, scale: finalScale, duration: .43, ease: 'power3.inOut' }, .94)
+      .to(overlay, { autoAlpha: 0, duration: .12 }, 1.30)
+      .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 1.16)
+      .to(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 1, duration: .22 }, 1.22)
+      .to('.hero-social', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 1.18)
+      .to('.hero-nav-actions a', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 1.27)
+      .to('.hero-message-kicker', { autoAlpha: 1, y: 0, duration: .29 }, 1.38)
+      .to(headlineLines, { autoAlpha: 1, yPercent: 0, stagger: .085, duration: .43, ease: 'power4.out' }, 1.48)
+      .to('.hero-product-ring', { autoAlpha: 1, scale: 1, duration: .48 }, mobile ? 2.13 : 1.77)
+      .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 2.17 : 1.82)
+      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut' }, mobile ? 2.17 : 1.82)
+      .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 1.86 : 1.99)
+      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28 }, mobile ? 1.97 : 2.11)
+      .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 2.07 : 2.20)
+      .to(badges, { autoAlpha: 1, scale: 1, rotation: 0, stagger: .07, duration: .34, ease: 'back.out(1.3)' }, mobile ? 2.34 : 2.35)
+      .to(handwritten, { autoAlpha: 1, y: 0, rotation: -8, duration: .27 }, 2.50);
+    if (arrowPath) intro.to(arrowPath, { strokeDashoffset: 0, duration: .45, ease: 'power2.inOut' }, 2.53);
+    intro.to('.hero-bottomline', { autoAlpha: 1, y: 0, duration: .25 }, 2.76);
+    return () => {
+      if (!introComplete) intro.progress(1);
+    };
   }
 
   function initNavWordmark() {
@@ -56,7 +128,7 @@
   }
 
   function initHeroArrows() {
-    gsap.to('.scroll-arrow', { y: 5, duration: .8, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    scrollArrowMotion = gsap.to('.scroll-arrow', { y: 5, duration: .8, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: !introComplete });
     mm.add('(hover: hover) and (pointer: fine)', () => {
       const listeners = [];
       document.querySelectorAll('.misso-pill-button').forEach(button => {
@@ -267,8 +339,16 @@
     viewport.addEventListener('focusout', () => motion?.resume());
   }
 
-  mm.add('(min-width: 768px)', () => { initHeroAnimation(false); initProductMotion(false); });
-  mm.add('(max-width: 767px)', () => { initHeroAnimation(true); initProductMotion(true); });
+  mm.add('(min-width: 768px)', () => {
+    if (introStarted) { initProductMotion(false); return; }
+    introStarted = true;
+    return initHeroAnimation(false);
+  });
+  mm.add('(max-width: 767px)', () => {
+    if (introStarted) { initProductMotion(true); return; }
+    introStarted = true;
+    return initHeroAnimation(true);
+  });
   initHeroArrows();
   initNavWordmark();
   initBrandIntro();

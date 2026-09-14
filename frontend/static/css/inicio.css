@@ -150,3 +150,16 @@ body:has(.home-page)>nav{display:none}
   .home-page .home-outro>.pill-link{margin-top:28px;z-index:4}
 }
 @media(max-width:390px){.home-page .outro-products{margin-top:0}}
+
+/* Home-only brand reveal. Without JS, the regular hero remains untouched. */
+.home-page .hero-intro-mark{display:none}
+html.misso-intro-pending .home-page .campaign-hero > :not(.hero-intro-mark){visibility:hidden}
+html.misso-intro-pending .home-page .hero-intro-mark,
+html.misso-intro-running .home-page .hero-intro-mark{position:absolute;inset:0 0 auto;z-index:30;display:grid;place-items:center;height:100svh;pointer-events:none}
+.home-page .hero-intro-window{max-width:100%;overflow:hidden;padding:.08em .06em}
+.home-page .hero-intro-word{display:block;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:clamp(6rem,22vw,23rem);font-weight:500;letter-spacing:-.09em;line-height:.88;white-space:nowrap;transform-origin:center center}
+html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);opacity:0}
+.home-page .hero-copy-line{display:block;overflow:hidden}
+.home-page .hero-copy-line > span{display:block}
+@media(max-width:767px){.home-page .hero-intro-word{font-size:22vw}}
+@media(prefers-reduced-motion:reduce){.home-page .hero-intro-mark{display:none!important}.home-page .campaign-hero > :not(.hero-intro-mark){visibility:visible!important}}
