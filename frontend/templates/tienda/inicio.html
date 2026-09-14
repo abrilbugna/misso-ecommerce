@@ -1,4 +1,5 @@
 {% extends 'tienda/base.html' %}
+{% block navigation %}{% endblock %}
 {% load static %}
 {% block title %}Misso — Tienda{% endblock %}
 {% block extra_css %}
@@ -54,7 +55,7 @@
       <h2><span class="hero-copy-line"><span>Un conjunto</span></span><span class="hero-copy-line hero-copy-line-inline"><span>cada</span><span><em>mes.</em></span></span></h2>
       <p>Recibís en tu domicilio un conjunto o pack de bombachas por mes, por solo:</p>
       <div class="hero-price"><strong>$25.000</strong><span>/ mes</span></div>
-      <a class="hero-subscribe misso-pill-button misso-pill-right" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20por%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer" aria-label="Consultar por la suscripción mensual de Misso en WhatsApp"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
+      <a class="hero-subscribe misso-pill-button misso-pill-right" href="{% url 'comenzar_suscripcion' %}"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
     </div>
     <div class="hero-bottomline"><a href="#universo">Deslizá para más info <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
   </section>
@@ -62,7 +63,7 @@
   <section class="brand-intro" id="universo" aria-labelledby="intro-title">
     <div class="intro-marquee" aria-hidden="true"><span>misso · misso · misso · </span></div>
     <div class="intro-grid">
-      <div class="intro-copy"><p class="eyebrow">Suscripción mensual seleccionada...</p><h2 id="intro-title">Especialmente<br><em>para vos.</em></h2><p>Rellenas un formulario con tus preferencias antes de suscribirte y nosotras nos encargamos de lo demás!</p></div>
+      <div class="intro-copy"><p class="eyebrow">Suscripción mensual seleccionada...</p><h2 id="intro-title">Especialmente<br><em>para vos.</em></h2><p>Rellenas un formulario con tus preferencias antes de suscribirte y nosotras nos encargamos de lo demás!</p><a class="intro-info-button misso-pill-button misso-pill-right" href="{% url 'informacion_suscripcion' %}" aria-label="Más información sobre la suscripción"><span class="misso-pill-label">Más info</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a></div>
       <div class="intro-image-wrap intro-carousel" role="region" aria-roledescription="carrusel" aria-label="Videos de Misso">
         <div class="intro-carousel-slide is-active" data-intro-slide data-stack-position="front" aria-label="Notificación 1 de 3">
           <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1789349219/WhatsApp_Video_2026-09-13_at_22.24.00_i9ex6g.jpg" alt="" loading="lazy">
@@ -102,7 +103,7 @@
         </a>
         {% endfor %}
       </div>
-      <div class="benefits-footer"><span>Deslizá para explorar</span><span>Misso ©</span></div>
+      <div class="benefits-footer"><span class="benefits-footer-desktop">Deslizá para explorar</span><span class="benefits-footer-mobile">Explorá nuestras líneas</span><span>Misso ©</span></div>
     </div>
   </section>
   {% endif %}
@@ -119,12 +120,13 @@
         </div>
       </div>
     </div>{% endif %}
-    <a class="pill-link pill-link-light" href="{% url 'catalogo' %}">Ver todos los productos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+    <a class="outro-catalog-link misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="misso-pill-label">Ver todos los productos</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
   </section>
 </div>
 {% endblock %}
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
+<script src="{% static 'js/pill-buttons.js' %}" defer></script>
 <script src="{% static 'js/inicio.js' %}" defer></script>
 {% endblock %}

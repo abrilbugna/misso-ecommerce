@@ -20,7 +20,7 @@ body:has(.home-page)>nav{display:none}
 .home-page .hero-social,.home-page .hero-cart{position:relative;display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:50%;background:var(--cream);color:var(--wine-dark);transition:transform .45s cubic-bezier(.2,.9,.2,1.3),background .25s}
 .home-page .hero-social svg{width:20px;height:20px;transition:transform .35s}.home-page .hero-social:first-child:hover,.home-page .hero-social:last-child:hover{background:var(--rose-light)}.home-page .hero-social:hover{background:var(--rose-light)}
 .home-page .hero-nav-pills a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 clamp(12px,1.35vw,22px);border:1px solid rgba(255,245,241,.7);border-radius:100px;color:var(--cream);font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;transition:transform .35s,background .25s,color .25s}.home-page .hero-nav-pills a:hover{transform:translateY(-3px) scale(1.03);background:var(--cream);color:var(--wine-dark)}
-.home-page .hero-cart svg{width:19px;height:19px}.home-page .hero-cart:hover{transform:translateY(-3px) scale(1.05);background:var(--rose-light)}.home-page .hero-cart-count{position:absolute;top:-5px;right:-4px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:50%;background:var(--wine-dark);color:var(--cream);font-size:9px;letter-spacing:0}
+.home-page .hero-cart svg{width:19px;height:19px}.home-page .hero-cart-count{position:absolute;top:-5px;right:-4px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:50%;background:var(--wine-dark);color:var(--cream);font-size:9px;letter-spacing:0}
 .home-page .hero-shop{display:inline-flex;align-items:center;gap:12px;height:44px;padding:4px 24px 4px 4px;border-radius:100px;background:var(--cream);color:var(--wine-dark);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:transform .35s,background .25s}.home-page .hero-shop:hover{background:var(--rose-light)}
 .home-page .hero-shop-arrow,.home-page .hero-subscribe-arrow{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:var(--wine-dark);color:var(--cream);font-size:21px;line-height:1}
 .home-page .hero-brand-mask{position:absolute;top:12%;left:3%;width:94%;height:27%;overflow:hidden;z-index:2;pointer-events:none}
@@ -77,8 +77,15 @@ body:has(.home-page)>nav{display:none}
 .home-page .misso-pill-arrow{right:0;z-index:2;width:44px;border-radius:50%;background:var(--cream);color:var(--wine-dark);transform:none}
 .home-page .hero-subscribe .misso-pill-arrow{width:48px}
 .home-page .hero-subscribe .misso-pill-label{width:calc(100% - 56px)}
+.home-page .intro-info-button.misso-pill-button{width:190px;height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;--pill-hover-label:var(--blush)}
+.home-page .intro-info-button .misso-pill-arrow{width:48px}
+.home-page .intro-info-button .misso-pill-label{width:calc(100% - 56px)}
+.home-page .intro-info-button .misso-pill-label,.home-page .intro-info-button .misso-pill-arrow{background:var(--rose-light)}
+.home-page .outro-catalog-link.misso-pill-button{width:min(320px,calc(100vw - 32px));height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.home-page .outro-catalog-link .misso-pill-arrow{width:48px}
+.home-page .outro-catalog-link .misso-pill-label{width:calc(100% - 56px)}
 .home-page .misso-pill-arrow{overflow:hidden}.home-page .misso-pill-arrow svg{position:absolute;display:block;width:20px;height:20px;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
-.home-page:not(.motion-ready) .misso-pill-button:hover .misso-pill-label{background:var(--rose-light)}
+.home-page:not(.pill-motion-ready) .misso-pill-button:hover .misso-pill-label{background:var(--rose-light)}
 .home-page .misso-pill-button:focus-visible,.home-page .hero-social:focus-visible{outline:2px solid var(--cream);outline-offset:4px}
 @media(max-width:767px){.home-page .hero-shop.misso-pill-button{width:112px;height:38px}.home-page .hero-shop .misso-pill-arrow{width:38px}.home-page .hero-shop .misso-pill-label{width:calc(100% - 44px)}.home-page .hero-subscribe.misso-pill-button{width:222px;height:48px}}
 @media(prefers-reduced-motion:reduce){.home-page .misso-pill-label,.home-page .misso-pill-arrow,.home-page .misso-pill-arrow svg{transform:none!important}.home-page .misso-pill-button:hover .misso-pill-label{background:var(--rose-light)}}
@@ -87,7 +94,7 @@ body:has(.home-page)>nav{display:none}
 .home-page .hero-social:first-child:hover,.home-page .hero-social:last-child:hover,.home-page .hero-social:hover{background:transparent}
 .home-page .hero-social-bubble{position:absolute;inset:0;display:grid;place-items:center;border-radius:50%;background:var(--cream);color:var(--wine-dark);pointer-events:none}
 .home-page .hero-social-bubble svg{transition:none}
-.home-page.motion-ready .misso-pill-label{transition:none}
+.home-page.pill-motion-ready .misso-pill-label{transition:none}
 @media(prefers-reduced-motion:reduce){.home-page .hero-social:hover .hero-social-bubble{background:var(--rose-light)}}
 /* Keep the wordmark readable at every viewport: no clipping or competing GSAP transforms. */
 .home-page .hero-brand-mask{height:auto;overflow:visible}
@@ -130,7 +137,7 @@ body:has(.home-page)>nav{display:none}
 @media(max-width:340px){.home-page .hero-nav{height:44px;min-height:44px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-shop.misso-pill-button{height:32px;min-height:32px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:32px}}
 /* Moving product ribbon in the final scene. */
 .home-page .home-outro{gap:28px;padding:90px 0 80px}
-.home-page .home-outro>.eyebrow,.home-page .home-outro>h2,.home-page .home-outro>.pill-link{position:relative;z-index:2}
+.home-page .home-outro>.eyebrow,.home-page .home-outro>h2,.home-page .home-outro>.outro-catalog-link{position:relative;z-index:2}
 .home-page .home-outro h2{font-size:clamp(5.5rem,11vw,12rem)}
 .home-page .outro-products{width:100%;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent);-webkit-mask-image:linear-gradient(to right,transparent,#000 5%,#000 95%,transparent)}
 .home-page .outro-products-track,.home-page .outro-products-group{display:flex;width:max-content;align-items:center}
@@ -165,7 +172,7 @@ body:has(.home-page)>nav{display:none}
   .home-page .home-outro>h2{width:100%;margin:0;padding:0 10px;font-size:clamp(4.2rem,16vw,7rem);line-height:.82;text-align:center;z-index:5}
   .home-page .home-outro>.eyebrow,.home-page .home-outro>h2{top:-8px}
   .home-page .outro-products{position:relative;z-index:2;margin-top:-2px}
-  .home-page .home-outro>.pill-link{margin-top:28px;z-index:4}
+  .home-page .home-outro>.outro-catalog-link{margin-top:28px;z-index:4}
 }
 @media(max-width:390px){.home-page .outro-products{margin-top:0}}
 
@@ -291,4 +298,34 @@ html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);
   .home-page .hero-message h2 .hero-copy-line-inline {
     transform: translateX(-.12em);
   }
+}
+
+.home-page .benefits-footer-mobile{display:none}
+@media(max-width:767px){
+  .home-page .benefits-scroll{height:100svh}
+  .home-page .benefits-sticky{position:relative}
+  .home-page .benefits-footer-desktop{display:none}
+  .home-page .benefits-footer-mobile{display:inline}
+}
+
+/* Keep the cart bubble visible against the pink navigation background. */
+.home-page .hero-nav .hero-cart,
+.home-page .hero-nav .hero-cart:hover,
+.home-page .hero-nav .hero-cart:focus-visible{
+  color:var(--wine-dark);
+  background:var(--cream);
+  transform:none;
+}
+.home-page .hero-nav .hero-cart svg{
+  transition:transform .35s cubic-bezier(.2,.9,.2,1.3);
+}
+@media(hover:hover) and (pointer:fine){
+  .home-page .hero-nav .hero-cart:hover svg{transform:translateY(-3px) rotate(-8deg)}
+}
+.home-page .hero-nav .hero-cart:focus-visible svg{transform:translateY(-3px) rotate(-8deg)}
+.home-page .hero-nav .hero-cart:focus-visible{outline:2px solid var(--wine-dark);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){
+  .home-page .hero-nav .hero-cart svg{transition:none}
+  .home-page .hero-nav .hero-cart:hover svg,
+  .home-page .hero-nav .hero-cart:focus-visible svg{transform:none}
 }

@@ -1,0 +1,48 @@
+{% extends 'tienda/base.html' %}
+{% block navigation %}{% endblock %}
+{% load static %}
+{% block title %}Tu suscripción — Misso{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+<link rel="stylesheet" href="{% static 'css/informacion_suscripcion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="home-page subscription-info-page">
+  <div class="subscription-top">
+    {% include "tienda/includes/bubble_nav.html" with nav_class="subscription-nav" nav_label="Navegación de suscripción" %}
+
+  </div>
+
+  <section class="subscription-faq" id="preguntas" aria-labelledby="faq-title">
+    <div class="subscription-section-heading"><span class="subscription-kicker">01 / Lo esencial</span><h1 id="faq-title">Preguntas<br><em>frecuentes.</em></h1><p>Todo lo que necesitás saber antes de escribirnos.</p></div>
+    <div class="subscription-faq-list">
+      <details><summary><span class="faq-number">01</span><span>¿Qué recibo cada mes?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>Un conjunto o un pack de bombachas elegido según tus preferencias. El contenido puntual se confirma al coordinar cada entrega.</p></details>
+      <details><summary><span class="faq-number">02</span><span>¿Cómo saben qué me gusta?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>Antes de suscribirte completás un formulario con tus gustos y preferencias. Esa información nos ayuda a preparar una selección para vos.</p></details>
+      <details><summary><span class="faq-number">03</span><span>¿Cuánto cuesta?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>El precio anunciado en el inicio es de $25.000 por mes. Consultanos antes de contratar para confirmar el monto vigente, el medio de pago y el costo de envío que corresponda.</p></details>
+      <details><summary><span class="faq-number">04</span><span>¿Cuándo y dónde llega?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>La propuesta es una entrega a domicilio cada mes. La zona de cobertura, la fecha estimada y las condiciones del envío se confirman al momento de suscribirte.</p></details>
+      <details><summary><span class="faq-number">05</span><span>¿Puedo actualizar mis preferencias?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>Podés escribirnos por WhatsApp para contarnos qué cambió. Te confirmaremos si es posible aplicarlo a la siguiente selección.</p></details>
+      <details><summary><span class="faq-number">06</span><span>¿Cómo consulto o solicito la baja?</span><span class="faq-plus" aria-hidden="true">+</span></summary><p>Escribinos por <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20por%20mi%20suscripci%C3%B3n" target="_blank" rel="noopener noreferrer">WhatsApp</a>. También tenés un acceso directo para solicitar la baja en el pie de esta página.</p></details>
+    </div>
+  </section>
+
+  <section class="subscription-terms" id="terminos" aria-labelledby="terms-title">
+    <div class="subscription-terms-intro"><span class="subscription-kicker">02 / Para leer con calma</span><h2 id="terms-title">Términos y<br><em>condiciones.</em></h2><p class="subscription-terms-lead">La selección se prepara según tus preferencias y se coordina con vos antes de cada entrega.</p></div>
+    <ol class="subscription-terms-list">
+      <li><span>01 / La propuesta</span><p>La suscripción Misso consiste en la selección de un conjunto o pack de bombachas por mes, tomando como referencia las preferencias informadas por la persona suscripta.</p></li>
+      <li><span>02 / Precio y pago</span><p>El precio publicado es de $25.000 por mes. Antes de confirmar la suscripción te informamos el total, el medio de pago, la fecha de cobro y cualquier costo de envío.</p></li>
+      <li><span>03 / Preferencias y disponibilidad</span><p>La selección se realiza según la información del formulario y la disponibilidad de productos. Se informarán las opciones y cualquier cambio relevante antes de preparar la entrega.</p></li>
+      <li><span>04 / Entrega</span><p>La suscripción contempla envíos a domicilio. Antes de confirmar tu pedido te indicamos la cobertura, el costo y el plazo estimado de entrega.</p></li>
+      <li><span>05 / Consultas y baja</span><p>Podés consultar por tu suscripción o solicitar la baja por los canales de contacto publicados en el sitio. Te confirmamos la recepción de tu pedido de baja y su fecha de efecto.</p></li>
+      <li><span>06 / Cambios y devoluciones</span><p>Si necesitás consultar por un cambio, una devolución o hacer un reclamo, escribinos por WhatsApp para revisar tu caso y darte una respuesta de acuerdo con la normativa aplicable.</p></li>
+    </ol>
+  </section>
+
+  <section class="subscription-close" aria-labelledby="subscription-close-title"><span class="subscription-kicker">¿Te quedó alguna duda?</span><h2 id="subscription-close-title">Hablemos de<br><em>tu próxima sorpresa.</em></h2><p>Elegí tu talle y contanos qué te gusta para empezar.</p><a class="subscription-contact-button misso-pill-button misso-pill-right" href="{% url 'comenzar_suscripcion' %}"><span class="misso-pill-label">Suscribirme</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a></section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
+<script src="{% static 'js/pill-buttons.js' %}" defer></script>
+{% endblock %}

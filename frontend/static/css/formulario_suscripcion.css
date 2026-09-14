@@ -1,0 +1,74 @@
+.subscription-form-page{background:var(--cream)}
+.subscription-form-layout{display:grid;grid-template-columns:minmax(280px,.85fr) minmax(0,1.15fr);align-items:start;gap:clamp(22px,4vw,60px);max-width:1360px;margin:0 auto;padding:clamp(45px,6vw,90px) clamp(20px,5vw,70px) clamp(80px,9vw,135px)}
+.subscription-form-intro{position:relative;min-height:780px;overflow:hidden;padding:clamp(35px,5vw,72px);border-radius:34px;background:radial-gradient(circle at 90% 82%,#f9dfe7 0,transparent 50%),var(--rose-light);color:var(--wine-dark)}
+.subscription-form-intro:before{content:"";position:absolute;right:-30%;bottom:-24%;width:90%;aspect-ratio:1;border:1px solid rgba(74,13,34,.25);border-radius:50%;transform:scaleY(.7);pointer-events:none}
+.subscription-form-intro h1{position:relative;margin:42px 0 30px;font-family:'Cormorant Garamond',serif;font-size:clamp(6rem,8vw,10.5rem);font-weight:300;letter-spacing:-.07em;line-height:.78}
+.subscription-form-intro h1 em{color:var(--rose-dark);font-weight:300}
+.subscription-form-intro>p{position:relative;max-width:400px;font-size:clamp(16px,1.4vw,19px);line-height:1.5}
+.subscription-form-mark{position:absolute;right:11%;bottom:8%;font-family:'Coolvetica Rg',sans-serif;font-size:clamp(80px,10vw,150px);letter-spacing:-.1em;line-height:.6;opacity:.22;transform:rotate(-10deg);pointer-events:none}
+.subscription-form-mark span{display:block;margin-left:46%;font-size:.55em}
+.subscription-form-help{position:absolute;left:clamp(35px,5vw,72px);bottom:38px;z-index:2;display:inline-flex;align-items:center;gap:10px;max-width:calc(100% - 70px);font-size:12px;font-weight:600;letter-spacing:.04em;line-height:1.4;text-decoration:underline;text-underline-offset:4px}
+.subscription-form-help span{font-size:18px;text-decoration:none;transition:transform .25s}
+.subscription-form-help:hover span{transform:translate(3px,-3px)}
+
+.subscription-preferences-form{padding:clamp(28px,4vw,58px);border:1px solid rgba(74,13,34,.12);border-radius:34px;background:var(--off-white);box-shadow:0 24px 70px rgba(74,13,34,.06)}
+.subscription-form-header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:20px;border-bottom:1px solid rgba(74,13,34,.22)}
+.subscription-form-header>span{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.subscription-form-header>p{font-size:12px;color:#795460}
+.subscription-form-group{min-width:0;margin:0;padding:32px 0;border:0;border-bottom:1px solid rgba(74,13,34,.18)}
+.subscription-form-group legend,.subscription-form-group h2{display:block;width:100%;font-family:'Cormorant Garamond',serif;font-size:clamp(28px,2.8vw,39px);font-weight:500;letter-spacing:-.035em;line-height:1.1}
+.subscription-form-group legend>span,.subscription-form-group h2>span{display:inline-block;margin-right:10px;color:var(--rose-dark);font-family:'Coolvetica Rg',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;vertical-align:middle}
+.subscription-field-hint{margin:8px 0 20px;color:#795460;font-size:13px;line-height:1.4}
+.subscription-choice-grid{display:grid;gap:10px;margin-top:20px}
+.subscription-size-grid{grid-template-columns:repeat(auto-fit,minmax(95px,1fr))}
+.subscription-type-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.subscription-choice{position:relative;display:block;cursor:pointer}
+.subscription-choice input{position:absolute;width:1px;height:1px;opacity:0}
+.subscription-choice span{display:flex;align-items:center;justify-content:center;min-height:66px;height:100%;padding:13px 10px;border:1px solid rgba(74,13,34,.24);border-radius:17px;background:var(--cream);color:var(--wine-dark);font-size:13px;line-height:1.25;text-align:center;transition:background .25s,color .25s,border-color .25s,transform .25s}
+.subscription-choice:hover span{border-color:var(--wine);transform:translateY(-2px)}
+.subscription-choice input:checked+span{border-color:var(--wine-dark);background:var(--wine-dark);color:var(--cream)}
+.subscription-choice input:focus-visible+span{outline:2px solid var(--rose-dark);outline-offset:3px}
+.subscription-text-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:20px}
+.subscription-text-field{min-width:0}
+.subscription-text-field label{display:block;min-height:34px;margin-bottom:8px;font-size:14px;line-height:1.25}
+.subscription-text-field input,.subscription-text-field textarea{display:block;width:100%;padding:14px 16px;border:1px solid rgba(74,13,34,.25);border-radius:14px;outline:none;background:var(--cream);color:var(--wine-dark);font:inherit;font-size:14px;transition:border-color .2s,box-shadow .2s}
+.subscription-text-field textarea{min-height:130px;resize:vertical}
+.subscription-text-field input:focus,.subscription-text-field textarea:focus{border-color:var(--wine);box-shadow:0 0 0 3px rgba(168,59,96,.12)}
+.subscription-text-field input::placeholder,.subscription-text-field textarea::placeholder{color:#987b84}
+.subscription-text-field small{display:block;margin-top:7px;color:#795460;font-size:11px;line-height:1.4}
+.subscription-last-group{border-bottom:0}
+.subscription-last-group .subscription-text-field{margin-top:18px}
+.subscription-field-error,.subscription-form-alert{margin-top:10px;color:#a92f45;font-size:13px;line-height:1.35}
+.subscription-form-alert{padding:14px 16px;border:1px solid #d48794;border-radius:12px;background:#fff0f1}
+.subscription-form-actions{padding-top:8px}
+.subscription-submit.misso-pill-button{width:min(320px,100%);height:52px;padding:0;border:0;color:var(--wine-dark);font-family:'Coolvetica Rg',sans-serif;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.subscription-submit .misso-pill-arrow{width:52px}
+.subscription-submit .misso-pill-label{width:calc(100% - 60px)}
+.subscription-form-actions>p{max-width:450px;margin-top:18px;color:#795460;font-size:12px;line-height:1.55}
+.subscription-form-actions>p a{color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+
+@media(max-width:960px){
+  .subscription-form-layout{grid-template-columns:1fr;gap:22px}
+  .subscription-form-intro{min-height:330px;padding:40px 48px 76px}
+  .subscription-form-intro h1{margin:25px 0 18px;font-size:clamp(5rem,11vw,8rem)}
+  .subscription-form-intro>p{max-width:600px}
+  .subscription-form-help{left:48px;bottom:30px}
+}
+@media(max-width:600px){
+  .subscription-form-layout{padding:18px 12px 65px;gap:12px}
+  .subscription-form-intro{min-height:0;padding:34px 26px 83px;border-radius:25px}
+  .subscription-form-intro h1{font-size:clamp(5rem,17vw,7rem)}
+  .subscription-form-intro>p{font-size:15px}
+  .subscription-form-mark{right:2%;bottom:26%;font-size:100px}
+  .subscription-form-help{left:26px;bottom:25px;max-width:calc(100% - 52px);font-size:11px}
+  .subscription-preferences-form{padding:25px 20px;border-radius:25px}
+  .subscription-form-group{padding:28px 0}
+  .subscription-form-group legend,.subscription-form-group h2{font-size:29px}
+  .subscription-choice-grid{gap:8px}
+  .subscription-type-grid{grid-template-columns:1fr}
+  .subscription-type-grid .subscription-choice span{min-height:52px}
+  .subscription-text-grid{grid-template-columns:1fr;gap:22px}
+  .subscription-text-field label{min-height:0}
+}
+@media(max-width:340px){.subscription-size-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.subscription-submit.misso-pill-button{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.subscription-choice span,.subscription-form-help span{transition:none}.subscription-choice:hover span{transform:none}}

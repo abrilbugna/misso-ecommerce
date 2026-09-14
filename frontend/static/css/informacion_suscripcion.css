@@ -1,0 +1,56 @@
+.subscription-info-page{background:var(--cream);color:var(--wine-dark)}
+.subscription-top{position:relative;background:var(--wine-dark);color:var(--cream);padding:12px 0}
+.subscription-kicker{display:block;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.subscription-section-heading h1,.subscription-terms h2,.subscription-close h2{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-.065em;line-height:.84}
+.subscription-close h2 em{color:var(--rose-light);font-weight:300}
+
+.subscription-faq,.subscription-terms{scroll-margin-top:20px}
+.subscription-faq{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.15fr);gap:clamp(35px,7vw,110px);max-width:1300px;margin:0 auto;padding:clamp(65px,8vw,110px) clamp(24px,6vw,88px) clamp(90px,10vw,150px)}
+.subscription-section-heading h1,.subscription-terms h2{margin:25px 0;font-size:clamp(5rem,7vw,8.5rem)}
+.subscription-section-heading h1 em{color:var(--rose-dark);font-weight:300}
+.subscription-section-heading>p{max-width:300px;font-size:17px;line-height:1.45}
+.subscription-faq-list{border-top:1px solid rgba(74,13,34,.25)}
+.subscription-faq-list details{border-bottom:1px solid rgba(74,13,34,.25)}
+.subscription-faq-list summary{display:grid;grid-template-columns:35px minmax(0,1fr) 25px;align-items:center;gap:15px;min-height:84px;padding:15px 0;cursor:pointer;list-style:none;font-size:clamp(18px,1.7vw,24px);line-height:1.2}
+.subscription-faq-list summary::-webkit-details-marker{display:none}
+.faq-number{align-self:start;padding-top:6px;color:var(--rose-dark);font-size:10px;font-weight:600;letter-spacing:.1em}
+.faq-plus{justify-self:end;font-size:28px;font-weight:300;line-height:1;transition:transform .25s}
+.subscription-faq-list details[open] .faq-plus{transform:rotate(45deg)}
+.subscription-faq-list details>p{max-width:590px;padding:0 32px 26px 50px;color:#6b4552;font-size:16px;line-height:1.55}
+.subscription-faq-list details>p a{color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+
+.subscription-terms{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.15fr);gap:clamp(35px,7vw,110px);padding:clamp(90px,10vw,145px) max(clamp(24px,6vw,88px),calc((100vw - 1300px)/2));background:var(--rose-light)}
+.subscription-terms h2 em{color:var(--wine);font-weight:300}
+.subscription-terms-lead{max-width:440px;margin-top:36px;font-size:17px;line-height:1.5}
+.subscription-terms-list{list-style:none;counter-reset:none}
+.subscription-terms-list li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;padding:23px 0;border-top:1px solid rgba(74,13,34,.28)}
+.subscription-terms-list li:last-child{border-bottom:1px solid rgba(74,13,34,.28)}
+.subscription-terms-list span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.subscription-terms-list p{max-width:560px;font-size:15px;line-height:1.55}
+
+.subscription-close{position:relative;display:flex;flex-direction:column;align-items:center;gap:24px;overflow:hidden;padding:clamp(100px,11vw,165px) 24px;text-align:center;background:var(--wine-dark);color:var(--cream)}
+.subscription-close:before{content:"";position:absolute;left:-14%;top:-45%;width:55vw;aspect-ratio:1;border:1px solid rgba(255,245,241,.16);border-radius:50%;transform:scaleY(.55);pointer-events:none}
+.subscription-close>*{position:relative;z-index:1}
+.subscription-close h2{font-size:clamp(5rem,9vw,10rem)}
+.subscription-close p{font-size:17px;line-height:1.4}
+.subscription-contact-button.misso-pill-button{width:244px;height:48px;margin-top:14px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.subscription-contact-button .misso-pill-arrow{width:48px}
+.subscription-contact-button .misso-pill-label{width:calc(100% - 56px)}
+body:has(.subscription-info-page) footer{background:var(--wine-dark);border-top-color:rgba(255,245,241,.2);color:var(--cream)}
+body:has(.subscription-info-page) footer a{color:var(--rose-light)}
+body:has(.subscription-info-page) footer a:hover{color:var(--cream)}
+
+@media(max-width:767px){
+  .subscription-faq,.subscription-terms{display:block;padding:78px 24px}
+  .subscription-faq{padding-top:56px}
+  .subscription-section-heading h1,.subscription-terms h2{font-size:clamp(4.8rem,13vw,7rem)}
+  .subscription-section-heading>p{margin-bottom:42px}
+  .subscription-faq-list summary{min-height:73px;font-size:19px;gap:10px}
+  .subscription-faq-list details>p{padding:0 20px 23px 45px;font-size:15px}
+  .subscription-terms-lead{margin:24px 0 40px}
+  .subscription-terms-list li{grid-template-columns:1fr;gap:10px}
+  .subscription-terms-list p{font-size:15px}
+  .subscription-close{padding:90px 24px 100px}
+  .subscription-close h2{font-size:clamp(4.8rem,13vw,7rem)}
+}
+@media(prefers-reduced-motion:reduce){.faq-plus{transition:none}}

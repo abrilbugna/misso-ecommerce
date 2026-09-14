@@ -1,5 +1,38 @@
 from django import forms
-from .models import OpcionEnvio
+from .models import OpcionEnvio, TALLES
+
+
+class PreferenciasSuscripcionForm(forms.Form):
+    TALLES_SUSCRIPCION = [*TALLES, ('ayuda', 'Necesito ayuda con el talle')]
+    TIPOS = [
+        ('conjuntos', 'Solo conjuntos armados'),
+        ('bombachas', 'Solo packs de bombachas'),
+        ('indistinto', 'Me gustan ambos'),
+    ]
+    ESTILOS = [
+        ('clasico', 'Clásico y simple'),
+        ('detalles', 'Con encaje o detalles'),
+        ('indistinto', 'Me da igual'),
+    ]
+
+    talle = forms.ChoiceField(choices=TALLES_SUSCRIPCION, widget=forms.RadioSelect)
+    tipo_prenda = forms.ChoiceField(choices=TIPOS, widget=forms.RadioSelect)
+    color_preferido = forms.CharField(
+        required=False,
+        max_length=120,
+        widget=forms.TextInput(attrs={'placeholder': 'Por ejemplo: negro, blanco o rosa'}),
+    )
+    color_evitar = forms.CharField(
+        required=False,
+        max_length=120,
+        widget=forms.TextInput(attrs={'placeholder': 'Por ejemplo: verde o amarillo'}),
+    )
+    estilo = forms.ChoiceField(choices=ESTILOS, widget=forms.RadioSelect)
+    comentarios = forms.CharField(
+        required=False,
+        max_length=400,
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Contanos cualquier otro detalle que te gustaría que tengamos en cuenta'}),
+    )
 
 class CheckoutForm(forms.Form):
     nombre = forms.CharField(max_length=200, label='Nombre completo')

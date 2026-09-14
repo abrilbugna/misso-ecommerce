@@ -1,0 +1,81 @@
+{% extends 'tienda/base.html' %}
+{% block navigation %}{% endblock %}
+{% load static %}
+{% block title %}Empezar mi suscripción — Misso{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+<link rel="stylesheet" href="{% static 'css/informacion_suscripcion.css' %}">
+<link rel="stylesheet" href="{% static 'css/formulario_suscripcion.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="home-page subscription-info-page subscription-form-page">
+  <div class="subscription-top">
+    {% include "tienda/includes/bubble_nav.html" with nav_class="subscription-nav" nav_label="Navegación de suscripción" %}
+  </div>
+
+  <section class="subscription-form-layout" aria-label="Tus preferencias de suscripción">
+    <div class="subscription-form-intro">
+      <span class="subscription-kicker">Tu suscripción / Paso 01</span>
+      <h1>Hecha<br><em>para vos.</em></h1>
+      <p>Elegí tu talle y contanos qué te gustaría recibir. Con tus respuestas preparadas, seguimos la charla para coordinar el pago y el envío.</p>
+      <div class="subscription-form-mark" aria-hidden="true">Misso<br><span>✳</span></div>
+      <a href="{% url 'informacion_suscripcion' %}#preguntas" class="subscription-form-help">¿Tenés dudas? Leé las preguntas frecuentes <span aria-hidden="true">↗</span></a>
+    </div>
+
+    <form class="subscription-preferences-form" method="post" novalidate>
+      {% csrf_token %}
+      <div class="subscription-form-header"><span>01 / Tus preferencias</span><p>Los campos con * son necesarios para continuar.</p></div>
+      {% if form.non_field_errors %}<div class="subscription-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+
+      <fieldset class="subscription-form-group">
+        <legend><span>01</span> ¿Qué talle usás? *</legend>
+        <p class="subscription-field-hint">Si no estás segura, elegí “Necesito ayuda” y lo vemos juntas.</p>
+        <div class="subscription-choice-grid subscription-size-grid">
+          {% for choice in form.talle %}<label class="subscription-choice">{{ choice.tag }}<span>{{ choice.choice_label }}</span></label>{% endfor %}
+        </div>
+        {% for error in form.talle.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}
+      </fieldset>
+
+      <fieldset class="subscription-form-group">
+        <legend><span>02</span> ¿Qué preferís recibir? *</legend>
+        <div class="subscription-choice-grid subscription-type-grid">
+          {% for choice in form.tipo_prenda %}<label class="subscription-choice">{{ choice.tag }}<span>{{ choice.choice_label }}</span></label>{% endfor %}
+        </div>
+        {% for error in form.tipo_prenda.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}
+      </fieldset>
+
+      <div class="subscription-form-group">
+        <h2><span>03</span> Contanos sobre los colores</h2>
+        <div class="subscription-text-grid">
+          <div class="subscription-text-field"><label for="{{ form.color_preferido.id_for_label }}">¿Hay algún color que te guste más?</label>{{ form.color_preferido }}<small>Podés dejarlo vacío si te da igual.</small>{% for error in form.color_preferido.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+          <div class="subscription-text-field"><label for="{{ form.color_evitar.id_for_label }}">¿Hay algún color que no quieras recibir?</label>{{ form.color_evitar }}<small>Podés dejarlo vacío si no hay ninguno.</small>{% for error in form.color_evitar.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+        </div>
+      </div>
+
+      <fieldset class="subscription-form-group">
+        <legend><span>04</span> ¿Qué estilo te gusta? *</legend>
+        <div class="subscription-choice-grid subscription-type-grid">
+          {% for choice in form.estilo %}<label class="subscription-choice">{{ choice.tag }}<span>{{ choice.choice_label }}</span></label>{% endfor %}
+        </div>
+        {% for error in form.estilo.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}
+      </fieldset>
+
+      <div class="subscription-form-group subscription-last-group">
+        <h2><span>05</span> ¿Algo más que quieras contarnos?</h2>
+        <div class="subscription-text-field">{{ form.comentarios }}{% for error in form.comentarios.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+      </div>
+
+      <div class="subscription-form-actions">
+        <button class="subscription-submit misso-pill-button misso-pill-right" type="submit"><span class="misso-pill-label">Continuar por WhatsApp</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></button>
+        <p>Se abrirá WhatsApp con tus respuestas para coordinar el pago y el envío. <a href="{% url 'informacion_suscripcion' %}#terminos">Ver términos y condiciones</a></p>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
+<script src="{% static 'js/pill-buttons.js' %}" defer></script>
+{% endblock %}

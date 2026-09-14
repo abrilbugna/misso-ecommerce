@@ -8,64 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/bubble_nav.css' %}">
 </head>
 <body>
 
-    <nav>
-        <div class="nav-links">
-            <a href="/">Inicio</a>
-            <a href="/tienda">Tienda</a>
-        </div>
-        <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">{% include 'tienda/includes/icon.html' with icon='menu' %}</button>
-        <a href="/" class="logo" id="nav-logo">Misso</a>
-
-        <!-- Desktop: lupa + carrito -->
-        <div class="nav-links">
-            <form method="GET" action="/tienda/" class="search-wrap">
-                <button type="button" onclick="toggleSearch()" class="search-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                </button>
-                <input type="text" name="q" id="search-input" placeholder="Buscar..." autocomplete="off">
-            </form>
-            <a href="/tienda/carrito/" class="nav-carrito">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
-                <span class="cart-badge" id="cart-count">{{ cart_count|default:0 }}</span>
-            </a>
-        </div>
-
-        <!-- Mobile: lupa + carrito -->
-        <div class="nav-mobile-right">
-            <form method="GET" action="/tienda/" class="search-wrap-mobile">
-                <button type="button" onclick="toggleSearchMobile()" class="search-icon-mobile">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                </button>
-                <input type="text" name="q" id="search-input-mobile" placeholder="Buscar..." autocomplete="off">
-            </form>
-            <a href="/tienda/carrito/" class="carrito-mobile">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
-                <span class="cart-badge-mobile" id="cart-count-mobile">{{ cart_count|default:0 }}</span>
-            </a>
-        </div>
-    </nav>
-
-    <div class="mobile-menu" id="mobileMenu">
-        <button class="cerrar-menu" onclick="toggleMenu()" aria-label="Cerrar menú">{% include 'tienda/includes/icon.html' with icon='close' %}</button>
-        <a href="/">Inicio</a>
-        <a href="/tienda">Tienda</a>
-        <a href="/tienda/carrito/">Carrito</a>
-    </div>
+    {% block navigation %}{% include "tienda/includes/bubble_nav.html" with nav_label="Navegación principal" %}{% endblock %}
 
     <main>
         {% block content %}{% endblock %}
@@ -76,13 +23,13 @@
             <div class="footer-contact"><span>Contactanos</span><a href="mailto:missocba@gmail.com">missocba@gmail.com</a></div>
         </div>
         <div class="footer-actions">
-            <a href="#">Términos y condiciones</a>
+            <a href="{% url 'informacion_suscripcion' %}#terminos">Términos de suscripción</a>
             <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20dar%20de%20baja%20mi%20suscripci%C3%B3n" target="_blank" rel="noopener noreferrer">Dar de baja suscripción</a>
             <a href="#">Seguir pedido</a>
         </div>
     </footer>
 
-    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/bubble_nav.js' %}" defer></script>
 
     {% block extra_js %}{% endblock %}
 </body>

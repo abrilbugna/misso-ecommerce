@@ -228,46 +228,6 @@
     scrollArrowMotion = gsap.to('.scroll-arrow', { y: 5, duration: .8, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: !introComplete });
     mm.add('(hover: hover) and (pointer: fine)', () => {
       const listeners = [];
-      document.querySelectorAll('.misso-pill-button').forEach(button => {
-        const circle = button.querySelector('.misso-pill-arrow');
-        const label = button.querySelector('.misso-pill-label');
-        const icon = circle?.querySelector('svg');
-        if (!circle || !label || !icon) return;
-        const incoming = icon.cloneNode(true);
-        incoming.classList.add('misso-arrow-in');
-        circle.appendChild(incoming);
-        gsap.set(incoming, { autoAlpha: 0, x: -9, y: 9 });
-        const styles = getComputedStyle(root);
-        const rose = styles.getPropertyValue('--rose-light').trim() || '#efb6c8';
-        const wine = styles.getPropertyValue('--wine-dark').trim() || '#4a0d22';
-        const cream = styles.getPropertyValue('--cream').trim() || '#fff5f1';
-        const swap = gsap.timeline({ paused: true });
-        swap
-          .to(circle, { x: () => -circle.offsetLeft, y: -7, scale: 1.07, duration: .26, ease: 'power2.out' }, 0)
-          .to(circle, { y: 0, scale: 1, duration: .26, ease: 'power3.out' }, .26)
-          .to(label, { x: () => circle.offsetWidth + circle.offsetLeft - label.offsetWidth, y: -2, duration: .27, ease: 'power2.out' }, 0)
-          .to(label, { y: 0, duration: .25, ease: 'power3.out' }, .27)
-          .to(label, { backgroundColor: rose, duration: .35, ease: 'power2.out' }, .08)
-          .to(circle, { backgroundColor: wine, color: cream, duration: .3, ease: 'power2.out' }, .16)
-          .to(icon, { x: 9, y: -9, autoAlpha: 0, duration: .2, ease: 'power2.in' }, .07)
-          .to(incoming, { x: 0, y: 0, autoAlpha: 1, duration: .25, ease: 'power3.out' }, .23)
-          .to(button, { scale: 1.01, duration: .25, ease: 'power2.out' }, .1);
-        const enter = () => swap.play();
-        const leave = () => swap.reverse();
-        button.addEventListener('pointerenter', enter);
-        button.addEventListener('pointerleave', leave);
-        button.addEventListener('focusin', enter);
-        button.addEventListener('focusout', leave);
-        listeners.push(() => {
-          button.removeEventListener('pointerenter', enter);
-          button.removeEventListener('pointerleave', leave);
-          button.removeEventListener('focusin', enter);
-          button.removeEventListener('focusout', leave);
-          swap.kill();
-          incoming.remove();
-          gsap.set([button, circle, label, icon], { clearProps: 'transform,backgroundColor,color,opacity,visibility' });
-        });
-      });
       document.querySelectorAll('.hero-social').forEach((button, index) => {
         const bubble = button.querySelector('.hero-social-bubble');
         const icon = bubble?.querySelector('svg');
@@ -315,8 +275,9 @@
     });
     mm.add('(hover: none), (pointer: coarse)', () => {
       const listeners = [];
-      document.querySelectorAll('.misso-pill-button, .hero-social').forEach(button => {
-        const target = button.querySelector('.hero-social-bubble') || button;
+      document.querySelectorAll('.hero-social').forEach(button => {
+        const target = button.querySelector('.hero-social-bubble');
+        if (!target) return;
         const press = () => gsap.to(target, { scale: .96, duration: .12, overwrite: true });
         const release = () => gsap.to(target, { scale: 1, duration: .2, overwrite: true });
         button.addEventListener('pointerdown', press);
@@ -340,20 +301,27 @@
     gsap.to('.intro-image-wrap video, .intro-image-wrap img', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.intro-grid', start: 'top bottom', end: 'bottom top', scrub: true } });
   }
 
-  function initBenefitsScroll(config) {
+  function initBenefitsScroll(config, autoplay = false) {
     const section = document.querySelector('.benefits-scroll');
     if (!section || !cards.length) return;
     const path = section.querySelector('.benefits-doodle path');
+    const originalPath = path?.getAttribute('d');
     if (path) {
-      const length = path.getTotalLength();
+      const length = path.getTotalLength() + (autoplay ? 250 : 0);
       gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
     }
-    const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: 1, onUpdate: self => {
-      if (cardCount) cardCount.textContent = String(Math.min(cards.length, Math.floor(self.progress * cards.length) + 1)).padStart(2, '0');
-    } } });
-    tl.to('.benefits-heading', { yPercent: -20, opacity: .28, ease: 'none', duration: 1 }, 0);
-    if (path) tl.to(path, { strokeDashoffset: 0, ease: 'none', duration: 1 }, 0);
-    const slot = 1 / cards.length;
+    const slot = autoplay ? 2.2 : 1 / cards.length;
+    const duration = slot * cards.length;
+    const updateCount = progress => {
+      if (cardCount) cardCount.textContent = String(Math.min(cards.length, Math.floor(progress * cards.length) + 1)).padStart(2, '0');
+    };
+    const tl = gsap.timeline(autoplay
+      ? { paused: true, repeat: -1, repeatDelay: .25, onUpdate() { updateCount(Math.min(1, this.time() / duration)); } }
+      : { scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: 1, onUpdate: self => updateCount(self.progress) } });
+    if (!autoplay) {
+      tl.to('.benefits-heading', { yPercent: -20, opacity: .28, ease: 'none', duration }, 0);
+      if (path) tl.to(path, { strokeDashoffset: 0, ease: 'none', duration }, 0);
+    }
     cards.forEach((card, index) => {
       const fromLeft = index % 2 === 0;
       const fromTop = index % 3 === 2;
@@ -363,15 +331,53 @@
       const yEnd = fromTop ? config.distanceY : -config.distanceY;
       const rotation = (fromLeft ? -1 : 1) * config.rotation;
       const start = index * slot;
-      gsap.set(card, { xPercent: xStart, yPercent: yStart, rotation: rotation * 1.6, scale: .82, opacity: 1, zIndex: index + 3 });
-      // Each card travels quickly at the edges, lingers around the center, then accelerates away.
-      tl.to(card, { xPercent: xStart * .23, yPercent: yStart * .23, rotation: rotation, scale: .96, duration: slot * .28, ease: 'power3.out' }, start);
-      tl.to(card, { xPercent: 0, yPercent: 0, rotation: rotation * .28, scale: 1, duration: slot * .24, ease: 'sine.out' }, start + slot * .28);
-      tl.to(card, { xPercent: xEnd * .07, yPercent: yEnd * .07, rotation: rotation * .45, scale: 1, duration: slot * .19, ease: 'sine.inOut' }, start + slot * .52);
-      tl.to(card, { xPercent: xEnd, yPercent: yEnd, rotation: -rotation * 1.5, scale: .87, duration: slot * .29, ease: 'power3.in' }, start + slot * .71);
+      gsap.set(card, { xPercent: xStart, yPercent: yStart, rotation: rotation * (autoplay ? 1.2 : 1.6), scale: autoplay ? .91 : .82, opacity: 1, zIndex: index + 3 });
+      if (autoplay) {
+        // A single eased arrival, a readable pause, and an overlapping exit keep the mobile loop fluid.
+        tl.to(card, { xPercent: 0, yPercent: 0, rotation: rotation * .15, scale: 1, duration: slot * .42, ease: 'power3.out' }, start);
+        tl.to(card, { xPercent: xEnd, yPercent: yEnd, rotation: -rotation * .85, scale: .94, duration: slot * .36, ease: 'power2.in' }, start + slot * .73);
+      } else {
+        // Each card travels quickly at the edges, lingers around the center, then accelerates away.
+        tl.to(card, { xPercent: xStart * .23, yPercent: yStart * .23, rotation: rotation, scale: .96, duration: slot * .28, ease: 'power3.out' }, start);
+        tl.to(card, { xPercent: 0, yPercent: 0, rotation: rotation * .28, scale: 1, duration: slot * .24, ease: 'sine.out' }, start + slot * .28);
+        tl.to(card, { xPercent: xEnd * .07, yPercent: yEnd * .07, rotation: rotation * .45, scale: 1, duration: slot * .19, ease: 'sine.inOut' }, start + slot * .52);
+        tl.to(card, { xPercent: xEnd, yPercent: yEnd, rotation: -rotation * 1.5, scale: .87, duration: slot * .29, ease: 'power3.in' }, start + slot * .71);
+      }
       const decor = card.querySelector('.card-star');
-      if (decor) tl.fromTo(decor, { rotation: -rotation * 7 }, { rotation: rotation * 7, ease: 'none', duration: slot }, start);
+      if (decor) tl.fromTo(decor, { rotation: -rotation * 7 }, { rotation: rotation * 7, ease: autoplay ? 'sine.inOut' : 'none', duration: slot }, start);
     });
+    if (autoplay) {
+      const scenery = gsap.timeline({ paused: true });
+      scenery.to('.benefits-heading', { yPercent: -12, opacity: .5, duration: 1.3, ease: 'power2.out' }, 0);
+      if (path) scenery.to(path, { strokeDashoffset: 0, duration: 2.4, ease: 'power1.inOut' }, 0);
+      const wave = { phase: 0 };
+      const lineMotion = path && gsap.to(wave, {
+        phase: Math.PI * 2,
+        duration: 8,
+        ease: 'none',
+        repeat: -1,
+        paused: true,
+        onUpdate: () => {
+          const sway = Math.sin(wave.phase);
+          const ripple = Math.sin(wave.phase * 2);
+          path.setAttribute('d', `M-60 ${495 + 14 * sway} C190 ${80 + 55 * ripple} 275 ${830 - 65 * sway} 535 ${400 + 28 * ripple} S780 ${100 + 50 * sway} 1070 ${390 - 18 * ripple}`);
+        },
+      });
+      const play = () => { scenery.play(); lineMotion?.play(); tl.play(); };
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        onEnter: play,
+        onEnterBack: play,
+        onLeave: () => { tl.pause(); lineMotion?.pause(); },
+        onLeaveBack: () => { tl.pause(0); lineMotion?.pause(); },
+      });
+      return () => {
+        lineMotion?.kill();
+        if (path && originalPath) path.setAttribute('d', originalPath);
+      };
+    }
   }
 
   function initButtonInteractions() {
@@ -452,7 +458,7 @@
   initBrandIntro();
   mm.add('(min-width: 992px)', () => initBenefitsScroll({ distanceX: 250, distanceY: 190, rotation: 11 }));
   mm.add('(min-width: 768px) and (max-width: 991px)', () => initBenefitsScroll({ distanceX: 215, distanceY: 160, rotation: 8 }));
-  mm.add('(max-width: 767px)', () => initBenefitsScroll({ distanceX: 150, distanceY: 135, rotation: 5 }));
+  mm.add('(max-width: 767px)', () => initBenefitsScroll({ distanceX: 150, distanceY: 135, rotation: 5 }, true));
   initButtonInteractions();
   initOutroProducts();
   window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
