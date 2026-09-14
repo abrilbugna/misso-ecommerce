@@ -18,9 +18,9 @@
     <header class="subscription-form-heading">
       <h1 id="subscription-form-title">Suscripción <em>mensual.</em></h1>
       <div class="subscription-help-links" aria-label="Información sobre la suscripción">
-        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#preguntas">Preguntas frecuentes <span aria-hidden="true">↗</span></a>
-        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#terminos">Términos y condiciones <span aria-hidden="true">↗</span></a>
-        <a class="subscription-help-link subscription-help-whatsapp" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20tengo%20una%20duda%20sobre%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer">Dudas por WhatsApp <span aria-hidden="true">↗</span></a>
+        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#preguntas">Preguntas frecuentes <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+        <a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#terminos">Términos y condiciones <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+        <a class="subscription-help-link subscription-help-whatsapp" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20tengo%20una%20duda%20sobre%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer">Dudas por WhatsApp <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
       </div>
     </header>
     <form class="subscription-preferences-form" method="post" novalidate>

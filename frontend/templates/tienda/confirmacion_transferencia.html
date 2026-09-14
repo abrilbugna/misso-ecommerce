@@ -4,17 +4,20 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/confirmacion_transferencia.css' %}">
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="confirmacion">
-    <div class="check">{% include 'tienda/includes/icon.html' with icon='bank' %}</div>
-    <h1>¡PEDIDO CONFIRMADO!</h1>
-    <p>Gracias por tu compra <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
-    <p class="total-transferencia">Total a transferir: ${{ orden.total }}</p>
+<div class="confirmacion purchase-page purchase-result purchase-transfer">
+    <div class="purchase-result-orbit" aria-hidden="true"></div>
+    <div class="check" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='bank' %}</div>
+    <span class="purchase-kicker">03 / Transferencia bancaria</span>
+    <h1>Pedido <em>recibido.</em></h1>
+    <p class="purchase-result-lead">Gracias, {{ orden.nombre }}. Guardamos tu pedido <strong>#{{ orden.pk }}</strong>. Para terminar, transferí el total y envianos el comprobante.</p>
+    <div class="total-transferencia"><span>Total a transferir</span><strong>${{ orden.total }}</strong></div>
 
     <div class="datos-transferencia">
-        <h2>{% include 'tienda/includes/icon.html' with icon='sparkle' %} Datos para transferir</h2>
+        <span class="purchase-kicker">Datos de pago</span><h2>Transferí <em>a Misso.</em></h2>
         <div class="dato">
             <span class="dato-label">Alias</span>
             <span class="dato-valor">missocba</span>
@@ -34,9 +37,9 @@
     </div>
 
     <div class="aviso">
-        {% include 'tienda/includes/icon.html' with icon='mail' %} Una vez realizada la transferencia por favor envianos el comprobante a <a href="https://wa.me/543517727224" target="_blank"> nuestro whatsapp</a> o por <a href="https://instagram.com/misso.cba" target="_blank">instagram</a> con el número de pedido <strong>#{{ orden.pk }}</strong>
+        {% include 'tienda/includes/icon.html' with icon='mail' %}<p>Cuando transfieras, envianos el comprobante con el número <strong>#{{ orden.pk }}</strong> por <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20te%20env%C3%ADo%20el%20comprobante%20de%20mi%20pedido%20%23{{ orden.pk }}" target="_blank" rel="noopener noreferrer">WhatsApp</a> o <a href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer">Instagram</a>.</p>
     </div>
-    
-    <a href="/tienda" class="btn">Seguir comprando</a>
+    <a href="{% url 'catalogo' %}" class="btn misso-pill-button misso-pill-right"><span class="misso-pill-label">Seguir explorando</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
 </div>
 {% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}

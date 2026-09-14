@@ -1,5 +1,5 @@
 (() => {
-  const root = document.querySelector('.home-page');
+  const root = document.querySelector('.home-page, .purchase-page');
   if (!root || !window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const { gsap } = window;

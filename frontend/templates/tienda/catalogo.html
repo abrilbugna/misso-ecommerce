@@ -17,7 +17,7 @@
   {% include "tienda/includes/bubble_nav.html" with nav_label="Navegación de tienda" %}
 
   <header class="catalog-heading" aria-labelledby="catalog-title">
-    <p class="catalog-eyebrow">Misso / Tienda <span aria-hidden="true">✦</span></p>
+    <p class="catalog-eyebrow">Misso / Tienda <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span></p>
     <h1 id="catalog-title"><span class="catalog-title-line"><span>Productos</span></span></h1>
   </header>
 
@@ -41,14 +41,14 @@
             {% with url=producto.get_imagen_url %}{% if url %}<img src="{{ url }}" alt="{{ producto.nombre }}" loading="lazy">{% else %}<div class="catalog-no-image">Sin imagen</div>{% endif %}{% endwith %}
             <span class="catalog-product-index">{{ forloop.counter|stringformat:'02d' }}</span>
           </div>
-          <div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio }}</span><span class="catalog-cta">Ver producto <b aria-hidden="true">↗</b></span></div></div>
+          <div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio }}</span><span class="catalog-cta">Ver producto <span class="catalog-cta-icon" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span></div></div>
         </a>
       </article>
       {% if forloop.counter == 4 %}
-      <aside class="catalog-subscription" data-catalog-promo><span class="catalog-promo-kicker">La sorpresa mensual ✦</span><h2>¿No sabés<br>cuál elegir?</h2><p>Dejá que misso elija por vos. Un conjunto distinto cada mes, pensado según tus preferencias.</p><div class="catalog-promo-price">$25.000 <small>/ mes</small></div><a href="{% url 'inicio' %}#suscripcion" class="catalog-promo-link">Ver suscripción <span aria-hidden="true">↗</span></a><span class="catalog-promo-doodle" aria-hidden="true">✳</span></aside>
+      <aside class="catalog-subscription" data-catalog-promo><span class="catalog-promo-kicker">La sorpresa mensual <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span></span><h2>¿No sabés<br>cuál elegir?</h2><p>Dejá que misso elija por vos. Un conjunto distinto cada mes, pensado según tus preferencias.</p><div class="catalog-promo-price">$25.000 <small>/ mes</small></div><a href="{% url 'inicio' %}#suscripcion" class="catalog-promo-link">Ver suscripción <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a><span class="catalog-promo-doodle" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='burst' %}</span></aside>
       {% endif %}
       {% empty %}
-      <div class="catalog-empty" role="status"><span class="catalog-empty-star" aria-hidden="true">✦</span><h2>Todavía no hay<br><em>misso por acá.</em></h2><p>No hay productos en esta categoría todavía.</p><a href="{% url 'catalogo' %}" class="catalog-empty-link">Ver todos <span aria-hidden="true">↗</span></a></div>
+      <div class="catalog-empty" role="status"><span class="catalog-empty-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span><h2>Todavía no hay<br><em>misso por acá.</em></h2><p>No hay productos en esta categoría todavía.</p><a href="{% url 'catalogo' %}" class="catalog-empty-link">Ver todos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a></div>
       {% endfor %}
     </div>
   </section>

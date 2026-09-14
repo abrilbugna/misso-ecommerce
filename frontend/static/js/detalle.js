@@ -73,6 +73,8 @@ function setColor(id, btn){
   document.getElementById('msgPocoStock').textContent = '';
   document.getElementById('msgPocoStock').classList.remove('visible');
   document.getElementById('addBtn').classList.add('disabled');
+  document.getElementById('addBtn').setAttribute('aria-disabled', 'true');
+  document.getElementById('addBtn').setAttribute('tabindex', '-1');
   document.getElementById('addBtn').href = '#';
 
   const imgAsociada = document.querySelector(`.miniaturas img[data-color="${id}"]`);
@@ -98,4 +100,6 @@ function setTalle(id, stock, btn){
   const cantidad = document.getElementById('cantidad').value;
   addBtn.href = `/tienda/agregar/${productoId}/?color=${selectedColor}&talle=${id}&cantidad=${cantidad}`;
   addBtn.classList.remove('disabled');
+  addBtn.removeAttribute('aria-disabled');
+  addBtn.removeAttribute('tabindex');
 }

@@ -2,25 +2,20 @@
 {% load static %}
 
 {% block title %}Pedido confirmado — Misso{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/confirmacion.css' %}"><link rel="stylesheet" href="{% static 'css/purchase.css' %}">{% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="{% static 'css/confirmacion.css' %}">
-
-<div class="confirmacion">
-    <div class="check">{% include 'tienda/includes/icon.html' with icon='check' %}</div>
-
-    <h1>PEDIDO CONFIRMADO</h1>
-
-    <p>Gracias por tu compra {{ orden.nombre }}, recibimos tu pedido :)</p>
-
-    <p class="numero">Número de orden: #{{ orden.pk }}</p>
-
-    <div class="info-contacto">
-        En breve te vamos a contactar para coordinar tu envío al <strong>{{ orden.telefono }}</strong> {% include 'tienda/includes/icon.html' with icon='mail' %}
+<div class="confirmacion purchase-page purchase-result">
+    <div class="purchase-result-orbit" aria-hidden="true"></div>
+    <div class="check" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='check' %}</div>
+    <span class="purchase-kicker">03 / Tu pedido está en marcha</span>
+    <h1>Pedido <em>confirmado.</em></h1>
+    <p class="purchase-result-lead">Gracias, {{ orden.nombre }}. Recibimos tu pedido y pronto te escribimos para coordinar la entrega.</p>
+    <div class="purchase-result-card">
+        <div class="purchase-result-row"><span>Número de pedido</span><strong>#{{ orden.pk }}</strong></div>
+        <div class="purchase-result-row"><span>Nos contactaremos al</span><strong>{{ orden.telefono }}</strong></div>
     </div>
-
-    <a href="/tienda" class="btn">Seguir comprando</a>
+    <a href="{% url 'catalogo' %}" class="btn misso-pill-button misso-pill-right"><span class="misso-pill-label">Seguir explorando</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
 </div>
-
 {% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}

@@ -14,7 +14,8 @@
 .subscription-faq-list summary{display:grid;grid-template-columns:35px minmax(0,1fr) 25px;align-items:center;gap:15px;min-height:84px;padding:15px 0;cursor:pointer;list-style:none;font-size:clamp(18px,1.7vw,24px);line-height:1.2}
 .subscription-faq-list summary::-webkit-details-marker{display:none}
 .faq-number{align-self:start;padding-top:6px;color:var(--rose-dark);font-size:10px;font-weight:600;letter-spacing:.1em}
-.faq-plus{justify-self:end;font-size:28px;font-weight:300;line-height:1;transition:transform .25s}
+.faq-plus{justify-self:end;display:grid;place-items:center;line-height:1;transition:transform .25s}
+.faq-plus .misso-icon{width:23px;height:23px;stroke-width:1.5}
 .subscription-faq-list details[open] .faq-plus{transform:rotate(45deg)}
 .subscription-faq-list details>p{max-width:590px;padding:0 32px 26px 50px;color:#6b4552;font-size:16px;line-height:1.55}
 .subscription-faq-list details>p a{color:var(--wine);text-decoration:underline;text-underline-offset:3px}

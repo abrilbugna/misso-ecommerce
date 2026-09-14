@@ -4,37 +4,41 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="carrito-wrap">
-    <a href="/tienda" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Seguir comprando</a>
-    <h1>CARRITO</h1>
+<div class="carrito-wrap purchase-page purchase-cart">
+    <a href="{% url 'catalogo' %}" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Seguir comprando</a>
+    <header class="purchase-heading"><span class="purchase-kicker">01 / Tu selección</span><h1>Tu <em>carrito.</em></h1><p>Todo lo que elegiste, listo para seguir.</p></header>
 
     {% if items %}
     <div class="carrito-grid">
-        <div class="items">
+        <div class="items purchase-panel">
+            <div class="purchase-panel-heading"><span>Productos elegidos</span><span>{{ items|length }} en tu carrito</span></div>
             {% for item in items %}
             <div class="item">
                 {% with img=item.imagen_mostrar %}
                 {% if img %}
                    <img src="{{ img.imagen.url }}" alt="{{ item.producto.nombre }}" class="item-img">
+                {% else %}<span class="item-img item-img-fallback" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span>
                 {% endif %}
                 {% endwith %}
                 <div>
-                    <p class="item-nombre">{{ item.producto.nombre }}</p>
+                    <p class="item-nombre"><a href="{% url 'detalle' item.producto.pk %}">{{ item.producto.nombre }}</a></p>
                     {% if item.color %}
                         <p class="item-precio">Color: {{ item.color.nombre }}</p>
                     {% endif %}
-                    <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
+                    {% if item.talle %}<p class="item-precio">Talle: {{ item.talle.talle }}</p>{% endif %}
+                    <p class="item-precio">{{ item.cantidad }} × ${{ item.producto.precio }}</p>
                 </div>
                 <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar" aria-label="Eliminar {{ item.producto.nombre }}">{% include 'tienda/includes/icon.html' with icon='close' %}</a>
             </div>
             {% endfor %}
         </div>
 
-        <div class="resumen">
-            <h2>Resumen {% include 'tienda/includes/icon.html' with icon='heart' %}</h2>
+        <div class="resumen purchase-panel">
+            <span class="purchase-kicker">Tu pedido</span><h2>Resumen <em>de compra.</em></h2>
 
             <div class="codigo-wrap">
                 <span class="codigo-label">Ingresar código promocional</span>
@@ -45,8 +49,8 @@
                 </div>
                 {% else %}
                 <div class="codigo-input-row">
-                    <input type="text" id="input-codigo" class="codigo-input" placeholder="CODIGO">
-                    <button class="codigo-btn" onclick="aplicarCodigo()">Aplicar</button>
+                    <input type="text" id="input-codigo" class="codigo-input" placeholder="Tu código" aria-label="Código promocional">
+                    <button type="button" class="codigo-btn" onclick="aplicarCodigo()">Aplicar</button>
                 </div>
                 <p class="codigo-msg" id="codigo-msg"></p>
                 {% endif %}
@@ -66,17 +70,20 @@
                 <span>Total</span>
                 <span>${{ total_con_descuento }}</span>
             </div>
-            <a href="/tienda/checkout/" class="btn">Finalizar compra {% include 'tienda/includes/icon.html' with icon='arrow-right' %}</a>
+            <a href="{% url 'checkout' %}" class="btn misso-pill-button misso-pill-right"><span class="misso-pill-label">Finalizar compra</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
         </div>
     </div>
 
     {% else %}
-    <div class="vacio">
-        <p>Tu carrito está vacío {% include 'tienda/includes/icon.html' with icon='bag' %}</p>
-        <a href="/tienda">Ver productos</a>
+    <div class="vacio purchase-panel">
+        <span class="vacio-icon" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='bag' %}</span>
+        <h2>Tu carrito espera<br><em>algo especial.</em></h2>
+        <p>Explorá la tienda y elegí tus favoritos.</p>
+        <a href="{% url 'catalogo' %}" class="btn misso-pill-button misso-pill-right"><span class="misso-pill-label">Ver productos</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
     </div>
     {% endif %}
 </div>
 
 <script src="{% static 'js/carrito.js' %}" data-csrf-token="{{ csrf_token }}"></script>
 {% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}

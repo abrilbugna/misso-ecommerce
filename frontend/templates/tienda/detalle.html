@@ -5,46 +5,51 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/detalle.css' %}">
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="detalle-wrap">
+<div class="detalle-wrap purchase-page purchase-detail">
 {% if request.GET.agregado %}
-<p class="msg-agregado">¡Producto agregado al carrito! {% include 'tienda/includes/icon.html' with icon='heart' %}</p>
+<p class="msg-agregado" role="status">{% include 'tienda/includes/icon.html' with icon='check' %} Producto agregado al carrito. <a href="{% url 'ver_carrito' %}">Ver carrito {% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</a></p>
 {% endif %}
-<a href="/tienda" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Volver</a>
+<a href="{% url 'catalogo' %}" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Volver a la tienda</a>
 <div class="detalle">
-  <div>
+  <div class="detalle-gallery">
     <div class="imagen-container">
       {% with primera=producto.imagenes.first %}
       {% if primera %}
-      <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}">
+      <img id="img" class="imagen-principal" src="{{ primera.imagen.url }}" alt="{{ producto.nombre }}">
+      {% else %}<div class="detalle-no-imagen">Misso {% include 'tienda/includes/icon.html' with icon='sparkle' %}</div>
       {% endif %}
       {% endwith %}
       {% if producto.imagenes.count > 1 %}
-      <button type="button" class="flecha-img prev" onclick="moverImg(-1)" aria-label="Foto anterior">‹</button>
-      <button type="button" class="flecha-img next" onclick="moverImg(1)" aria-label="Foto siguiente">›</button>
+      <button type="button" class="flecha-img prev" onclick="moverImg(-1)" aria-label="Foto anterior">{% include 'tienda/includes/icon.html' with icon='arrow-left' %}</button>
+      <button type="button" class="flecha-img next" onclick="moverImg(1)" aria-label="Foto siguiente">{% include 'tienda/includes/icon.html' with icon='arrow-right' %}</button>
       {% endif %}
     </div>
     <div class="miniaturas">
       {% for img in producto.imagenes.all %}
-      <img src="{{ img.imagen.url }}" data-color="{{ img.color_id|default:'' }}" data-index="{{ forloop.counter0 }}" class="{% if forloop.first %}activa{% endif %}" onclick="setImg('{{ img.imagen.url }}', this)">
+      <img src="{{ img.imagen.url }}" alt="{{ producto.nombre }} — imagen {{ forloop.counter }}" data-color="{{ img.color_id|default:'' }}" data-index="{{ forloop.counter0 }}" class="{% if forloop.first %}activa{% endif %}" onclick="setImg('{{ img.imagen.url }}', this)">
       {% endfor %}
     </div>
   </div>
   <div class="detalle-info">
+    <span class="purchase-kicker">Misso / {{ producto.get_categoria_display }}</span>
     <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
     <p class="detalle-precio">${{ producto.precio }}</p>
     {% if producto.descripcion %}
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
     {% endif %}
     {% if producto.colores.exists %}
+    <p class="detalle-option-label">01 / Elegí tu color</p>
     <div class="cores">
       {% for color in producto.colores.all %}
       <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, this)">{{ color.nombre }}</button>
       {% endfor %}
     </div>
     <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">{% include 'tienda/includes/icon.html' with icon='alert' %} Seleccioná un color antes de continuar.</p>
+    <p class="detalle-option-label">02 / Elegí tu talle</p>
     <div class="talles" id="tallesContainer">
       <button class="talle-btn" disabled>85</button>
       <button class="talle-btn" disabled>90</button>
@@ -55,24 +60,24 @@
     <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">{% include 'tienda/includes/icon.html' with icon='alert' %} Sin stock para este color y talle. Probá otra combinación.</p>
     <p class="msg-poco-stock" id="msgPocoStock"></p>
     <div class="cantidad-wrap">
-      <label>Cantidad</label>
+      <label for="cantidad">Cantidad</label>
       <div class="cantidad-controles">
-        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(-1)" aria-label="Restar una unidad">−</button>
         <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
-        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(1)" aria-label="Sumar una unidad">+</button>
       </div>
     </div>
-    <a id="addBtn" class="btn disabled" href="#">Agregar al carrito</a>
+    <a id="addBtn" class="btn misso-pill-button misso-pill-right disabled" href="#" aria-disabled="true" tabindex="-1"><span class="misso-pill-label">Agregar al carrito</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
     {% else %}
     <div class="cantidad-wrap">
-      <label>Cantidad</label>
+      <label for="cantidad">Cantidad</label>
       <div class="cantidad-controles">
-        <button class="cantidad-btn" onclick="cambiarCantidad(-1)">−</button>
+        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(-1)" aria-label="Restar una unidad">−</button>
         <input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly>
-        <button class="cantidad-btn" onclick="cambiarCantidad(1)">+</button>
+        <button type="button" class="cantidad-btn" onclick="cambiarCantidad(1)" aria-label="Sumar una unidad">+</button>
       </div>
     </div>
-    <a id="addBtnSimple" class="btn" href="/tienda/agregar/{{ producto.pk }}/?cantidad=1">Agregar al carrito</a>
+    <a id="addBtnSimple" class="btn misso-pill-button misso-pill-right" href="/tienda/agregar/{{ producto.pk }}/?cantidad=1"><span class="misso-pill-label">Agregar al carrito</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
     {% endif %}
   </div>
 </div>
@@ -81,4 +86,5 @@
 
 {% block extra_js %}
 <script src="{% static 'js/detalle.js' %}" data-producto-id="{{ producto.pk }}"></script>
+{% include 'tienda/includes/purchase_pill_scripts.html' %}
 {% endblock %}

@@ -5,7 +5,8 @@
 .subscription-form-heading h1 em{color:var(--rose-dark);font-weight:300}
 .subscription-help-links{display:flex;flex-wrap:wrap;gap:10px}
 .subscription-form-page .subscription-help-link{display:inline-flex;align-items:center;justify-content:space-between;gap:15px;min-height:43px;padding:10px 16px;border:1px solid rgba(74,13,34,.3);border-radius:999px;background:var(--off-white);color:var(--wine-dark);font-size:12px;line-height:1.2;transition:transform .25s ease,background .25s ease,border-color .25s ease}
-.subscription-help-link span{font-size:18px;line-height:1}
+.subscription-help-link span{display:inline-flex;align-items:center;line-height:1}
+.subscription-help-link .misso-icon{width:17px;height:17px}
 .subscription-form-page .subscription-help-link:hover,.subscription-form-page .subscription-help-link:focus-visible{transform:translateY(-2px);border-color:var(--wine-dark);background:var(--rose-light);color:var(--wine-dark)}
 .subscription-form-page .subscription-help-whatsapp{border-color:var(--wine-dark);background:var(--wine-dark);color:var(--cream)}
 .subscription-form-page .subscription-help-whatsapp:hover,.subscription-form-page .subscription-help-whatsapp:focus-visible{border-color:var(--wine);background:var(--wine);color:var(--cream)}

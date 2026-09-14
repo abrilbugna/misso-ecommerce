@@ -5,29 +5,19 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pago_mp.css' %}">
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="pago">
-    <div class="icono">
-    <svg viewBox="0 0 24 24" width="52" height="52" fill="none" stroke="var(--rosa)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
-    </svg>
-    </div>
-
-    <h1>PAGAR CON MERCADOPAGO</h1>
-
-    <p>Pedido #{{ orden.pk }} — {{ orden.nombre }}</p>
-
-    <p class="total">Total: ${{ orden.total }}</p>
-
-    <p>Cuando toques el botón vas a ser redirigido/a a MercadoPago para terminar el pago de forma segura.</p>
-
-    <a href="{{ mp_url }}" class="btn-mp">Pagar ahora {% include 'tienda/includes/icon.html' with icon='arrow-right' %}</a>
-
-    <div class="aviso">
-        {% include 'tienda/includes/icon.html' with icon='lock' %} Pago seguro procesado por MercadoPago
-    </div>
+<div class="pago purchase-page purchase-result purchase-payment">
+    <div class="purchase-result-orbit" aria-hidden="true"></div>
+    <div class="icono" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='lock' %}</div>
+    <span class="purchase-kicker">03 / Pago seguro</span>
+    <h1>Un paso <em>más.</em></h1>
+    <p class="purchase-result-lead">Tu pedido <strong>#{{ orden.pk }}</strong> está listo, {{ orden.nombre }}. Continuá en Mercado Pago para completar el pago.</p>
+    <div class="total"><span>Total del pedido</span><strong>${{ orden.total }}</strong></div>
+    <a href="{{ mp_url }}" class="btn-mp misso-pill-button misso-pill-right"><span class="misso-pill-label">Ir a pagar</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+    <p class="aviso">{% include 'tienda/includes/icon.html' with icon='lock' %} El pago se completa de forma segura en Mercado Pago.</p>
 </div>
 {% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}

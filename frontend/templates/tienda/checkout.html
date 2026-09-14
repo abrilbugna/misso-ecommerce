@@ -4,57 +4,63 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="checkout-wrap">
-    <a href="/tienda/carrito/" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Volver al carrito</a>
-    <h1>CHECKOUT</h1>
+<div class="checkout-wrap purchase-page purchase-checkout">
+    <a href="{% url 'ver_carrito' %}" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Volver al carrito</a>
+    <header class="purchase-heading"><span class="purchase-kicker">02 / Casi tuyo</span><h1>Finalizá <em>tu compra.</em></h1><p>Completá tus datos y elegí cómo recibir tu pedido.</p></header>
     <div class="checkout-grid">
-        <div class="form-section">
-            <h2>{% include 'tienda/includes/icon.html' with icon='sparkle' %} Tus datos</h2>
+        <div class="form-section purchase-panel">
+            <span class="purchase-kicker">Tus datos</span><h2>Contanos <em>de vos.</em></h2>
             <form method="post" id="checkout-form">
                 {% csrf_token %}
+                {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
                 <div class="form-group">
-                    <label>Nombre completo</label>
+                    <label for="{{ form.nombre.id_for_label }}">Nombre completo</label>
                     {{ form.nombre }}
+                    {% if form.nombre.errors %}<p class="form-error" role="alert">{{ form.nombre.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="form-group">
-                    <label>Email</label>
+                    <label for="{{ form.email.id_for_label }}">Email</label>
                     {{ form.email }}
                     {% if form.email.errors %}
                     <p class="form-error">{{ form.email.errors.0 }}</p>
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    <label>Teléfono</label>
+                    <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
                     {{ form.telefono }}
                     {% if form.telefono.errors %}
                     <p class="form-error">{{ form.telefono.errors.0 }}</p>
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    <label>Dirección</label>
+                    <label for="{{ form.direccion.id_for_label }}">Dirección</label>
                     {{ form.direccion }}
+                    {% if form.direccion.errors %}<p class="form-error" role="alert">{{ form.direccion.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="form-group">
-                    <label>Opción de envío</label>
+                    <label for="{{ form.envio.id_for_label }}">Opción de envío</label>
                     {{ form.envio }}
+                    {% if form.envio.errors %}<p class="form-error" role="alert">{{ form.envio.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="form-group">
-                    <label>Método de pago</label>
+                    <span class="form-group-label">Método de pago</span>
                     <div class="metodo-pago-opciones">
                         {% for radio in form.metodo_pago %}
                         {{ radio }}
                         {% endfor %}
                     </div>
+                    {% if form.metodo_pago.errors %}<p class="form-error" role="alert">{{ form.metodo_pago.errors.0 }}</p>{% endif %}
                 </div>
-                <button type="button" class="btn-confirmar" onclick="confirmarPedido()">Confirmar pedido {% include 'tienda/includes/icon.html' with icon='arrow-right' %}</button>
+                <button type="button" class="btn-confirmar misso-pill-button misso-pill-right" onclick="confirmarPedido()"><span class="misso-pill-label">Confirmar pedido</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></button>
             </form>
         </div>
 
-        <div class="resumen">
-            <h2>Tu pedido {% include 'tienda/includes/icon.html' with icon='heart' %}</h2>
+        <div class="resumen purchase-panel">
+            <span class="purchase-kicker">Antes de confirmar</span><h2>Tu <em>pedido.</em></h2>
             {% for item in items %}
             <div class="resumen-item">
                 <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
@@ -88,3 +94,4 @@
 <script src="{% static 'js/checkout.js' %}" data-total="{{ total_con_descuento }}"></script>
 
 {% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}
