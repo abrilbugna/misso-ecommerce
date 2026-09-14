@@ -61,15 +61,17 @@ def comenzar_suscripcion(request):
     if request.method == 'POST' and form.is_valid():
         respuestas = form.cleaned_data
         talle = dict(form.fields['talle'].choices)[respuestas['talle']]
-        tipo = dict(form.fields['tipo_prenda'].choices)[respuestas['tipo_prenda']]
-        estilo = dict(form.fields['estilo'].choices)[respuestas['estilo']]
+        tipo = dict(form.fields['tipo_prenda'].choices).get(respuestas.get('tipo_prenda'), 'A elección de Misso')
+        estilo = dict(form.fields['estilo'].choices).get(respuestas.get('estilo'), 'A elección de Misso')
         mensaje = '\n'.join([
             'Hola Misso, quiero empezar mi suscripción mensual. Estas son mis preferencias:',
+            f"Es para: {'mí' if respuestas['destino'] == 'mismo' else 'un regalo'}",
             f'Talle: {talle}',
             f'Tipo de prenda: {tipo}',
             f'Colores que prefiero: {respuestas["color_preferido"] or "Sin preferencia"}',
             f'Colores que prefiero evitar: {respuestas["color_evitar"] or "Ninguno"}',
             f'Estilo: {estilo}',
+            f'Carta para regalo: {respuestas["carta"] or "No, gracias"}',
             f'Otros detalles: {respuestas["comentarios"] or "Ninguno"}',
             'Quiero coordinar el pago y el envío.',
         ])

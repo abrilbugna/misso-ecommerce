@@ -13,6 +13,7 @@
 .subscription-help-link:focus-visible{outline:2px solid var(--rose-dark);outline-offset:3px}
 
 .subscription-preferences-form{padding:clamp(28px,4vw,58px);border:1px solid rgba(74,13,34,.12);border-radius:34px;background:var(--off-white);box-shadow:0 24px 70px rgba(74,13,34,.06)}
+.subscription-dependent[hidden]{display:none}
 .subscription-form-header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:20px;border-bottom:1px solid rgba(74,13,34,.22)}
 .subscription-form-header>span{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
 .subscription-form-header>p{font-size:12px;color:#795460}

@@ -3,6 +3,10 @@ from .models import OpcionEnvio, TALLES
 
 
 class PreferenciasSuscripcionForm(forms.Form):
+    DESTINOS = [
+        ('mismo', 'Para mí'),
+        ('regalo', 'Para otra persona, como regalo'),
+    ]
     TALLES_SUSCRIPCION = [*TALLES, ('ayuda', 'Necesito ayuda con el talle')]
     TIPOS = [
         ('conjuntos', 'Solo conjuntos armados'),
@@ -15,8 +19,9 @@ class PreferenciasSuscripcionForm(forms.Form):
         ('indistinto', 'Me da igual'),
     ]
 
-    talle = forms.ChoiceField(choices=TALLES_SUSCRIPCION, widget=forms.RadioSelect)
-    tipo_prenda = forms.ChoiceField(choices=TIPOS, widget=forms.RadioSelect)
+    destino = forms.ChoiceField(choices=DESTINOS, widget=forms.RadioSelect)
+    talle = forms.ChoiceField(choices=TALLES_SUSCRIPCION, required=False, widget=forms.RadioSelect)
+    tipo_prenda = forms.ChoiceField(choices=TIPOS, required=False, widget=forms.RadioSelect)
     color_preferido = forms.CharField(
         required=False,
         max_length=120,
@@ -27,12 +32,23 @@ class PreferenciasSuscripcionForm(forms.Form):
         max_length=120,
         widget=forms.TextInput(attrs={'placeholder': 'Por ejemplo: verde o amarillo'}),
     )
-    estilo = forms.ChoiceField(choices=ESTILOS, widget=forms.RadioSelect)
+    estilo = forms.ChoiceField(choices=ESTILOS, required=False, widget=forms.RadioSelect)
+    carta = forms.CharField(required=False, max_length=400, widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Escribí un mensaje para incluir en la carta'}))
     comentarios = forms.CharField(
         required=False,
         max_length=400,
         widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Contanos cualquier otro detalle que te gustaría que tengamos en cuenta'}),
     )
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('destino') == 'mismo':
+            for field in ('talle', 'tipo_prenda', 'estilo'):
+                if not cleaned.get(field):
+                    self.add_error(field, 'Elegí una opción para continuar.')
+        elif cleaned.get('destino') == 'regalo' and not cleaned.get('talle'):
+            self.add_error('talle', 'Elegí un talle para el regalo.')
+        return cleaned
 
 class CheckoutForm(forms.Form):
     nombre = forms.CharField(max_length=200, label='Nombre completo')
