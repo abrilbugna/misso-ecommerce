@@ -51,6 +51,20 @@ body:has(.home-page)>nav{display:none}
 /* La foto principal se muestra sin marco ni máscara. */
 .home-page .hero-product-ring{display:none}
 .home-page .hero-product-link{border:0;border-radius:0;box-shadow:none;mask-image:none;-webkit-mask-image:none;background:transparent}
+/* Toda la suscripción usa la variante itálica de Coolvetica. */
+.home-page .campaign-hero *{font-family:'Coolvetica Rg',sans-serif}
+/* Sobrescribe las tipografías decorativas del bloque de suscripción. */
+.home-page .hero-message,
+.home-page .hero-message *,
+.home-page .hero-badge,
+.home-page .hero-badge *{font-family:'Coolvetica Rg',sans-serif!important}
+.home-page .hero-message h2 em{font-family:'Cormorant Garamond',serif!important}
+/* La burbuja rosa queda sin wordmark central. */
+.home-page .hero-nav-pills{display:none!important}
+@media(min-width:768px){
+  .home-page .hero-message{left:56%;right:2%;max-width:600px}
+  .home-page .hero-copy-line{overflow:visible}
+}
 /* Two independent bubbles swap places without changing the link's footprint. */
 .home-page .misso-pill-button{position:relative;display:inline-block;flex:none;overflow:visible;isolation:isolate;background:transparent;transform-origin:center;vertical-align:middle}
 .home-page .hero-shop.misso-pill-button{width:148px;height:44px;padding:0;background:transparent}
@@ -153,6 +167,25 @@ body:has(.home-page)>nav{display:none}
   .home-page .home-outro>.pill-link{margin-top:28px;z-index:4}
 }
 @media(max-width:390px){.home-page .outro-products{margin-top:0}}
+
+/* En mobile no mostramos el wordmark superior para aprovechar ese espacio. */
+@media(max-width:767px){
+  .home-page .hero-brand-mask{display:none}
+  .home-page .hero-message{margin-top:24px}
+  .home-page .hero-message h2{font-size:clamp(58px,16vw,88px);overflow:visible}
+  .home-page .hero-message h2 span{white-space:normal}
+}
+
+/* Acortamos el espacio sobre el texto desplazable de la sección siguiente. */
+@media(min-width:768px){
+  .home-page .brand-intro{padding-bottom:60px}
+  .home-page .intro-copy>p:not(.eyebrow){margin-top:48px}
+}
+@media(max-width:767px){
+  .home-page .brand-intro{padding-top:25px;padding-bottom:35px}
+  .home-page .intro-marquee{margin-top:30px}
+  .home-page .intro-copy>p:not(.eyebrow){margin-top:38px}
+}
 
 /* Home-only brand reveal. Without JS, the regular hero remains untouched. */
 .home-page .hero-intro-mark{display:none}

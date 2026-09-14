@@ -63,6 +63,8 @@ footer .footer-logo { font-family: 'Romantic', serif; font-size: 36px; color: va
 .footer-info { display: flex; justify-content: center; gap: 24px; margin-bottom: 8px; font-size: 10px; letter-spacing: 2px; flex-wrap: wrap; }
 .footer-info a { color: var(--rosa); text-decoration: none; transition: color 0.2s; }
 .footer-info a:hover { color: var(--rosa-deep); }
+.subscription-cancel { display: inline-flex; align-items: center; justify-content: center; margin-top: 12px; padding: 9px 16px; border: 1px solid var(--rosa); border-radius: 999px; color: var(--rosa); background: transparent; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; transition: color .2s, background .2s; }
+.subscription-cancel:hover { color: white; background: var(--rosa); }
 .footer-copy { font-size: 9px; letter-spacing: 2px; color: var(--gris); }
 
 .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--texto); }
