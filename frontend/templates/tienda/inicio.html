@@ -88,13 +88,13 @@
   {% if categorias %}
   <section class="benefits-scroll" id="lineas" aria-labelledby="benefits-title">
     <div class="benefits-sticky">
-      <div class="benefits-heading"><span class="eyebrow">Elegí tu forma de sentir</span><h2 id="benefits-title">Un mundo<br><em>para vos.</em></h2></div>
+      <div class="benefits-heading"><span class="eyebrow">Muchas variedades</span><h2 id="benefits-title">Descubrí<br><em>nuestras lineas.</em></h2></div>
       <svg class="benefits-doodle" viewBox="0 0 1000 700" fill="none" aria-hidden="true"><path d="M-60 495 C190 80 275 830 535 400 S780 100 1070 390" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
       <div class="benefits-counter" aria-hidden="true"><span data-card-count>01</span> / {{ categorias|length|stringformat:'02d' }}</div>
       <div class="benefits-cards">
         {% for cat in categorias %}
         <a class="benefit-card benefit-card-{{ forloop.counter0|add:'1' }}" href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" data-card-index="{{ forloop.counter0 }}">
-          <span class="card-top"><span>Misso / {{ forloop.counter|stringformat:'02d' }}</span><span class="card-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='burst' %}</span></span>
+          <span class="card-top"><span>:) / {{ forloop.counter|stringformat:'02d' }}</span><span class="card-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='burst' %}</span></span>
           <div class="card-image"><img src="{{ cat.imagen }}" alt="" loading="lazy"></div>
           <span class="card-bottom"><strong>{{ cat.nombre }}</strong><span class="card-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span>
           <span class="card-discover">Explorar línea</span>
