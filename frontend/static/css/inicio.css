@@ -261,3 +261,24 @@ html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);
 .home-page .intro-carousel-controls{right:10%;bottom:-9px;left:10%}
 @media(max-width:767px){.home-page .intro-carousel{width:min(100%,420px);height:auto;aspect-ratio:.82;max-height:none}.home-page .intro-carousel .intro-carousel-slide{width:68%;border-radius:25px}.home-page .intro-carousel-controls{right:7%;bottom:-12px;left:7%}}
 @media(prefers-reduced-motion:reduce){.home-page .intro-carousel .intro-carousel-slide{transition:none}}
+
+/* Anti-clipping repair: reveal masks have ink-safe room and never constrain the final motion. */
+.home-page .hero-copy-line{overflow:hidden;padding-block:.16em .22em;padding-inline:.1em;margin-block:-.16em -.22em;margin-inline:-.1em}
+.home-page .hero-intro-window{font-size:clamp(6rem,22vw,23rem);line-height:.88;padding-block:.14em .2em;padding-inline:.1em}
+.home-page .hero-intro-word{font-size:1em}
+.home-page .hero-product-link{overflow:visible;mask-image:none;-webkit-mask-image:none}
+.home-page .campaign-hero{overflow-x:clip;overflow-y:visible}
+@media(max-width:767px){.home-page .hero-intro-window{font-size:18vw}.home-page .campaign-hero{overflow-x:clip;overflow-y:visible}}
+
+/* Keep the serif accent on the same baseline as “cada” at every viewport. */
+.home-page .hero-message h2 .hero-copy-line-inline {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .15em;
+  white-space: nowrap;
+}
+.home-page .hero-message h2 .hero-copy-line-inline > span {
+  display: block;
+  flex: 0 0 auto;
+}

@@ -164,6 +164,7 @@
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-running');
       gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-handwritten, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
+      gsap.set('.hero-intro-window, .hero-copy-line', { overflow: 'visible' });
       if (arrowPath) gsap.set(arrowPath, { clearProps: 'strokeDasharray,strokeDashoffset' });
       scrollArrowMotion?.play();
       initProductMotion(mobile);
@@ -173,6 +174,7 @@
     const intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish });
     intro
       .to(word, { yPercent: 0, autoAlpha: 1, duration: .76, ease: 'power4.out' }, 0)
+      .set('.hero-intro-window', { overflow: 'visible' }, .94)
       .to(word, { x: travelX, y: travelY, scale: finalScale, duration: .43, ease: 'power3.inOut' }, .94)
       .to(overlay, { autoAlpha: 0, duration: .12 }, 1.30)
       .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 1.16)
@@ -181,9 +183,10 @@
       .to('.hero-nav-actions a', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 1.27)
       .to('.hero-message-kicker', { autoAlpha: 1, y: 0, duration: .29 }, 1.38)
       .to(headlineLines, { autoAlpha: 1, yPercent: 0, stagger: .085, duration: .43, ease: 'power4.out' }, 1.48)
+      .set('.hero-copy-line', { overflow: 'visible' }, 2.1)
       .to('.hero-product-ring', { autoAlpha: 1, scale: 1, duration: .48 }, mobile ? 2.13 : 1.77)
       .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 2.17 : 1.82)
-      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut' }, mobile ? 2.17 : 1.82)
+      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut', onComplete: () => gsap.set(photo, { clearProps: 'clipPath', overflow: 'visible' }) }, mobile ? 2.17 : 1.82)
       .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 1.86 : 1.99)
       .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28 }, mobile ? 1.97 : 2.11)
       .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 2.07 : 2.20)
