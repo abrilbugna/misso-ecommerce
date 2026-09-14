@@ -72,12 +72,14 @@
     </main>
 
     <footer>
-        <span class="footer-logo">Misso</span>
-        <div class="footer-info">
-            <a href="https://instagram.com/misso.cba" target="_blank">{% include 'tienda/includes/icon.html' with icon='instagram' %} @misso.cba</a>
-            <a href="https://wa.me/543517727224" target="_blank">{% include 'tienda/includes/icon.html' with icon='phone' %} +54 351 772 7224</a>
+        <div class="footer-main">
+            <div class="footer-contact"><span>Contactanos</span><a href="mailto:missocba@gmail.com">missocba@gmail.com</a></div>
         </div>
-        <a class="subscription-cancel" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20dar%20de%20baja%20mi%20suscripci%C3%B3n" target="_blank" rel="noopener noreferrer">Dar de baja mi suscripción</a>
+        <div class="footer-actions">
+            <a href="#">Términos y condiciones</a>
+            <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20dar%20de%20baja%20mi%20suscripci%C3%B3n" target="_blank" rel="noopener noreferrer">Dar de baja suscripción</a>
+            <a href="#">Seguir pedido</a>
+        </div>
     </footer>
 
     <script src="{% static 'js/base.js' %}"></script>

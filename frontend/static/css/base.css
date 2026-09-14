@@ -58,13 +58,16 @@ nav a:hover { color: var(--rosa-deep); }
 .carrito-mobile svg { width: 22px; height: 22px; stroke: var(--texto); fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .cart-badge-mobile { position: absolute; top: -7px; right: -9px; font-size: 9px; font-family: 'Coolvetica Rg', sans-serif; font-weight: 400; color: var(--texto); min-width: 14px; text-align: center; letter-spacing: 0; }
 
-footer { text-align: center; padding: 20px 50px; background: var(--rosa-light); border-top: 1px solid var(--borde); font-size: 10px; letter-spacing: 2px; color: var(--gris); text-transform: uppercase; margin-top: 0; }
-footer .footer-logo { font-family: 'Romantic', serif; font-size: 36px; color: var(--rosa); letter-spacing: 4px; display: block; margin-bottom: 12px; text-transform: none; }
-.footer-info { display: flex; justify-content: center; gap: 24px; margin-bottom: 8px; font-size: 10px; letter-spacing: 2px; flex-wrap: wrap; }
-.footer-info a { color: var(--rosa); text-decoration: none; transition: color 0.2s; }
+footer { padding: 28px 50px 22px; background: var(--rosa-light); border-top: 1px solid var(--borde); font-size: 10px; letter-spacing: 2px; color: var(--gris); text-transform: uppercase; margin-top: 0; }
+.footer-main { display: flex; justify-content: center; align-items: center; }
+footer .footer-logo { font-family: 'Romantic', serif; font-size: 36px; color: var(--rosa); letter-spacing: 4px; display: block; text-align: left; text-transform: none; }
+.footer-contact { display: flex; flex-direction: column; gap: 6px; text-align: center; }
+.footer-contact a, .footer-info a { color: var(--rosa); text-decoration: none; transition: color 0.2s; }
+.footer-info { display: flex; justify-content: flex-end; gap: 18px; font-size: 10px; flex-wrap: wrap; }
 .footer-info a:hover { color: var(--rosa-deep); }
-.subscription-cancel { display: inline-flex; align-items: center; justify-content: center; margin-top: 12px; padding: 9px 16px; border: 1px solid var(--rosa); border-radius: 999px; color: var(--rosa); background: transparent; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; transition: color .2s, background .2s; }
-.subscription-cancel:hover { color: white; background: var(--rosa); }
+.footer-contact a:hover, .footer-actions a:hover { color: var(--rosa-deep); }
+.footer-actions { display: flex; justify-content: center; gap: 26px; margin-top: 24px; }
+.footer-actions a { color: var(--rosa); text-decoration: none; font-size: 9px; letter-spacing: 1.5px; }
 .footer-copy { font-size: 9px; letter-spacing: 2px; color: var(--gris); }
 
 .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--texto); }
@@ -79,9 +82,15 @@ footer .footer-logo { font-family: 'Romantic', serif; font-size: 36px; color: va
     .nav-mobile-right { display: flex; }
     .logo { font-size: 25px; letter-spacing: 2px; }
     nav { padding: 16px 20px; }
-    footer { padding: 6px 20px; font-size: 9px; }
+    footer { padding: 26px 16px 24px; font-size: 9px; }
     footer .footer-logo { font-size: 24px; margin-bottom: 6px; }
+    .footer-main { gap: 0; }
+    .footer-contact { gap: 8px; line-height: 1.3; }
+    .footer-contact span { font-size: 10px; letter-spacing: 2px; }
+    .footer-contact a { font-size: 11px; letter-spacing: 1px; }
+    footer .footer-logo, .footer-contact, .footer-info { text-align: center; justify-content: center; }
     .footer-info { gap: 12px; font-size: 9px; flex-direction: row; align-items: center; margin-bottom: 8px; }
+    .footer-actions { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 18px; margin-top: 24px; }
     .footer-copy { font-size: 8px; }
 }
 
