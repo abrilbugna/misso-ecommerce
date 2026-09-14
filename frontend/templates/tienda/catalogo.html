@@ -1,43 +1,12 @@
 {% extends 'tienda/base.html' %}
 {% load static %}
-
 {% block title %}Tienda — Misso{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">
-{% endblock %}
-
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/catalogo.css' %}">{% endblock %}
 {% block content %}
-
-<div class="catalogo-header">
-    <h1>TIENDA</h1>
-    <div class="filtros">
-        <a href="/tienda/" class="filtro-btn {% if not categoria_activa %}activo{% endif %}">Todos</a>
-        {% for valor, nombre in categorias %}
-        <a href="/tienda/?categoria={{ valor }}" class="filtro-btn {% if categoria_activa == valor %}activo{% endif %}">{{ nombre }}</a>
-        {% endfor %}
-    </div>
+<div class="catalog-page">
+<nav class="catalog-nav" aria-label="Navegación de tienda"><div class="catalog-nav-socials"><a href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer" aria-label="Instagram">{% include 'tienda/includes/icon.html' with icon='instagram' %}</a><a href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">{% include 'tienda/includes/icon.html' with icon='phone' %}</a></div><a class="catalog-nav-logo" href="{% url 'inicio' %}">Misso</a><div class="catalog-nav-actions"><a class="catalog-nav-cart" href="{% url 'ver_carrito' %}" aria-label="Ver carrito">{% include 'tienda/includes/icon.html' with icon='bag' %}<span>{{ cart_count|default:0 }}</span></a></div></nav>
+  <header class="catalog-heading"><h1>Productos</h1></header>
+  <div class="catalog-content"><aside class="catalog-sidebar"><button class="catalog-filter-toggle" type="button">Filtrar</button><div class="catalog-sort"><label for="catalog-sort-select">Ordenar por</label><select id="catalog-sort-select"><option value="relevantes">Más relevantes</option><option value="caros">Más caros</option><option value="baratos">Más baratos</option><option value="az">Nombre A–Z</option></select></div><div class="catalog-category-filter"><span>Categoría</span><nav class="catalog-filters"><a href="{% url 'catalogo' %}{% if busqueda %}?q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if not categoria_activa %}is-active{% endif %}">Todos</a>{% for valor, nombre in categorias %}<a href="{% url 'catalogo' %}?categoria={{ valor }}{% if busqueda %}&q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if categoria_activa == valor %}is-active{% endif %}">{{ nombre }}</a>{% endfor %}</nav></div><div class="catalog-count">{{ productos|length }} productos</div></aside><main class="catalog-grid" aria-label="Productos">{% for producto in productos %}<article class="catalog-product" data-catalog-card data-price="{{ producto.precio }}" data-relevance="{% if producto.destacado %}1{% else %}0{% endif %}" data-name="{{ producto.nombre|lower }}"><a class="catalog-product-link" href="{% url 'detalle' producto.pk %}"><div class="catalog-product-media">{% with url=producto.get_imagen_url %}{% if url %}<img src="{{ url }}" alt="{{ producto.nombre }}" loading="lazy">{% else %}<div class="catalog-no-image">Sin imagen</div>{% endif %}{% endwith %}<span class="catalog-product-index">{{ forloop.counter|stringformat:'02d' }}</span></div><div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio }}</span><span class="catalog-cta">Ver producto <b>↗</b></span></div></div></a></article>{% if forloop.counter == 4 %}<aside class="catalog-subscription" data-catalog-promo><span class="catalog-promo-kicker">La sorpresa mensual ✦</span><h2>¿No sabés<br>cuál elegir?</h2><p>Dejá que misso elija por vos. Un conjunto distinto cada mes, pensado según tus preferencias.</p><div class="catalog-promo-price">$25.000 <small>/ mes</small></div><a href="{% url 'inicio' %}#suscripcion" class="catalog-promo-link">Ver suscripción <span>↗</span></a><span class="catalog-promo-doodle">✳</span></aside>{% endif %}{% empty %}<p class="catalog-empty">No hay productos en esta categoría todavía.</p>{% endfor %}</main></div>
 </div>
-
-<div class="grid">
-    {% for producto in productos %}
-    <div class="producto">
-        <a href="/tienda/{{ producto.pk }}/">
-            <div class="producto-img">
-                {% with url=producto.get_imagen_url %}
-                {% if url %}<img src="{{ url }}">{% endif %}
-                {% endwith %}
-            </div>
-            <div class="producto-info">
-                <p class="producto-nombre">{{ producto.nombre }}</p>
-                <p class="producto-precio">${{ producto.precio }}</p>
-            </div>
-        </a>
-    </div>
-    {% endfor %}
-    {% if not productos %}
-    <p class="vacio">No hay productos en esta categoría todavía.</p>
-    {% endif %}
-</div>
-
 {% endblock %}
+{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}" defer></script>{% endblock %}
