@@ -3,22 +3,23 @@
 {% load static %}
 {% block title %}Misso — Tienda{% endblock %}
 {% block extra_css %}
+<link rel="preload" href="{% static 'fonts/Coolvetica Rg It.otf' %}" as="font" type="font/otf" crossorigin>
 <script>
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('misso-intro-pending');
     window.missoIntroFallback = window.setTimeout(() => {
       if (!document.documentElement.classList.contains('misso-intro-pending') && !document.documentElement.classList.contains('misso-intro-running')) return;
-      document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running');
+      document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
       document.querySelectorAll('.campaign-hero [style]').forEach((element) => {
         ['opacity', 'visibility', 'transform', 'clip-path', 'stroke-dasharray', 'stroke-dashoffset'].forEach((property) => element.style.removeProperty(property));
       });
-    }, 4000);
+    }, 6500);
     document.addEventListener('DOMContentLoaded', () => {
-      if (!document.documentElement.classList.contains('misso-intro-running')) document.documentElement.classList.remove('misso-intro-pending');
+      if (!document.documentElement.classList.contains('misso-intro-running') && !document.documentElement.classList.contains('misso-intro-waiting')) document.documentElement.classList.remove('misso-intro-pending');
     }, { once: true });
   }
 </script>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=intro-font-20260914">
 {% endblock %}
 {% block content %}
 <div class="home-page">
@@ -128,5 +129,5 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}" defer></script>
-<script src="{% static 'js/inicio.js' %}" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=intro-font-20260914" defer></script>
 {% endblock %}

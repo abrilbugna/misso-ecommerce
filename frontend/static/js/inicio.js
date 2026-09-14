@@ -120,13 +120,14 @@
     const html = document.documentElement;
     const overlay = document.querySelector('.hero-intro-mark');
     const word = overlay?.querySelector('.hero-intro-word');
-    const target = document.querySelector(mobile ? '.hero-wordmark' : '.hero-nav-wordmark-text');
+    // The large mobile wordmark is hidden in the mobile layout, so it cannot be a travel target.
+    const target = mobile ? null : document.querySelector('.hero-nav-wordmark-text');
     const headlineLines = gsap.utils.toArray('.hero-copy-line > span');
     const badges = gsap.utils.toArray('.hero-badge');
     const handwritten = document.querySelector('.hero-handwritten');
     const arrowPath = handwritten?.querySelector('path');
     const photo = document.querySelector('.hero-product-link');
-    if (!overlay || !word || !target || !photo || !product) {
+    if (!overlay || !word || (!mobile && !target) || !photo || !product) {
       html.classList.remove('misso-intro-pending');
       return;
     }
@@ -134,10 +135,10 @@
     html.classList.add('misso-intro-running');
     gsap.set(word, { yPercent: 0, autoAlpha: 0, x: 0, y: 0, scale: 1 });
     const start = word.getBoundingClientRect();
-    const end = target.getBoundingClientRect();
-    const travelX = end.left + end.width / 2 - start.left - start.width / 2;
-    const travelY = end.top + end.height / 2 - start.top - start.height / 2;
-    const finalScale = Math.min(1, end.width / start.width);
+    const end = target?.getBoundingClientRect();
+    const travelX = mobile ? 0 : end.left + end.width / 2 - start.left - start.width / 2;
+    const travelY = mobile ? -Math.min(48, start.height * .18) : end.top + end.height / 2 - start.top - start.height / 2;
+    const finalScale = mobile ? .92 : Math.min(1, end.width / start.width);
 
     gsap.set(word, { yPercent: 110, autoAlpha: 0 });
     gsap.set('.hero-nav', { autoAlpha: 0 });
@@ -443,15 +444,36 @@
     viewport.addEventListener('focusout', () => motion?.resume());
   }
 
-  mm.add('(min-width: 768px)', () => {
-    if (introStarted) { initProductMotion(false); return; }
-    introStarted = true;
-    return initHeroAnimation(false);
-  });
-  mm.add('(max-width: 767px)', () => {
-    if (introStarted) { initProductMotion(true); return; }
-    introStarted = true;
-    return initHeroAnimation(true);
+  // Font metrics affect both the entrance mask and the measured travel to the logo.
+  // If the font is unavailable on a slow connection, show the hero without an unstable intro.
+  document.documentElement.classList.add('misso-intro-waiting');
+  const introFontReady = document.fonts?.load
+    ? Promise.race([
+      document.fonts.load('400 100px "Coolvetica Rg"', 'misso').then(faces => faces.length > 0).catch(() => false),
+      new Promise(resolve => window.setTimeout(() => resolve(false), 1800)),
+    ])
+    : Promise.resolve(true);
+  introFontReady.then(ready => {
+    document.documentElement.classList.remove('misso-intro-waiting');
+    if (!ready || !document.documentElement.classList.contains('misso-intro-pending')) {
+      introStarted = true;
+      introComplete = true;
+      window.clearTimeout(window.missoIntroFallback);
+      document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running');
+      scrollArrowMotion?.play();
+      initProductMotion(window.innerWidth < 768);
+      return;
+    }
+    mm.add('(min-width: 768px)', () => {
+      if (introStarted) { initProductMotion(false); return; }
+      introStarted = true;
+      return initHeroAnimation(false);
+    });
+    mm.add('(max-width: 767px)', () => {
+      if (introStarted) { initProductMotion(true); return; }
+      introStarted = true;
+      return initHeroAnimation(true);
+    });
   });
   initHeroArrows();
   initNavWordmark();
