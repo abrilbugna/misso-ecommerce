@@ -54,21 +54,40 @@
       <div class="hero-handwritten"><span>una sorpresa para vos,<br>todos los meses</span><svg viewBox="0 0 150 90" fill="none" aria-hidden="true"><path d="M6 7c31 4 30 36 66 34 30-2 36-21 67-7m0 0-21-3m21 3-13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     </div>
     <div class="hero-message" id="como-funciona">
-      <span class="hero-message-kicker">La suscripción mensual de Misso ✦</span>
+      <span class="hero-message-kicker">La suscripción mensual de Misso {% include 'tienda/includes/icon.html' with icon='sparkle' %}</span>
       <h2><span class="hero-copy-line"><span>Tu Misso</span></span><span class="hero-copy-line"><span>cada</span></span><span class="hero-copy-line"><span><em>mes.</em></span></span></h2>
       <p>Un conjunto distinto cada mes, elegido según tus preferencias y enviado a tu casa cada día 15. La elección final es sorpresa.</p>
       <div class="hero-price"><strong>$25.000</strong><span>/ mes</span></div>
       <a class="hero-subscribe misso-pill-button misso-pill-right" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20por%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer" aria-label="Consultar por la suscripción mensual de Misso en WhatsApp"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
     </div>
-    <div class="hero-bottomline"><span>Misso / Córdoba</span><a href="#universo">Deslizá para descubrir <span class="scroll-arrow" aria-hidden="true">↓</span></a></div>
+    <div class="hero-bottomline"><span>Misso / Córdoba</span><a href="#universo">Deslizá para descubrir <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
   </section>
 
   <section class="brand-intro" id="universo" aria-labelledby="intro-title">
-    <div class="intro-kicker"><span>El universo Misso</span><span>✳ 01 / 03</span></div>
+    <div class="intro-kicker"><span>El universo Misso</span><span>{% include 'tienda/includes/icon.html' with icon='burst' %} 01 / 03</span></div>
     <div class="intro-marquee" aria-hidden="true"><span>MISSO · MISSO · MISSO · </span></div>
     <div class="intro-grid">
-      <div class="intro-copy"><p class="eyebrow">Una invitación a ser vos</p><h2 id="intro-title">Cada día,<br><em>más vos.</em></h2><p>Explorá las líneas de Misso y encontrá las piezas que acompañan tu manera de sentirte.</p><a class="pill-link" href="{% url 'catalogo' %}">Explorar la tienda <span aria-hidden="true">↗</span></a></div>
-      <div class="intro-image-wrap">{% for cat in categorias %}{% if forloop.last %}<img src="{{ cat.imagen }}" alt="Línea {{ cat.nombre }} de Misso" loading="lazy">{% endif %}{% empty %}<img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1782074350/copy_of_hero_sin_texto_tgmmko.png" alt="Campaña Misso" loading="lazy">{% endfor %}<span class="intro-image-tag">Misso / colección</span></div>
+      <div class="intro-copy"><p class="eyebrow">Una invitación a ser vos</p><h2 id="intro-title">Cada día,<br><em>más vos.</em></h2><p>Explorá las líneas de Misso y encontrá las piezas que acompañan tu manera de sentirte.</p><a class="pill-link" href="{% url 'catalogo' %}">Explorar la tienda <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a></div>
+      <div class="intro-image-wrap intro-carousel" role="region" aria-roledescription="carrusel" aria-label="Videos de Misso">
+        <div class="intro-carousel-slide is-active" data-intro-slide data-stack-position="front" aria-label="Notificación 1 de 3">
+          <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1789349219/WhatsApp_Video_2026-09-13_at_22.24.00_i9ex6g.jpg" alt="" loading="lazy">
+          <video class="intro-video" muted loop playsinline preload="metadata" aria-hidden="true"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/v1789349219/WhatsApp_Video_2026-09-13_at_22.24.00_i9ex6g.mp4" type="video/mp4"></video>
+          <div class="intro-notification"><span class="intro-notification-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9M8 5.5l9 4.5"/></svg></span><span class="intro-notification-copy"><strong>CORREO ARGENTINO</strong><small>Llegó tu paquete</small></span><span class="intro-notification-time">ahora</span></div>
+        </div>
+        <div class="intro-carousel-slide" data-intro-slide data-stack-position="next" aria-label="Notificación 2 de 3" aria-hidden="true">
+          <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1785898081/fdxofmwmp9lxtygthcvs.jpg" alt="" loading="lazy">
+          <video class="intro-video" muted loop playsinline preload="none" aria-hidden="true"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/f_mp4,vc_h264,q_auto/v1785898081/fdxofmwmp9lxtygthcvs.mp4" type="video/mp4"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/v1785898081/fdxofmwmp9lxtygthcvs.mov" type="video/quicktime"></video>
+        </div>
+        <div class="intro-carousel-slide" data-intro-slide data-stack-position="last" aria-label="Notificación 3 de 3" aria-hidden="true">
+          <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1789350394/WhatsApp_Video_2026-09-13_at_22.45.51_qsmalu.jpg" alt="" loading="lazy">
+          <video class="intro-video" muted loop playsinline preload="none" aria-hidden="true"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/v1789350394/WhatsApp_Video_2026-09-13_at_22.45.51_qsmalu.mp4" type="video/mp4"></video>
+        </div>
+        <div class="intro-carousel-controls" aria-label="Controles de videos">
+          <button class="intro-carousel-arrow" type="button" data-intro-prev aria-label="Video anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg></button>
+          <div class="intro-carousel-dots" aria-label="Elegir video"><button class="is-active" type="button" data-intro-dot="0" aria-label="Ver video 1" aria-current="true"></button><button type="button" data-intro-dot="1" aria-label="Ver video 2"></button><button type="button" data-intro-dot="2" aria-label="Ver video 3"></button></div>
+          <button class="intro-carousel-arrow" type="button" data-intro-next aria-label="Video siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5 7 7-7 7"/></svg></button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -81,9 +100,9 @@
       <div class="benefits-cards">
         {% for cat in categorias %}
         <a class="benefit-card benefit-card-{{ forloop.counter0|add:'1' }}" href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" data-card-index="{{ forloop.counter0 }}">
-          <span class="card-top"><span>Misso / {{ forloop.counter|stringformat:'02d' }}</span><span class="card-star" aria-hidden="true">✳</span></span>
+          <span class="card-top"><span>Misso / {{ forloop.counter|stringformat:'02d' }}</span><span class="card-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='burst' %}</span></span>
           <div class="card-image"><img src="{{ cat.imagen }}" alt="" loading="lazy"></div>
-          <span class="card-bottom"><strong>{{ cat.nombre }}</strong><span class="card-arrow" aria-hidden="true">↗</span></span>
+          <span class="card-bottom"><strong>{{ cat.nombre }}</strong><span class="card-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span>
           <span class="card-discover">Explorar línea</span>
         </a>
         {% endfor %}
@@ -96,18 +115,16 @@
   <section class="home-outro" aria-labelledby="outro-title">
     <span class="eyebrow">Tu próximo favorito te espera</span>
     <h2 id="outro-title">Encontrá<br><em>el tuyo.</em></h2>
-    <div class="outro-products" aria-label="Explorá las líneas de Misso">
+    {% if productos_inicio %}<div class="outro-products" aria-label="Explorá los productos de Misso">
       <div class="outro-products-track">
         <div class="outro-products-group">
-          {% for cat in categorias %}
-          <a class="outro-product" href="{% url 'catalogo' %}?categoria={{ cat.slug|urlencode }}" aria-label="Explorar {{ cat.nombre }}"><img src="{{ cat.imagen }}" alt="{{ cat.nombre }}" loading="lazy"><span>{{ cat.nombre }} <span aria-hidden="true">↗</span></span></a>
-          {% empty %}
-          <a class="outro-product" href="{% url 'catalogo' %}" aria-label="Explorar la tienda Misso"><img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1782074350/copy_of_hero_sin_texto_tgmmko.png" alt="Campaña Misso" loading="lazy"><span>Misso <span aria-hidden="true">↗</span></span></a>
+          {% for producto in productos_inicio %}
+          <a class="outro-product" href="{% url 'detalle' producto.id %}" aria-label="Ver {{ producto.nombre }}"><img src="{{ producto.imagen }}" alt="{{ producto.nombre }}" loading="lazy"></a>
           {% endfor %}
         </div>
       </div>
-    </div>
-    <a class="pill-link pill-link-light" href="{% url 'catalogo' %}">Ver todos los productos <span aria-hidden="true">↗</span></a>
+    </div>{% endif %}
+    <a class="pill-link pill-link-light" href="{% url 'catalogo' %}">Ver todos los productos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
     <img src="{% static 'images/conejos.svg' %}" alt="" class="outro-mark">
   </section>
 </div>

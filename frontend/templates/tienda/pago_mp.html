@@ -24,10 +24,10 @@
 
     <p>Cuando toques el botón vas a ser redirigido/a a MercadoPago para terminar el pago de forma segura.</p>
 
-    <a href="{{ mp_url }}" class="btn-mp">Pagar ahora →</a>
+    <a href="{{ mp_url }}" class="btn-mp">Pagar ahora {% include 'tienda/includes/icon.html' with icon='arrow-right' %}</a>
 
     <div class="aviso">
-        🔒 Pago seguro procesado por MercadoPago
+        {% include 'tienda/includes/icon.html' with icon='lock' %} Pago seguro procesado por MercadoPago
     </div>
 </div>
 {% endblock %}

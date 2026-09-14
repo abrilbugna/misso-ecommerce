@@ -1,5 +1,99 @@
 (() => {
   const root = document.querySelector('.home-page');
+  function initIntroCarousel() {
+    const carousel = root?.querySelector('.intro-carousel');
+    if (!carousel) return;
+    const slides = Array.from(carousel.querySelectorAll('[data-intro-slide]'));
+    const dots = Array.from(carousel.querySelectorAll('[data-intro-dot]'));
+    const videos = slides.map(slide => slide.querySelector('video'));
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let active = 0;
+    let visible = !('IntersectionObserver' in window);
+    let focused = false;
+    let autoTimer;
+    let touchStart;
+    let swiped = false;
+
+    videos.forEach(video => {
+      if (!video) return;
+      const ready = () => video.classList.add('is-ready');
+      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) ready();
+      else video.addEventListener('loadeddata', ready);
+      video.addEventListener('error', () => video.classList.remove('is-ready'));
+      video.pause();
+    });
+
+    const playActive = () => {
+      videos.forEach((video, index) => {
+        if (!video) return;
+        if (index === active && visible && !reduced && !document.hidden) video.play().catch(() => {});
+        else video.pause();
+      });
+    };
+    const schedule = () => {
+      window.clearTimeout(autoTimer);
+      if (visible && !reduced && !focused && !document.hidden) {
+        autoTimer = window.setTimeout(() => show((active + 1) % slides.length), 6200);
+      }
+    };
+    const show = next => {
+      if (next === active || !slides[next]) return;
+      active = next;
+      slides.forEach((slide, index) => {
+        const depth = (index - active + slides.length) % slides.length;
+        slide.dataset.stackPosition = ['front', 'next', 'last'][depth];
+        slide.classList.toggle('is-active', depth === 0);
+        if (depth === 0) slide.removeAttribute('aria-hidden');
+        else slide.setAttribute('aria-hidden', 'true');
+      });
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('is-active', index === active);
+        if (index === active) dot.setAttribute('aria-current', 'true');
+        else dot.removeAttribute('aria-current');
+      });
+      videos.forEach((video, index) => { if (index !== active) video?.pause(); });
+      if (videos[active]?.readyState >= HTMLMediaElement.HAVE_METADATA) videos[active].currentTime = 0;
+      playActive();
+      schedule();
+    };
+
+    carousel.querySelector('[data-intro-prev]')?.addEventListener('click', () => show((active + slides.length - 1) % slides.length));
+    carousel.querySelector('[data-intro-next]')?.addEventListener('click', () => show((active + 1) % slides.length));
+    dots.forEach((dot, index) => dot.addEventListener('click', () => show(index)));
+    slides.forEach((slide, index) => slide.addEventListener('click', () => {
+      if (swiped) { swiped = false; return; }
+      if (index !== active) show(index);
+    }));
+    carousel.addEventListener('focusin', event => {
+      if (event.target.matches(':focus-visible')) { focused = true; schedule(); }
+    });
+    carousel.addEventListener('focusout', event => {
+      if (!carousel.contains(event.relatedTarget)) { focused = false; schedule(); }
+    });
+    carousel.addEventListener('pointerdown', event => { touchStart = { x: event.clientX, y: event.clientY }; });
+    carousel.addEventListener('pointerup', event => {
+      if (!touchStart) return;
+      if (event.target.closest('button')) { touchStart = null; return; }
+      const dx = event.clientX - touchStart.x;
+      const dy = event.clientY - touchStart.y;
+      touchStart = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) {
+        swiped = true;
+        show((active + (dx < 0 ? 1 : slides.length - 1)) % slides.length);
+        window.setTimeout(() => { swiped = false; }, 250);
+      }
+    });
+    carousel.addEventListener('pointercancel', () => { touchStart = null; });
+    document.addEventListener('visibilitychange', () => { playActive(); schedule(); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        visible = entries[0].isIntersecting;
+        playActive();
+        schedule();
+      }, { threshold: .2 }).observe(carousel);
+    } else { playActive(); schedule(); }
+  }
+  initIntroCarousel();
   if (!root || !window.gsap || !window.ScrollTrigger) {
     document.documentElement.classList.remove('misso-intro-pending');
     return;
@@ -239,7 +333,8 @@
     gsap.to('.intro-marquee span', { xPercent: -32, ease: 'none', scrollTrigger: { trigger: '.brand-intro', start: 'top bottom', end: 'bottom top', scrub: true } });
     gsap.from('.intro-copy > *', { y: 55, opacity: 0, stagger: .11, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: '.intro-copy', start: 'top 78%' } });
     gsap.from('.intro-image-wrap', { y: 80, rotation: 4, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: '.intro-grid', start: 'top 78%' } });
-    gsap.to('.intro-image-wrap img', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.intro-grid', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.from('.intro-notification', { y: -18, scale: .96, opacity: 0, duration: .5, delay: .45, ease: 'back.out(1.3)', scrollTrigger: { trigger: '.intro-grid', start: 'top 78%' } });
+    gsap.to('.intro-image-wrap video, .intro-image-wrap img', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.intro-grid', start: 'top bottom', end: 'bottom top', scrub: true } });
   }
 
   function initBenefitsScroll(config) {

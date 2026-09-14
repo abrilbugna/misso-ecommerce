@@ -16,7 +16,7 @@
             <a href="/">Inicio</a>
             <a href="/tienda">Tienda</a>
         </div>
-        <button class="hamburger" onclick="toggleMenu()">☰</button>
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Abrir menú">{% include 'tienda/includes/icon.html' with icon='menu' %}</button>
         <a href="/" class="logo" id="nav-logo">Misso</a>
 
         <!-- Desktop: lupa + carrito -->
@@ -61,7 +61,7 @@
     </nav>
 
     <div class="mobile-menu" id="mobileMenu">
-        <button class="cerrar-menu" onclick="toggleMenu()">✕</button>
+        <button class="cerrar-menu" onclick="toggleMenu()" aria-label="Cerrar menú">{% include 'tienda/includes/icon.html' with icon='close' %}</button>
         <a href="/">Inicio</a>
         <a href="/tienda">Tienda</a>
         <a href="/tienda/carrito/">Carrito</a>
@@ -74,8 +74,8 @@
     <footer>
         <span class="footer-logo">Misso</span>
         <div class="footer-info">
-            <a href="https://instagram.com/misso.cba" target="_blank">➤ @misso.cba</a>
-            <a href="https://wa.me/543517727224" target="_blank">✆ +54 351 772 7224</a>
+            <a href="https://instagram.com/misso.cba" target="_blank">{% include 'tienda/includes/icon.html' with icon='instagram' %} @misso.cba</a>
+            <a href="https://wa.me/543517727224" target="_blank">{% include 'tienda/includes/icon.html' with icon='phone' %} +54 351 772 7224</a>
         </div>
     </footer>
 

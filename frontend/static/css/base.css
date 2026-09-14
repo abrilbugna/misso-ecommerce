@@ -95,3 +95,4 @@ body:has(.home-page) nav .carrito-mobile svg { stroke: var(--cream); }
 body:has(.home-page) nav a:hover { color: var(--rose-light); }
 body:has(.home-page) nav .cart-badge,
 body:has(.home-page) nav .cart-badge-mobile { color: var(--cream); }
+.misso-icon{display:inline-block;width:1em;height:1em;vertical-align:-.14em;flex:none}

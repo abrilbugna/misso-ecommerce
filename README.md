@@ -65,7 +65,7 @@ python manage.py collectstatic --noinput
 **La carpeta del backend cambió.** En Render u otro servidor, mantener la raíz del repositorio como directorio de trabajo y actualizar el comando de inicio a:
 
 ```bash
-gunicorn --pythonpath backend misso.wsgi:application
+gunicorn --chdir backend misso.wsgi:application
 ```
 
 Para un servidor ASGI, agregar igualmente `backend/` al path de Python y usar `misso.asgi:application`. Las dependencias y `manage.py` siguen en la raíz. La base de datos local y la salida `staticfiles/` conservan su ubicación. En producción, configurar las variables en el proveedor, usar una clave secreta propia y `DEBUG=False`.

@@ -8,13 +8,13 @@
 
 {% block content %}
 <div class="confirmacion">
-    <div class="check">🏦</div>
+    <div class="check">{% include 'tienda/includes/icon.html' with icon='bank' %}</div>
     <h1>¡PEDIDO CONFIRMADO!</h1>
     <p>Gracias por tu compra <strong>{{ orden.nombre }}</strong>, recibimos tu pedido #{{ orden.pk }}.</p>
     <p class="total-transferencia">Total a transferir: ${{ orden.total }}</p>
 
     <div class="datos-transferencia">
-        <h2>✦ Datos para transferir</h2>
+        <h2>{% include 'tienda/includes/icon.html' with icon='sparkle' %} Datos para transferir</h2>
         <div class="dato">
             <span class="dato-label">Alias</span>
             <span class="dato-valor">missocba</span>
@@ -34,7 +34,7 @@
     </div>
 
     <div class="aviso">
-        📩 Una vez realizada la transferencia por favor envianos el comprobante a <a href="https://wa.me/543517727224" target="_blank"> nuestro whatsapp</a> o por <a href="https://instagram.com/misso.cba" target="_blank">instagram</a> con el número de pedido <strong>#{{ orden.pk }}</strong>
+        {% include 'tienda/includes/icon.html' with icon='mail' %} Una vez realizada la transferencia por favor envianos el comprobante a <a href="https://wa.me/543517727224" target="_blank"> nuestro whatsapp</a> o por <a href="https://instagram.com/misso.cba" target="_blank">instagram</a> con el número de pedido <strong>#{{ orden.pk }}</strong>
     </div>
     
     <a href="/tienda" class="btn">Seguir comprando</a>

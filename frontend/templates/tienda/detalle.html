@@ -10,9 +10,9 @@
 {% block content %}
 <div class="detalle-wrap">
 {% if request.GET.agregado %}
-<p class="msg-agregado">¡Producto agregado al carrito!    ˖⁺‧₊˚♡˚₊‧⁺˖</p>
+<p class="msg-agregado">¡Producto agregado al carrito! {% include 'tienda/includes/icon.html' with icon='heart' %}</p>
 {% endif %}
-<a href="/tienda" class="volver">← Volver</a>
+<a href="/tienda" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Volver</a>
 <div class="detalle">
   <div>
     <div class="imagen-container">
@@ -44,15 +44,15 @@
       <button class="cor-btn" data-id="{{ color.id }}" onclick="setColor({{ color.id }}, this)">{{ color.nombre }}</button>
       {% endfor %}
     </div>
-    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">⚠ Seleccioná un color antes de continuar.</p>
+    <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">{% include 'tienda/includes/icon.html' with icon='alert' %} Seleccioná un color antes de continuar.</p>
     <div class="talles" id="tallesContainer">
       <button class="talle-btn" disabled>85</button>
       <button class="talle-btn" disabled>90</button>
       <button class="talle-btn" disabled>95</button>
       <button class="talle-btn" disabled>100</button>
     </div>
-    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">⚠ Seleccioná un talle antes de continuar.</p>
-    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">⚠ Sin stock para este color y talle. Probá otra combinación.</p>
+    <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">{% include 'tienda/includes/icon.html' with icon='alert' %} Seleccioná un talle antes de continuar.</p>
+    <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">{% include 'tienda/includes/icon.html' with icon='alert' %} Sin stock para este color y talle. Probá otra combinación.</p>
     <p class="msg-poco-stock" id="msgPocoStock"></p>
     <div class="cantidad-wrap">
       <label>Cantidad</label>

@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="{% static 'css/confirmacion.css' %}">
 
 <div class="confirmacion">
-    <div class="check">✓</div>
+    <div class="check">{% include 'tienda/includes/icon.html' with icon='check' %}</div>
 
     <h1>PEDIDO CONFIRMADO</h1>
 
@@ -17,7 +17,7 @@
     <p class="numero">Número de orden: #{{ orden.pk }}</p>
 
     <div class="info-contacto">
-        En breve te vamos a contactar para coordinar tu envío al <strong>{{ orden.telefono }}</strong> 💌
+        En breve te vamos a contactar para coordinar tu envío al <strong>{{ orden.telefono }}</strong> {% include 'tienda/includes/icon.html' with icon='mail' %}
     </div>
 
     <a href="/tienda" class="btn">Seguir comprando</a>

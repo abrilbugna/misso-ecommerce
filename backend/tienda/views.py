@@ -10,6 +10,7 @@ import json
 
 def inicio(request):
     categorias_con_imagen = []
+    productos_inicio = []
 
     productos_por_categoria = (
         Producto.objects
@@ -20,21 +21,34 @@ def inicio(request):
 
     productos_dict = {}
     for p in productos_por_categoria:
+        imagen = next(iter(p.imagenes.all()), None)
+        if not imagen:
+            continue
+        imagen_url = imagen.imagen.url
+        productos_inicio.append({
+            'id': p.pk,
+            'nombre': p.nombre,
+            'imagen': imagen_url,
+            'destacado': p.destacado,
+            'creado': p.creado,
+        })
         if p.categoria not in productos_dict:
-            productos_dict[p.categoria] = p
+            productos_dict[p.categoria] = imagen_url
 
     for slug, nombre in CATEGORIAS:
-        producto = productos_dict.get(slug)
-        if producto:
-            imagen_url = producto.get_imagen_url()
-            if imagen_url:
-                categorias_con_imagen.append({
-                    'slug': slug,
-                    'nombre': nombre,
-                    'imagen': imagen_url,
-                })
+        imagen_url = productos_dict.get(slug)
+        if imagen_url:
+            categorias_con_imagen.append({
+                'slug': slug,
+                'nombre': nombre,
+                'imagen': imagen_url,
+            })
 
-    return render(request, 'tienda/inicio.html', {'categorias': categorias_con_imagen})
+    productos_inicio.sort(key=lambda p: (p['destacado'], p['creado']), reverse=True)
+    return render(request, 'tienda/inicio.html', {
+        'categorias': categorias_con_imagen,
+        'productos_inicio': productos_inicio[:12],
+    })
 
 
 def catalogo(request):

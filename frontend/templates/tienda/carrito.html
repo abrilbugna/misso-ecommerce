@@ -8,7 +8,7 @@
 
 {% block content %}
 <div class="carrito-wrap">
-    <a href="/tienda" class="volver">← Seguir comprando</a>
+    <a href="/tienda" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Seguir comprando</a>
     <h1>CARRITO</h1>
 
     {% if items %}
@@ -28,20 +28,20 @@
                     {% endif %}
                     <p class="item-precio">{{ item.cantidad }} x ${{ item.producto.precio }}</p>
                 </div>
-                <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar">✕</a>
+                <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar" aria-label="Eliminar {{ item.producto.nombre }}">{% include 'tienda/includes/icon.html' with icon='close' %}</a>
             </div>
             {% endfor %}
         </div>
 
         <div class="resumen">
-            <h2>Resumen ❣︎</h2>
+            <h2>Resumen {% include 'tienda/includes/icon.html' with icon='heart' %}</h2>
 
             <div class="codigo-wrap">
                 <span class="codigo-label">Ingresar código promocional</span>
                 {% if codigo_aplicado %}
                 <div class="codigo-aplicado">
-                    <span>✓ {{ codigo_aplicado }}</span>
-                    <a href="/tienda/carrito/eliminar-codigo/" class="codigo-quitar">✕</a>
+                    <span>{% include 'tienda/includes/icon.html' with icon='check' %} {{ codigo_aplicado }}</span>
+                    <a href="/tienda/carrito/eliminar-codigo/" class="codigo-quitar" aria-label="Quitar código promocional">{% include 'tienda/includes/icon.html' with icon='close' %}</a>
                 </div>
                 {% else %}
                 <div class="codigo-input-row">
@@ -66,13 +66,13 @@
                 <span>Total</span>
                 <span>${{ total_con_descuento }}</span>
             </div>
-            <a href="/tienda/checkout/" class="btn">Finalizar compra →</a>
+            <a href="/tienda/checkout/" class="btn">Finalizar compra {% include 'tienda/includes/icon.html' with icon='arrow-right' %}</a>
         </div>
     </div>
 
     {% else %}
     <div class="vacio">
-        <p>Tu carrito está vacío 🛍</p>
+        <p>Tu carrito está vacío {% include 'tienda/includes/icon.html' with icon='bag' %}</p>
         <a href="/tienda">Ver productos</a>
     </div>
     {% endif %}
