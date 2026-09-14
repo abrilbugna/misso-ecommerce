@@ -6,7 +6,7 @@ h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; 
 .form-section h2 { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--rosa-deep); margin-bottom: 24px; }
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; color: var(--gris); }
-.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--borde); background: white; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; border-radius: 8px; transition: border 0.2s; color: var(--texto); }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--borde); background: white; font-family: 'Coolvetica Rg', sans-serif; font-size: 14px; outline: none; border-radius: 8px; transition: border 0.2s; color: var(--texto); }
 .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--rosa-deep); }
 .metodo-pago-opciones { display: flex; flex-direction: column; gap: 12px; }
 .metodo-pago-opciones label { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1.5px solid var(--borde); border-radius: 8px; cursor: pointer; font-size: 13px; letter-spacing: 1px; text-transform: none; color: var(--texto); transition: all 0.2s; }
@@ -14,7 +14,7 @@ h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; 
 .recargo-mp { display: none; justify-content: space-between; font-size: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); color: #c0392b; }
 .recargo-mp.visible { display: flex; }
 .metodo-pago-opciones input[type="radio"] { width: auto; margin: 0; accent-color: var(--rosa-deep); }
-.btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
+.btn-confirmar { display: block; width: 100%; padding: 18px; background: var(--texto); color: white; border: none; font-family: 'Coolvetica Rg', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; border-radius: 8px; margin-top: 30px; transition: background 0.3s; }
 .btn-confirmar:hover { background: var(--rosa-deep); }
 .resumen { background: var(--rosa-light); border: 2px dashed var(--rosa); border-radius: 16px; padding: 20px 36px; position: sticky; top: 100px; }
 .resumen h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; margin-bottom: 24px; letter-spacing: 2px; }

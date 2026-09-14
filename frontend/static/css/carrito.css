@@ -17,15 +17,15 @@ h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; 
 .resumen-linea { display: flex; justify-content: space-between; font-size: 14px; color: var(--gris); margin-bottom: 10px; }
 .resumen-descuento { display: flex; justify-content: space-between; font-size: 14px; color: #c0768a; margin-bottom: 10px; }
 .resumen-total { display: flex; justify-content: space-between; font-size: 18px; font-family: 'Playfair Display', serif; color: var(--rosa-deep); margin-top: 16px; margin-bottom: 30px; border-top: 1px solid var(--borde); padding-top: 16px; }
-.btn { display: block; width: 100%; padding: 16px; background: var(--texto); color: white; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
+.btn { display: block; width: 100%; padding: 16px; background: var(--texto); color: white; border: none; font-family: 'Coolvetica Rg', sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; text-align: center; text-decoration: none; border-radius: 8px; transition: background 0.3s; }
 .btn:hover { background: var(--rosa-deep); }
 
 .codigo-wrap { margin-bottom: 20px; }
 .codigo-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gris); margin-bottom: 8px; display: block; }
 .codigo-input-row { display: flex; gap: 8px; }
-.codigo-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--borde); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border 0.2s; background: white; }
+.codigo-input { flex: 1; padding: 10px 14px; border: 1.5px solid var(--borde); border-radius: 8px; font-family: 'Coolvetica Rg', sans-serif; font-size: 13px; outline: none; transition: border 0.2s; background: white; }
 .codigo-input:focus { border-color: var(--rosa-deep); }
-.codigo-btn { padding: 10px 16px; background: white; border: 1.5px solid var(--texto); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.codigo-btn { padding: 10px 16px; background: white; border: 1.5px solid var(--texto); border-radius: 8px; font-family: 'Coolvetica Rg', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .codigo-btn:hover { background: var(--texto); color: white; }
 .codigo-msg { font-size: 12px; margin-top: 6px; }
 .codigo-msg.ok { color: #c0768a; }
