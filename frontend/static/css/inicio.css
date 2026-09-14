@@ -64,6 +64,7 @@ body:has(.home-page)>nav{display:none}
 @media(min-width:768px){
   .home-page .hero-message{left:56%;right:2%;max-width:600px}
   .home-page .hero-copy-line{overflow:visible}
+  .home-page .hero-bottomline{display:none}
 }
 /* Two independent bubbles swap places without changing the link's footprint. */
 .home-page .misso-pill-button{position:relative;display:inline-block;flex:none;overflow:visible;isolation:isolate;background:transparent;transform-origin:center;vertical-align:middle}
@@ -172,11 +173,19 @@ body:has(.home-page)>nav{display:none}
 @media(max-width:767px){
   .home-page .hero-brand-mask{display:none}
   .home-page .hero-message{margin-top:24px}
-  .home-page .hero-message h2{font-size:clamp(58px,16vw,88px);overflow:visible}
+  .home-page .hero-message h2{font-size:clamp(52px,14vw,78px);overflow:visible;letter-spacing:-.1em}
   .home-page .hero-message h2 span{white-space:normal}
-  .home-page .campaign-hero{min-height:auto}
+  .home-page .hero-copy-line{overflow:visible}
+  .home-page .campaign-hero{min-height:100svh;padding-bottom:18px}
   .home-page .mobile-product-stage{display:none}
+  .home-page .hero-message{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:auto;text-align:center}
+  .home-page .hero-message p{max-width:340px}
+  .home-page .hero-bottomline{margin:14px 20px 0;justify-content:center}
+  .home-page .hero-bottomline a{gap:12px;text-align:center}
+  .home-page .scroll-arrow{display:inline-flex;animation:misso-scroll-arrow 1.15s ease-in-out infinite}
 }
+
+@keyframes misso-scroll-arrow{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
 /* Acortamos el espacio sobre el texto desplazable de la sección siguiente. */
 @media(min-width:768px){
@@ -200,6 +209,10 @@ html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);
 .home-page .hero-copy-line{display:block;overflow:hidden}
 .home-page .hero-copy-line > span{display:block}
 @media(max-width:767px){.home-page .hero-intro-word{font-size:22vw}}
+@media(max-width:767px){
+  .home-page .hero-intro-window{width:100%;text-align:center}
+  .home-page .hero-intro-word{font-size:18vw;letter-spacing:-.08em}
+}
 @media(prefers-reduced-motion:reduce){.home-page .hero-intro-mark{display:none!important}.home-page .campaign-hero > :not(.hero-intro-mark){visibility:visible!important}}
 
 /* The original image stays behind the film as its loading/error fallback. */
