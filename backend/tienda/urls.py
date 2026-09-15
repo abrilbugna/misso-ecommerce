@@ -13,5 +13,7 @@ urlpatterns = [
     path('confirmacion/<int:pk>/', views.confirmacion, name='confirmacion'),
     path('confirmacion/transferencia/<int:pk>/', views.confirmacion_transferencia, name='confirmacion_transferencia'),
     path('pago/mp/<int:pk>/', views.pago_mp, name='pago_mp'),
+    path('pago/mp/retorno/<int:pk>/', views.mercadopago_retorno, name='mercadopago_retorno'),
+    path('pago/mp/webhook/', views.mercadopago_webhook, name='mercadopago_webhook'),
     path('talles/<int:color_id>/', views.talles_por_color, name='talles_por_color'),
 ]

@@ -76,6 +76,7 @@ def _filas_items(items):
 def html_comprobante_cliente(orden, items):
     filas, subtotal = _filas_items(items)
     envio_costo = orden.envio.costo if orden.envio else 0
+    recargo_mp = orden.total - subtotal + orden.descuento - envio_costo if orden.metodo_pago == 'mercadopago' else 0
     if orden.descuento:
         fila_descuento = f'''
         <tr>
@@ -84,6 +85,14 @@ def html_comprobante_cliente(orden, items):
         </tr>'''
     else:
         fila_descuento = ''
+    if recargo_mp > 0:
+        fila_recargo = f'''
+        <tr>
+          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;">Recargo Mercado Pago (10%)</td>
+          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${recargo_mp:,.2f}</td>
+        </tr>'''
+    else:
+        fila_recargo = ''
 
     return f'''<!DOCTYPE html>
 <html>
@@ -114,6 +123,7 @@ def html_comprobante_cliente(orden, items):
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${subtotal:,.2f}</td>
         </tr>
         {fila_descuento}
+        {fila_recargo}
         <tr>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;">Envío</td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${envio_costo:,.2f}</td>

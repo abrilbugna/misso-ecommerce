@@ -104,6 +104,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MERCADOPAGO_PUBLIC_KEY = os.getenv("MP_PUBLIC_KEY")
 MERCADOPAGO_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+SITE_URL = os.getenv("SITE_URL", "https://misso.ar").rstrip("/")
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 

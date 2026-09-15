@@ -1,4 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
 from .forms import CheckoutForm, PreferenciasSuscripcionForm
 from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
@@ -7,6 +11,15 @@ from django.conf import settings
 from django.http import JsonResponse
 import json
 from urllib.parse import quote
+
+
+MERCADOPAGO_RECARGO = Decimal('0.10')
+
+
+def _total_mercadopago(total_sin_recargo):
+    return (total_sin_recargo * (Decimal('1.00') + MERCADOPAGO_RECARGO)).quantize(
+        Decimal('0.01'), rounding=ROUND_HALF_UP
+    )
 
 
 def inicio(request):
@@ -280,7 +293,12 @@ def checkout(request):
         if form.is_valid():
             envio = form.cleaned_data['envio']
             metodo_pago = form.cleaned_data['metodo_pago']
-            total = subtotal - descuento + envio.costo
+            total_sin_recargo = subtotal - descuento + envio.costo
+            total = (
+                _total_mercadopago(total_sin_recargo)
+                if metodo_pago == 'mercadopago'
+                else total_sin_recargo
+            )
 
             orden = Orden.objects.create(
                 nombre=form.cleaned_data['nombre'],
@@ -316,12 +334,12 @@ def checkout(request):
                     item.talle.stock = max(0, item.talle.stock - item.cantidad)
                     item.talle.save()
 
-            try:
-                enviar_notificacion_tienda(orden, items_guardados)
-                if metodo_pago != 'mercadopago':
+            if metodo_pago != 'mercadopago':
+                try:
+                    enviar_notificacion_tienda(orden, items_guardados)
                     enviar_comprobante_cliente(orden)
-            except Exception:
-                pass
+                except Exception:
+                    pass
 
             items.delete()
 
@@ -348,6 +366,12 @@ def checkout(request):
 
 def confirmacion(request, pk):
     orden = get_object_or_404(Orden, pk=pk)
+    if orden.metodo_pago == 'mercadopago' and not orden.pagado:
+        return render(request, 'tienda/pago_mp.html', {
+            'orden': orden,
+            'mp_url': reverse('pago_mp', args=[orden.pk]),
+            'estado_pago': 'pendiente',
+        })
     return render(request, 'tienda/confirmacion.html', {'orden': orden})
 
 
@@ -359,23 +383,51 @@ def confirmacion_transferencia(request, pk):
 def pago_mp(request, pk):
     orden = get_object_or_404(Orden, pk=pk)
 
+    if orden.metodo_pago != 'mercadopago':
+        return redirect('confirmacion', pk=orden.pk)
+    if orden.pagado:
+        return redirect('confirmacion', pk=orden.pk)
+
     sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
-    items = ItemOrden.objects.filter(orden=orden)
+    envio_costo = orden.envio.costo if orden.envio else Decimal('0.00')
+    productos_con_descuento = orden.subtotal - orden.descuento
+    recargo = orden.total - productos_con_descuento - envio_costo
+
+    preference_items = [{
+        "id": f"orden-{orden.pk}-productos",
+        "title": f"Productos Misso — pedido #{orden.pk}",
+        "currency_id": "ARS",
+        "quantity": 1,
+        "unit_price": float(productos_con_descuento),
+    }]
+    if envio_costo > 0:
+        preference_items.append({
+            "id": f"orden-{orden.pk}-envio",
+            "title": f"Envío — {orden.envio.nombre}",
+            "currency_id": "ARS",
+            "quantity": 1,
+            "unit_price": float(envio_costo),
+        })
+    if recargo > 0:
+        preference_items.append({
+            "id": f"orden-{orden.pk}-recargo",
+            "title": "Recargo Mercado Pago (10%)",
+            "currency_id": "ARS",
+            "quantity": 1,
+            "unit_price": float(recargo),
+        })
+
+    site_url = settings.SITE_URL
 
     preference_data = {
-        "items": [
-            {
-                "title": item.producto.nombre,
-                "quantity": item.cantidad,
-                "unit_price": float(item.precio),
-            }
-            for item in items
-        ],
+        "items": preference_items,
+        "payer": {"email": orden.email},
         "back_urls": {
-            "success": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
-            "failure": f"https://misso.ar/tienda/carrito/",
-            "pending": f"https://misso.ar/tienda/confirmacion/{orden.pk}/",
+            "success": f"{site_url}{reverse('mercadopago_retorno', args=[orden.pk])}",
+            "failure": f"{site_url}{reverse('mercadopago_retorno', args=[orden.pk])}",
+            "pending": f"{site_url}{reverse('mercadopago_retorno', args=[orden.pk])}",
         },
+        "notification_url": f"{site_url}{reverse('mercadopago_webhook')}",
         "auto_return": "approved",
         "external_reference": str(orden.pk),
     }
@@ -388,3 +440,92 @@ def pago_mp(request, pk):
         return redirect('ver_carrito')
 
     return redirect(mp_url)
+
+
+def _confirmar_pago_mercadopago(payment_id):
+    """Confirma la orden solo con los datos obtenidos de la API de Mercado Pago."""
+    sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
+    payment_response = sdk.payment().get(str(payment_id))
+    if payment_response.get('status') != 200:
+        return None
+
+    payment = payment_response.get('response', {})
+    if payment.get('status') != 'approved' or payment.get('currency_id') != 'ARS':
+        return None
+
+    try:
+        orden_pk = int(payment.get('external_reference'))
+        monto_pagado = Decimal(str(payment.get('transaction_amount'))).quantize(Decimal('0.01'))
+    except (TypeError, ValueError, InvalidOperation):
+        return None
+
+    enviar_emails = False
+    with transaction.atomic():
+        try:
+            orden = Orden.objects.select_for_update().get(
+                pk=orden_pk,
+                metodo_pago='mercadopago',
+            )
+        except Orden.DoesNotExist:
+            return None
+
+        if monto_pagado != orden.total:
+            return None
+
+        if not orden.pagado:
+            orden.pagado = True
+            orden.save(update_fields=['pagado'])
+            enviar_emails = True
+
+    if enviar_emails:
+        items = list(orden.itemorden_set.select_related('producto', 'color', 'talle'))
+        try:
+            enviar_notificacion_tienda(orden, items)
+            enviar_comprobante_cliente(orden)
+        except Exception:
+            pass
+
+    return orden
+
+
+def mercadopago_retorno(request, pk):
+    orden = get_object_or_404(Orden, pk=pk, metodo_pago='mercadopago')
+    payment_id = request.GET.get('payment_id') or request.GET.get('collection_id')
+    orden_confirmada = None
+    if payment_id:
+        try:
+            orden_confirmada = _confirmar_pago_mercadopago(payment_id)
+        except Exception:
+            orden_confirmada = None
+
+    if orden_confirmada and orden_confirmada.pk == orden.pk:
+        return redirect('confirmacion', pk=orden.pk)
+
+    return render(request, 'tienda/pago_mp.html', {
+        'orden': orden,
+        'mp_url': reverse('pago_mp', args=[orden.pk]),
+        'estado_pago': request.GET.get('status', 'pendiente'),
+    })
+
+
+@csrf_exempt
+def mercadopago_webhook(request):
+    if request.method != 'POST':
+        return JsonResponse({'ok': True})
+
+    try:
+        payload = json.loads(request.body or b'{}')
+    except (TypeError, ValueError, json.JSONDecodeError):
+        payload = {}
+
+    topic = request.GET.get('type') or payload.get('type')
+    payment_id = request.GET.get('data.id') or payload.get('data', {}).get('id')
+    if topic != 'payment' or not payment_id:
+        return JsonResponse({'ok': True})
+
+    try:
+        _confirmar_pago_mercadopago(payment_id)
+    except Exception:
+        # Un error temporal provoca un reintento de la notificación.
+        return JsonResponse({'ok': False}, status=503)
+    return JsonResponse({'ok': True})
