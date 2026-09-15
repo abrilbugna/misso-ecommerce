@@ -13,7 +13,7 @@
     <header class="purchase-heading"><span class="purchase-kicker">02 / Casi tuyo</span><h1>Finalizá <em>tu compra.</em></h1><p>Completá tus datos y elegí cómo recibir tu pedido.</p></header>
     <div class="checkout-grid">
         <div class="form-section purchase-panel">
-            <span class="purchase-kicker">Tus datos</span><h2>Contanos <em>de vos.</em></h2>
+            <h2>Tus datos</h2>
             <form method="post" id="checkout-form">
                 {% csrf_token %}
                 {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}

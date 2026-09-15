@@ -10,7 +10,7 @@
 {% block content %}
 <div class="carrito-wrap purchase-page purchase-cart">
     <a href="{% url 'catalogo' %}" class="volver">{% include 'tienda/includes/icon.html' with icon='arrow-left' %} Seguir comprando</a>
-    <header class="purchase-heading"><span class="purchase-kicker">01 / Tu selección</span><h1>Tu <em>carrito.</em></h1><p>Todo lo que elegiste, listo para seguir.</p></header>
+    <header class="purchase-heading"><span class="purchase-kicker">01 / Tu selección</span><h1>Tu <em>carrito.</em></h1></header>
 
     {% if items %}
     <div class="carrito-grid">

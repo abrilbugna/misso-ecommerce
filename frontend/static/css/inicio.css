@@ -205,22 +205,19 @@ body:has(.home-page)>nav{display:none}
   .home-page .intro-copy>p:not(.eyebrow){margin-top:38px}
 }
 
-/* Home-only brand reveal. Without JS, the regular hero remains untouched. */
+/* The asset is hidden before its first painted frame; no-JS keeps the regular hero. */
 .home-page .hero-intro-mark{display:none}
 html.misso-intro-pending .home-page .campaign-hero > :not(.hero-intro-mark){visibility:hidden}
 html.misso-intro-pending .home-page .hero-intro-mark,
-html.misso-intro-running .home-page .hero-intro-mark{position:absolute;inset:0 0 auto;z-index:30;display:grid;place-items:center;height:100svh;pointer-events:none}
-.home-page .hero-intro-window{max-width:100%;overflow:hidden;padding:.08em .06em}
-.home-page .hero-intro-word{display:block;color:var(--cream);font-family:'Coolvetica Rg',sans-serif;font-size:clamp(6rem,22vw,23rem);font-weight:500;letter-spacing:-.09em;line-height:.88;white-space:nowrap;transform-origin:center center}
-html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);opacity:0}
+html.misso-intro-running .home-page .hero-intro-mark{position:absolute;inset:0 0 auto;z-index:30;display:grid;place-items:center;height:100svh;overflow:visible;pointer-events:none}
+.home-page .hero-intro-logo{display:block;width:clamp(300px,33vw,660px);height:auto;overflow:visible;opacity:0;transform-origin:center;translate:2% -2%}
+.home-page .hero-intro-guide{fill:none;stroke:white;stroke-linecap:round;stroke-linejoin:round}
+.home-page .hero-intro-base{fill:var(--wine-dark)}
+.home-page .hero-intro-warm{stop-color:var(--cream)}
+.home-page .hero-intro-rose{stop-color:var(--rose-light)}
 .home-page .hero-copy-line{display:block;overflow:hidden}
 .home-page .hero-copy-line > span{display:block}
-@media(max-width:767px){.home-page .hero-intro-word{font-size:22vw}}
-@media(max-width:767px){
-  .home-page .hero-intro-window{width:100%;text-align:center}
-  .home-page .hero-intro-word{font-size:18vw;letter-spacing:-.08em}
-}
-@media(prefers-reduced-motion:reduce){.home-page .hero-intro-mark{display:none!important}.home-page .campaign-hero > :not(.hero-intro-mark){visibility:visible!important}}
+@media(max-width:767px){.home-page .hero-intro-logo{width:68vw;translate:1% -2%}}
 
 /* The original image stays behind the film as its loading/error fallback. */
 .home-page .intro-image-wrap .intro-video-fallback,
@@ -271,11 +268,8 @@ html.misso-intro-pending .home-page .hero-intro-word{transform:translateY(110%);
 
 /* Anti-clipping repair: reveal masks have ink-safe room and never constrain the final motion. */
 .home-page .hero-copy-line{overflow:hidden;padding-block:.16em .22em;padding-inline:.1em;margin-block:-.16em -.22em;margin-inline:-.1em}
-.home-page .hero-intro-window{font-size:clamp(6rem,22vw,23rem);line-height:.88;padding-block:.14em .2em;padding-inline:.1em}
-.home-page .hero-intro-word{font-size:1em}
 .home-page .hero-product-link{overflow:visible;mask-image:none;-webkit-mask-image:none}
 .home-page .campaign-hero{overflow-x:clip;overflow-y:visible}
-@media(max-width:767px){.home-page .hero-intro-window{font-size:18vw}.home-page .campaign-hero{overflow-x:clip;overflow-y:visible}}
 
 /* Keep the serif accent on the same baseline as “cada” at every viewport. */
 .home-page .hero-message h2 .hero-copy-line-inline {

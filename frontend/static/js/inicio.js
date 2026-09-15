@@ -101,11 +101,7 @@
   const { gsap, ScrollTrigger } = window;
   gsap.registerPlugin(ScrollTrigger);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reducedMotion) {
-    document.documentElement.classList.remove('misso-intro-pending');
-    return;
-  }
-  root.classList.add('motion-ready');
+  if (!reducedMotion) root.classList.add('motion-ready');
 
   const mm = gsap.matchMedia();
   const cards = gsap.utils.toArray('.benefit-card');
@@ -116,31 +112,136 @@
   let introComplete = false;
   let scrollArrowMotion;
 
+  // letram.svg is a filled silhouette, not an open pen path. These guides only
+  // expose its ink: every visible edge still comes from the fetched original.
+  // Coordinates below are in the asset's 600 × 365 viewBox after its g transform.
+  const logoGestures = [
+    { d: 'M187 123 Q213 122 231 113', width: 28, at: .10, duration: .10 },
+    { d: 'M222 119 L222 231 Q222 245 209 246', width: 42, at: .18, duration: .22 },
+    { d: 'M189 247 Q219 241 250 247', width: 22, at: .37, duration: .08 },
+    { d: 'M239 153 C260 108 286 102 298 132 Q302 143 302 170 L302 232', width: 42, at: .43, duration: .28 },
+    { d: 'M302 231 Q302 245 268 247 L336 247', width: 24, at: .69, duration: .08 },
+    { d: 'M318 153 C338 111 365 100 377 129 Q381 140 380 181 L382 233 Q385 272 403 280', width: 42, at: .75, duration: .32 },
+    { d: 'M402 280 C428 300 449 275 450 245', width: 25, at: 1.05, duration: .16 },
+    { d: 'M450 243 C434 235 423 220 434 211 Q444 205 452 221 Q466 201 472 216 C479 230 460 239 450 243', width: 21, at: 1.19, duration: .16 },
+  ];
+
+  async function prepareIntroLogo() {
+    const overlay = root.querySelector('.hero-intro-mark');
+    if (!overlay) return false;
+    try {
+      const response = await fetch(overlay.dataset.logoSrc, { signal: AbortSignal.timeout(3500) });
+      if (!response.ok) return false;
+      const documentSvg = new DOMParser().parseFromString(await response.text(), 'image/svg+xml');
+      const original = documentSvg.querySelector('svg > g');
+      if (!original || documentSvg.querySelector('parsererror')) return false;
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('viewBox', '170 92 325 218');
+      svg.setAttribute('class', 'hero-intro-logo');
+      svg.setAttribute('focusable', 'false');
+      svg.innerHTML = `
+        <defs>
+          <mask id="misso-ink-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="365" style="mask-type:luminance">
+            ${logoGestures.map(gesture => `<path class="hero-intro-guide" d="${gesture.d}" stroke-width="${gesture.width}"/>`).join('')}
+          </mask>
+          <radialGradient id="misso-pen-light" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="19">
+            <stop class="hero-intro-warm" stop-opacity=".95"/>
+            <stop class="hero-intro-rose" offset=".35" stop-opacity=".7"/>
+            <stop class="hero-intro-rose" offset="1" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="misso-finish-light" gradientUnits="userSpaceOnUse" x1="-26" y1="0" x2="26" y2="0" gradientTransform="translate(120 200) rotate(20)">
+            <stop class="hero-intro-rose" stop-opacity="0"/>
+            <stop class="hero-intro-rose" offset=".36" stop-opacity=".15"/>
+            <stop class="hero-intro-warm" offset=".5" stop-opacity=".95"/>
+            <stop class="hero-intro-rose" offset=".64" stop-opacity=".15"/>
+            <stop class="hero-intro-rose" offset="1" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <g class="hero-intro-ink" mask="url(#misso-ink-reveal)">
+          <use class="hero-intro-base" href="#misso-original-mark"/>
+          <use class="hero-intro-pen" href="#misso-original-mark" fill="url(#misso-pen-light)" opacity="0"/>
+        </g>
+        <use class="hero-intro-finish" href="#misso-original-mark" fill="url(#misso-finish-light)" opacity="0"/>`;
+      const geometry = document.importNode(original, true);
+      geometry.setAttribute('id', 'misso-original-mark');
+      // Inherit the brand color from each use; d and the original transform stay intact.
+      geometry.removeAttribute('fill');
+      svg.querySelector('defs').prepend(geometry);
+      overlay.replaceChildren(svg);
+      return true;
+    } catch {
+      return false; // The watchdog also releases the hero if the script fails entirely.
+    }
+  }
+
+  function addLogoDrawing(intro, logo, mobile) {
+    const guides = Array.from(logo.querySelectorAll('.hero-intro-guide'));
+    const pen = logo.querySelector('.hero-intro-pen');
+    const light = logo.querySelector('#misso-pen-light');
+    const finishLight = logo.querySelector('#misso-finish-light');
+    const finishInk = logo.querySelector('.hero-intro-finish');
+    // Paint servers inherit the original path's inverted, scaled coordinate space.
+    // Cancel that transform so both highlights travel in the guides' viewBox units.
+    const inverse = logo.querySelector('#misso-original-mark').transform.baseVal.consolidate().matrix.inverse();
+    const paintSpace = `matrix(${inverse.a} ${inverse.b} ${inverse.c} ${inverse.d} ${inverse.e} ${inverse.f})`;
+    finishLight.setAttribute('gradientTransform', `${paintSpace} translate(120 200) rotate(20)`);
+    guides.forEach((path, index) => {
+      const length = path.getTotalLength();
+      const gesture = logoGestures[index];
+      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0 });
+      // A small overlap joins the gestures; the newest stroke owns the moving light.
+      intro.set(path, { opacity: 1 }, gesture.at);
+      intro.to(path, { strokeDashoffset: 0, duration: gesture.duration, ease: 'sine.inOut', onUpdate() {
+        if (intro.time() >= (logoGestures[index + 1]?.at ?? Infinity)) return;
+        const distance = length * this.ratio;
+        const point = path.getPointAtLength(distance);
+        const before = path.getPointAtLength(Math.max(0, distance - .5));
+        const after = path.getPointAtLength(Math.min(length, distance + .5));
+        const angle = Math.atan2(after.y - before.y, after.x - before.x) * 180 / Math.PI + 90;
+        light.setAttribute('gradientTransform', `${paintSpace} translate(${point.x} ${point.y}) rotate(${angle}) scale(1 .28)`);
+      } }, gesture.at);
+    });
+    intro.to(logo, { opacity: 1, duration: .08 }, .10)
+      .to(pen, { opacity: .9, duration: .14 }, .26)
+      // The last curved gesture fills both heart lobes, then a single small glint settles.
+      .to(pen, { opacity: 1, duration: .06 }, 1.33)
+      .to(pen, { opacity: 0, duration: .13 }, 1.39)
+      // Also retain the four microscopic isolated marks in the original export.
+      .set(logo.querySelector('.hero-intro-ink'), { attr: { mask: 'none' } }, 1.36)
+      .set(finishInk, { opacity: 1 }, 1.48)
+      .to(finishLight, { attr: { gradientTransform: `${paintSpace} translate(580 200) rotate(20)` }, duration: .34, ease: 'none' }, 1.48)
+      .set(finishInk, { opacity: 0 }, 1.82)
+      .to(logo, { opacity: 0, scale: mobile ? 1.035 : 1.06, y: mobile ? -6 : -10, duration: .52, ease: 'power3.inOut' }, 1.80);
+  }
+
   function initHeroAnimation(mobile) {
     const html = document.documentElement;
     const overlay = document.querySelector('.hero-intro-mark');
-    const word = overlay?.querySelector('.hero-intro-word');
-    // The large mobile wordmark is hidden in the mobile layout, so it cannot be a travel target.
-    const target = mobile ? null : document.querySelector('.hero-nav-wordmark-text');
+    const logo = overlay?.querySelector('.hero-intro-logo');
     const headlineLines = gsap.utils.toArray('.hero-copy-line > span');
     const badges = gsap.utils.toArray('.hero-badge');
     const handwritten = document.querySelector('.hero-handwritten');
     const arrowPath = handwritten?.querySelector('path');
     const photo = document.querySelector('.hero-product-link');
-    if (!overlay || !word || (!mobile && !target) || !photo || !product) {
+    if (!overlay || !logo || !photo || !product) {
       html.classList.remove('misso-intro-pending');
       return;
     }
 
     html.classList.add('misso-intro-running');
-    gsap.set(word, { yPercent: 0, autoAlpha: 0, x: 0, y: 0, scale: 1 });
-    const start = word.getBoundingClientRect();
-    const end = target?.getBoundingClientRect();
-    const travelX = mobile ? 0 : end.left + end.width / 2 - start.left - start.width / 2;
-    const travelY = mobile ? -Math.min(48, start.height * .18) : end.top + end.height / 2 - start.top - start.height / 2;
-    const finalScale = mobile ? .92 : Math.min(1, end.width / start.width);
-
-    gsap.set(word, { yPercent: 110, autoAlpha: 0 });
+    gsap.set(logo, { opacity: 0, y: 0, scale: 1 });
+    if (reducedMotion) {
+      logo.querySelector('.hero-intro-ink').removeAttribute('mask');
+      const reducedIntro = gsap.timeline({ onComplete: () => {
+        window.clearTimeout(window.missoIntroFallback);
+        html.classList.remove('misso-intro-pending', 'misso-intro-running');
+      } });
+      reducedIntro.to(logo, { opacity: 1, duration: .14 })
+        .to(logo, { opacity: 0, duration: .18 }, .30)
+        .call(() => html.classList.remove('misso-intro-pending'), [], .34);
+      return;
+    }
     gsap.set('.hero-nav', { autoAlpha: 0 });
     gsap.set('.hero-social, .hero-nav-actions a', { autoAlpha: 0, y: -12 });
     gsap.set(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 0 });
@@ -165,36 +266,33 @@
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-running');
       gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-handwritten, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
-      gsap.set('.hero-intro-window, .hero-copy-line', { overflow: 'visible' });
+      gsap.set('.hero-copy-line', { overflow: 'visible' });
       if (arrowPath) gsap.set(arrowPath, { clearProps: 'strokeDasharray,strokeDashoffset' });
       scrollArrowMotion?.play();
       initProductMotion(mobile);
       ScrollTrigger.refresh();
     };
 
-    const intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish });
-    intro
-      .to(word, { yPercent: 0, autoAlpha: 1, duration: .76, ease: 'power4.out' }, 0)
-      .set('.hero-intro-window', { overflow: 'visible' }, .94)
-      .to(word, { x: travelX, y: travelY, scale: finalScale, duration: .43, ease: 'power3.inOut' }, .94)
-      .to(overlay, { autoAlpha: 0, duration: .12 }, 1.30)
-      .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 1.16)
-      .to(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 1, duration: .22 }, 1.22)
-      .to('.hero-social', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 1.18)
-      .to('.hero-nav-actions a', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 1.27)
-      .to('.hero-message-kicker', { autoAlpha: 1, y: 0, duration: .29 }, 1.38)
-      .to(headlineLines, { autoAlpha: 1, yPercent: 0, stagger: .085, duration: .43, ease: 'power4.out' }, 1.48)
-      .set('.hero-copy-line', { overflow: 'visible' }, 2.1)
-      .to('.hero-product-ring', { autoAlpha: 1, scale: 1, duration: .48 }, mobile ? 2.13 : 1.77)
-      .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 2.17 : 1.82)
-      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut', onComplete: () => gsap.set(photo, { clearProps: 'clipPath', overflow: 'visible' }) }, mobile ? 2.17 : 1.82)
-      .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 1.86 : 1.99)
-      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28 }, mobile ? 1.97 : 2.11)
-      .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 2.07 : 2.20)
-      .to(badges, { autoAlpha: 1, scale: 1, rotation: 0, stagger: .07, duration: .34, ease: 'back.out(1.3)' }, mobile ? 2.34 : 2.35)
-      .to(handwritten, { autoAlpha: 1, y: 0, rotation: -8, duration: .27 }, 2.50);
-    if (arrowPath) intro.to(arrowPath, { strokeDashoffset: 0, duration: .45, ease: 'power2.inOut' }, 2.53);
-    intro.to('.hero-bottomline', { autoAlpha: 1, y: 0, duration: .25 }, 2.76);
+    const intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish }).timeScale(1.4);
+    addLogoDrawing(intro, logo, mobile);
+    intro.addLabel('hero', 1.95)
+      .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 'hero+=0.00')
+      .to(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 1, duration: .22 }, 'hero+=0.06')
+      .to('.hero-social', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 'hero+=0.02')
+      .to('.hero-nav-actions a', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 'hero+=0.11')
+      .to('.hero-message-kicker', { autoAlpha: 1, y: 0, duration: .29 }, 'hero+=0.22')
+      .to(headlineLines, { autoAlpha: 1, yPercent: 0, stagger: .085, duration: .43, ease: 'power4.out' }, 'hero+=0.32')
+      .set('.hero-copy-line', { overflow: 'visible' }, 'hero+=0.94')
+      .to('.hero-product-ring', { autoAlpha: 1, scale: 1, duration: .48 }, mobile ? 'hero+=0.97' : 'hero+=0.61')
+      .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 'hero+=1.01' : 'hero+=0.66')
+      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut', onComplete: () => gsap.set(photo, { clearProps: 'clipPath', overflow: 'visible' }) }, mobile ? 'hero+=1.01' : 'hero+=0.66')
+      .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 'hero+=0.70' : 'hero+=0.83')
+      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28 }, mobile ? 'hero+=0.81' : 'hero+=0.95')
+      .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 'hero+=0.91' : 'hero+=1.04')
+      .to(badges, { autoAlpha: 1, scale: 1, rotation: 0, stagger: .07, duration: .34, ease: 'back.out(1.3)' }, mobile ? 'hero+=1.18' : 'hero+=1.19')
+      .to(handwritten, { autoAlpha: 1, y: 0, rotation: -8, duration: .27 }, 'hero+=1.34');
+    if (arrowPath) intro.to(arrowPath, { strokeDashoffset: 0, duration: .45, ease: 'power2.inOut' }, 'hero+=1.37');
+    intro.to('.hero-bottomline', { autoAlpha: 1, y: 0, duration: .25 }, 'hero+=1.60');
     return () => {
       if (!introComplete) intro.progress(1);
     };
@@ -444,16 +542,8 @@
     viewport.addEventListener('focusout', () => motion?.resume());
   }
 
-  // Font metrics affect both the entrance mask and the measured travel to the logo.
-  // If the font is unavailable on a slow connection, show the hero without an unstable intro.
   document.documentElement.classList.add('misso-intro-waiting');
-  const introFontReady = document.fonts?.load
-    ? Promise.race([
-      document.fonts.load('400 100px "Coolvetica Rg"', 'misso').then(faces => faces.length > 0).catch(() => false),
-      new Promise(resolve => window.setTimeout(() => resolve(false), 1800)),
-    ])
-    : Promise.resolve(true);
-  introFontReady.then(ready => {
+  prepareIntroLogo().then(ready => {
     document.documentElement.classList.remove('misso-intro-waiting');
     if (!ready || !document.documentElement.classList.contains('misso-intro-pending')) {
       introStarted = true;
@@ -461,9 +551,10 @@
       window.clearTimeout(window.missoIntroFallback);
       document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running');
       scrollArrowMotion?.play();
-      initProductMotion(window.innerWidth < 768);
+      if (!reducedMotion) initProductMotion(window.innerWidth < 768);
       return;
     }
+    if (reducedMotion) { initHeroAnimation(window.innerWidth < 768); return; }
     mm.add('(min-width: 768px)', () => {
       if (introStarted) { initProductMotion(false); return; }
       introStarted = true;
@@ -475,6 +566,7 @@
       return initHeroAnimation(true);
     });
   });
+  if (reducedMotion) return;
   initHeroArrows();
   initNavWordmark();
   initBrandIntro();

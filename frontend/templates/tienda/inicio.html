@@ -5,7 +5,7 @@
 {% block extra_css %}
 <link rel="preload" href="{% static 'fonts/Coolvetica Rg It.otf' %}" as="font" type="font/otf" crossorigin>
 <script>
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  {
     document.documentElement.classList.add('misso-intro-pending');
     window.missoIntroFallback = window.setTimeout(() => {
       if (!document.documentElement.classList.contains('misso-intro-pending') && !document.documentElement.classList.contains('misso-intro-running')) return;
@@ -19,12 +19,13 @@
     }, { once: true });
   }
 </script>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=intro-font-20260914">
+<link rel="preload" href="{% static 'img/letram.svg' %}" as="fetch" crossorigin>
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=intro-draw-20260915-burgundy">
 {% endblock %}
 {% block content %}
 <div class="home-page">
   <section class="campaign-hero" id="suscripcion" aria-labelledby="hero-title">
-    <div class="hero-intro-mark" aria-hidden="true"><div class="hero-intro-window"><span class="hero-intro-word">misso</span></div></div>
+    <div class="hero-intro-mark" aria-hidden="true" data-logo-src="{% static 'img/letram.svg' %}"></div>
     <nav class="hero-nav" aria-label="Navegación de inicio">
       <div class="hero-socials" aria-label="Redes de Misso">
         <a class="hero-social" href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.7" cy="6.4" r=".8" fill="currentColor" stroke="none"/></svg></span></a>
@@ -129,5 +130,5 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}" defer></script>
-<script src="{% static 'js/inicio.js' %}?v=intro-font-20260914" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=intro-draw-20260915-fast2" defer></script>
 {% endblock %}
