@@ -6,21 +6,102 @@
 <link rel="preload" href="{% static 'fonts/Coolvetica Rg It.otf' %}" as="font" type="font/otf" crossorigin>
 <script>
   {
-    document.documentElement.classList.add('misso-intro-pending');
-    window.missoIntroFallback = window.setTimeout(() => {
-      if (!document.documentElement.classList.contains('misso-intro-pending') && !document.documentElement.classList.contains('misso-intro-running')) return;
-      document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
-      document.querySelectorAll('.campaign-hero [style]').forEach((element) => {
-        ['opacity', 'visibility', 'transform', 'clip-path', 'stroke-dasharray', 'stroke-dashoffset'].forEach((property) => element.style.removeProperty(property));
+    const html = document.documentElement;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lockState = {
+      locked: false,
+      scrollX: 0,
+      scrollY: 0,
+      restoration: null,
+      properties: [],
+      handlePageHide: null,
+      handleError: null,
+      handleRejection: null,
+    };
+    const lockProperties = ['--misso-intro-lock-top', '--misso-intro-lock-left', '--misso-intro-scrollbar-width'];
+
+    const restoreLockProperties = () => {
+      lockState.properties.forEach(({ name, value, priority }) => {
+        if (value) html.style.setProperty(name, value, priority);
+        else html.style.removeProperty(name);
       });
-    }, 6500);
+      lockState.properties = [];
+    };
+
+    window.unlockIntroScroll = () => {
+      html.classList.remove('misso-intro-scroll-lock', 'misso-intro-scrollbar-compensated');
+      if (!lockState.locked) {
+        restoreLockProperties();
+        return;
+      }
+      lockState.locked = false;
+      window.removeEventListener('pagehide', lockState.handlePageHide);
+      window.removeEventListener('error', lockState.handleError);
+      window.removeEventListener('unhandledrejection', lockState.handleRejection);
+      restoreLockProperties();
+      window.scrollTo(lockState.scrollX, lockState.scrollY);
+      if (lockState.restoration !== null) {
+        try { window.history.scrollRestoration = lockState.restoration; } catch {}
+      }
+    };
+
+    function releaseIntro() {
+      window.clearTimeout(window.missoIntroFallback);
+      const introActive = html.classList.contains('misso-intro-pending') || html.classList.contains('misso-intro-running') || html.classList.contains('misso-intro-waiting');
+      if (introActive) {
+        html.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
+        document.querySelectorAll('.campaign-hero [style]').forEach((element) => {
+          ['opacity', 'visibility', 'transform', 'clip-path', 'stroke-dasharray', 'stroke-dashoffset'].forEach((property) => element.style.removeProperty(property));
+        });
+      }
+      window.unlockIntroScroll();
+    }
+
+    window.lockIntroScroll = () => {
+      if (lockState.locked || reducedMotion) return;
+      lockState.properties = lockProperties.map(name => ({
+        name,
+        value: html.style.getPropertyValue(name),
+        priority: html.style.getPropertyPriority(name),
+      }));
+      if ('scrollRestoration' in window.history) {
+        try {
+          lockState.restoration = window.history.scrollRestoration;
+          window.history.scrollRestoration = 'manual';
+        } catch { lockState.restoration = null; }
+      }
+      // The intro is a fresh presentation, so suppress browser scroll restoration before paint.
+      window.scrollTo(0, 0);
+      lockState.scrollX = 0;
+      lockState.scrollY = 0;
+      html.style.setProperty('--misso-intro-lock-top', '0px');
+      html.style.setProperty('--misso-intro-lock-left', '0px');
+      const scrollbarWidth = Math.max(0, window.innerWidth - html.clientWidth);
+      html.style.setProperty('--misso-intro-scrollbar-width', `${scrollbarWidth}px`);
+      if (!window.CSS?.supports?.('scrollbar-gutter: stable') && scrollbarWidth) {
+        html.classList.add('misso-intro-scrollbar-compensated');
+      }
+      html.classList.add('misso-intro-scroll-lock');
+      lockState.locked = true;
+      lockState.handlePageHide = () => releaseIntro();
+      lockState.handleError = () => releaseIntro();
+      lockState.handleRejection = () => releaseIntro();
+      window.addEventListener('pagehide', lockState.handlePageHide);
+      window.addEventListener('error', lockState.handleError);
+      window.addEventListener('unhandledrejection', lockState.handleRejection);
+    };
+
+    window.abortMissoIntro = releaseIntro;
+    html.classList.add('misso-intro-pending');
+    window.lockIntroScroll();
+    window.missoIntroFallback = window.setTimeout(releaseIntro, 6500);
     document.addEventListener('DOMContentLoaded', () => {
-      if (!document.documentElement.classList.contains('misso-intro-running') && !document.documentElement.classList.contains('misso-intro-waiting')) document.documentElement.classList.remove('misso-intro-pending');
+      if (!html.classList.contains('misso-intro-running') && !html.classList.contains('misso-intro-waiting')) releaseIntro();
     }, { once: true });
   }
 </script>
 <link rel="preload" href="{% static 'img/letram.svg' %}" as="fetch" crossorigin>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=intro-draw-20260915-burgundy">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=price-shimmer-700ms-20260916">
 {% endblock %}
 {% block content %}
 <div class="home-page">
@@ -43,20 +124,29 @@
     <div class="mobile-product-stage" id="beneficios" aria-label="La suscripción Misso">
       <div class="hero-product-ring" aria-hidden="true"></div>
       <div class="hero-badges">
-        <div class="hero-badge hero-badge-one"><strong>$25K</strong><span>por mes</span></div>
-        <div class="hero-badge hero-badge-two hero-badge-delivery"><span>Directo a tu</span><strong>domicilio</strong></div>
-        <div class="hero-badge hero-badge-three"><strong>Elegido</strong><span>para vos</span></div>
+        <div class="hero-badge hero-badge-one"><strong>${{ subscription_price_compact }}</strong><span>por mes</span></div>
+        <div class="hero-badge hero-badge-two hero-badge-delivery"><strong>Envío gratis</strong><span>incluido</span></div>
+        <div class="hero-badge hero-badge-three">
+          <div class="hero-badge-three-desktop">
+            <span class="hero-badge-personalized-a11y">100% personalizada</span>
+            <div class="hero-badge-personalized-visual" aria-hidden="true">
+              <strong class="hero-badge-personalized-number">100%</strong>
+              <span class="hero-badge-personalized-track"><span class="hero-badge-personalized-progress"></span></span>
+              <span class="hero-badge-personalized-label">personalizada</span>
+            </div>
+          </div>
+          <div class="hero-badge-three-mobile"><strong>Elegido</strong><span>para vos</span></div>
+        </div>
       </div>
       <div class="hero-product" data-product-motion>
         <a href="{% url 'catalogo' %}" class="hero-product-link" aria-label="Explorar la tienda"><img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1789352751/Imagen_de_Codex_13_sept_2026_11_24_35_p.m._ldyyhq.png" alt="Campaña Misso" fetchpriority="high"></a>
       </div>
-      <div class="hero-handwritten"><span>una sorpresa para vos,<br>todos los meses</span><svg viewBox="0 0 150 90" fill="none" aria-hidden="true"><path d="M6 7c31 4 30 36 66 34 30-2 36-21 67-7m0 0-21-3m21 3-13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     </div>
     <div class="hero-message" id="como-funciona">
       <span class="hero-message-kicker">Suscripción de ropa interior {% include 'tienda/includes/icon.html' with icon='sparkle' %}</span>
       <h2><span class="hero-copy-line"><span>Un conjunto</span></span><span class="hero-copy-line hero-copy-line-inline"><span>cada</span><span><em>mes.</em></span></span></h2>
       <p>Recibís en tu domicilio un conjunto o pack de bombachas por mes, por solo:</p>
-      <div class="hero-price"><strong>$25.000</strong><span>/ mes</span></div>
+      <div class="hero-price"><strong class="hero-price-shimmer" data-price="${{ subscription_price_display }}">${{ subscription_price_display }}</strong><span>/ mes</span></div>
       <a class="hero-subscribe misso-pill-button misso-pill-right" href="{% url 'comenzar_suscripcion' %}"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
     </div>
     <div class="hero-bottomline"><a href="#universo">Deslizá para más info <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
@@ -76,7 +166,7 @@
           <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1785898081/fdxofmwmp9lxtygthcvs.jpg" alt="" loading="lazy">
           <video class="intro-video" muted loop playsinline preload="none" aria-hidden="true"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/f_mp4,vc_h264,q_auto/v1785898081/fdxofmwmp9lxtygthcvs.mp4" type="video/mp4"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/v1785898081/fdxofmwmp9lxtygthcvs.mov" type="video/quicktime"></video>
         </div>
-        <div class="intro-carousel-slide" data-intro-slide data-stack-position="last" aria-label="Notificación 3 de 3" aria-hidden="true">
+        <div class="intro-carousel-slide" style="--intro-video-ratio:29/52" data-intro-slide data-stack-position="last" aria-label="Notificación 3 de 3" aria-hidden="true">
           <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1789350394/WhatsApp_Video_2026-09-13_at_22.45.51_qsmalu.jpg" alt="" loading="lazy">
           <video class="intro-video" muted loop playsinline preload="none" aria-hidden="true"><source src="https://res.cloudinary.com/ddsobe4fw/video/upload/v1789350394/WhatsApp_Video_2026-09-13_at_22.45.51_qsmalu.mp4" type="video/mp4"></video>
         </div>
@@ -105,7 +195,7 @@
         </a>
         {% endfor %}
       </div>
-      <div class="benefits-footer"><span class="benefits-footer-desktop">Deslizá para explorar</span><span class="benefits-footer-mobile">Explorá nuestras líneas</span><span>Misso ©</span></div>
+      <div class="benefits-footer"><span>Explorá nuestras líneas</span><span>Misso ©</span></div>
     </div>
   </section>
   {% endif %}
@@ -130,5 +220,5 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}" defer></script>
-<script src="{% static 'js/inicio.js' %}?v=intro-draw-20260915-fast2" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=price-shimmer-700ms-20260916" defer></script>
 {% endblock %}

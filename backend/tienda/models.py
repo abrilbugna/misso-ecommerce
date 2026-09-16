@@ -189,3 +189,5 @@ class ItemOrden(models.Model):
             if img:
                 return img
         return self.producto.imagenes.first()
+# Registered in the same Django app; isolated from the purchase models above.
+from .subscription_models import Suscripcion, PagoSuscripcion, EventoMercadoPago, EmailSuscripcion

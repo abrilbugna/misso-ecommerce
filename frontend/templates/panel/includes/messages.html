@@ -1,0 +1,1 @@
+{% if messages %}<div class="panel-messages" aria-live="polite">{% for message in messages %}<div class="panel-notice {{ message.tags }}" role="status"><span aria-hidden="true">{% if message.tags == 'success' %}✓{% else %}✦{% endif %}</span> {{ message }}</div>{% endfor %}</div>{% endif %}

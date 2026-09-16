@@ -5,7 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
 <link rel="stylesheet" href="{% static 'css/informacion_suscripcion.css' %}">
-<link rel="stylesheet" href="{% static 'css/formulario_suscripcion.css' %}">
+<link rel="stylesheet" href="{% static 'css/formulario_suscripcion.css' %}?v=subscriptions-20260915">
 {% endblock %}
 
 {% block content %}
@@ -23,10 +23,18 @@
       </div>
     </header>
     <form class="subscription-preferences-form" method="post" novalidate>
-      {% csrf_token %}
+      {% csrf_token %}{{ form.submission_token }}
       <div class="subscription-form-header"><span>Tus preferencias</span><p>Los campos con * son necesarios para continuar.</p></div>
       {% if form.non_field_errors %}<div class="subscription-form-alert" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 
+      <section class="subscription-form-group" aria-labelledby="subscription-contact-title">
+        <h2 id="subscription-contact-title">Tus datos</h2>
+        <div class="subscription-text-grid">
+          <div class="subscription-text-field"><label for="{{ form.nombre.id_for_label }}">Nombre completo *</label>{{ form.nombre }}{{ form.nombre.errors }}</div>
+          <div class="subscription-text-field"><label for="{{ form.email.id_for_label }}">Email *</label>{{ form.email }}{{ form.email.errors }}</div>
+          <div class="subscription-text-field"><label for="{{ form.telefono.id_for_label }}">Teléfono *</label>{{ form.telefono }}{{ form.telefono.errors }}</div>
+        </div>
+      </section>
       <fieldset class="subscription-form-group">
         <legend><span>01</span> ¿Para quién es la suscripción? *</legend>
         <div class="subscription-choice-grid subscription-type-grid">{% for choice in form.destino %}<label class="subscription-choice">{{ choice.tag }}<span>{{ choice.choice_label }}</span></label>{% endfor %}</div>
@@ -75,9 +83,14 @@
         <div class="subscription-text-field">{{ form.comentarios }}{% for error in form.comentarios.errors %}<p class="subscription-field-error" role="alert">{{ error }}</p>{% endfor %}</div>
       </div>
 
+      <div class="subscription-form-group">
+        <p class="subscription-field-hint">Suscripción mensual: ${{ subscription_amount }} {{ subscription_currency }}. Autorizás los cobros recurrentes en Mercado Pago.</p>
+        <label class="subscription-acceptance">{{ form.terminos_aceptados }}<span>Leí y acepto los <a href="{% url 'informacion_suscripcion' %}#terminos" target="_blank" rel="noopener">Términos y Condiciones de Misso</a>.</span></label>
+        {{ form.terminos_aceptados.errors }}{{ form.submission_token.errors }}
+      </div>
       <div class="subscription-form-actions">
-        <button class="subscription-submit misso-pill-button misso-pill-right" type="submit"><span class="misso-pill-label">Continuar por WhatsApp</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></button>
-        <p>Se abrirá WhatsApp con tus respuestas para coordinar el pago y el envío. Si tenés alguna duda o consulta, podés comunicarte por <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20tengo%20una%20duda%20sobre%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer">nuestro WhatsApp</a>.</p>
+        <button class="subscription-submit misso-pill-button misso-pill-right" type="submit"><span class="misso-pill-label">Suscribirme</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></button>
+        <p>Continuarás en Mercado Pago para autorizar tu suscripción mensual. Si tenés alguna duda o consulta, podés comunicarte por <a href="https://wa.me/543517727224?text=Hola%20Misso%2C%20tengo%20una%20duda%20sobre%20la%20suscripci%C3%B3n%20mensual" target="_blank" rel="noopener noreferrer">nuestro WhatsApp</a>.</p>
       </div>
     </form>
   </section>
@@ -101,6 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   options.forEach(option => option.addEventListener('change', update));
   update();
+  document.querySelector('.subscription-preferences-form').addEventListener('submit', event => {
+    const button = event.currentTarget.querySelector('button[type="submit"]');
+    button.disabled = true;
+    event.currentTarget.setAttribute('aria-busy', 'true');
+    button.querySelector('.misso-pill-label').textContent = 'Redirigiendo…';
+  });
+  window.addEventListener('pageshow', () => {
+    const form = document.querySelector('.subscription-preferences-form');
+    form.removeAttribute('aria-busy');
+    form.querySelector('button[type="submit"]').disabled = false;
+    form.querySelector('.misso-pill-label').textContent = 'Suscribirme';
+  });
 });
 </script>
 {% endblock %}

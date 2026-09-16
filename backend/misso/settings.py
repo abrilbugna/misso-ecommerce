@@ -50,7 +50,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'tienda.context_processors.cart_count', 
+                'tienda.context_processors.cart_count',
+                'tienda.context_processors.subscription_offer',
             ],
         },
     },
@@ -110,3 +111,38 @@ GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 NOTIFICACION_EMAIL = os.getenv('EMAIL_HOST_USER')
+
+# One commercial definition; production reuses MP_ACCESS_TOKEN, test is isolated.
+from decimal import Decimal
+PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', '').strip().rstrip('/')
+MP_SUBSCRIPTION_MODE = os.getenv('MP_SUBSCRIPTION_MODE', 'test').strip().lower()
+MP_SUBSCRIPTION_TEST_ACCESS_TOKEN = os.getenv('MP_SUBSCRIPTION_TEST_ACCESS_TOKEN', '').strip()
+# Only the explicitly configured public origin is trusted for the development tunnel.
+from urllib.parse import urlsplit
+_public_origin = urlsplit(PUBLIC_BASE_URL)
+if _public_origin.scheme == 'https' and _public_origin.hostname:
+    ALLOWED_HOSTS.append(_public_origin.hostname)
+    CSRF_TRUSTED_ORIGINS = [f'https://{_public_origin.netloc}']
+
+MP_SUBSCRIPTION_ENABLED = os.getenv('MP_SUBSCRIPTION_ENABLED', 'False').lower() == 'true'
+MP_SUBSCRIPTION_AMOUNT = Decimal(os.getenv('MP_SUBSCRIPTION_AMOUNT', '25000'))
+MP_SUBSCRIPTION_CURRENCY = os.getenv('MP_SUBSCRIPTION_CURRENCY', 'ARS')
+MP_SUBSCRIPTION_REASON = os.getenv('MP_SUBSCRIPTION_REASON', 'Misso — Suscripción mensual')
+MP_SUBSCRIPTION_FREQUENCY = 1
+MP_SUBSCRIPTION_FREQUENCY_TYPE = 'months'
+MP_WEBHOOK_SECRET = os.getenv('MP_WEBHOOK_SECRET', '')
+MISSO_ADMIN_EMAIL = os.getenv('MISSO_ADMIN_EMAIL') or NOTIFICACION_EMAIL
+MISSO_EMAIL_FROM = os.getenv('MISSO_EMAIL_FROM', 'Misso <hola@misso.ar>')
+# Leave blank for the documented hosted pending checkout. See docs/suscripciones.md.
+MP_SUBSCRIPTION_PLAN_ID = os.getenv('MP_SUBSCRIPTION_PLAN_ID', '')
+
+# Targeted billing audit logs; preserve the existing Django/payment loggers.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'subscription_console': {'class': 'logging.StreamHandler'}},
+    'loggers': {
+        name: {'handlers': ['subscription_console'], 'level': 'INFO', 'propagate': False}
+        for name in ('tienda.subscription_services', 'tienda.subscription_views', 'tienda.subscription_emails', 'tienda.subscription_api')
+    },
+}

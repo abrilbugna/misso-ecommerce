@@ -96,3 +96,39 @@ class OrdenAdmin(admin.ModelAdmin):
 class OpcionEnvioAdmin(admin.ModelAdmin):
     list_display = ['nombre', 'costo', 'activo']
     list_editable = ['costo', 'activo']
+
+# Subscription state is exclusively reconciled with Mercado Pago, even in /admin/.
+from .models import Suscripcion, PagoSuscripcion, EventoMercadoPago, EmailSuscripcion
+
+
+class SubscriptionReadOnlyAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Suscripcion)
+class SuscripcionAdmin(SubscriptionReadOnlyAdmin):
+    list_display = ('id', 'nombre', 'email', 'estado', 'importe', 'mp_preapproval_id', 'actualizado')
+    list_filter = ('estado', 'creado')
+    search_fields = ('nombre', 'email', 'telefono', 'external_reference', 'mp_preapproval_id')
+
+
+@admin.register(EventoMercadoPago)
+class EventoSuscripcionAdmin(SubscriptionReadOnlyAdmin):
+    list_display = ('id', 'topico', 'recurso_id', 'recibido_at', 'procesado_at', 'intentos', 'error')
+    list_filter = ('topico', 'procesado_at')
+
+
+@admin.register(EmailSuscripcion)
+class EmailSuscripcionAdmin(SubscriptionReadOnlyAdmin):
+    list_display = ('id', 'suscripcion', 'tipo', 'enviado_at', 'intentos', 'revision_manual', 'error')
+    exclude = ('payload',)
+
+
+admin.site.register(PagoSuscripcion, SubscriptionReadOnlyAdmin)

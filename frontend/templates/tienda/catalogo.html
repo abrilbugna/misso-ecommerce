@@ -10,7 +10,7 @@
 </script>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
-<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=filters-20260914-2">
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=category-blob-20260916">
 {% endblock %}
 {% block content %}
 <div class="home-page catalog-page">
@@ -28,8 +28,9 @@
         <span class="catalog-count">{{ productos|length }} productos</span>
       </div>
       <div class="catalog-filters" role="navigation" aria-label="Filtrar por categoría">
-        <a href="{% url 'catalogo' %}{% if busqueda %}?q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if not categoria_activa %}is-active{% endif %}" {% if not categoria_activa %}aria-current="page"{% endif %}>Todos</a>
-        {% for valor, nombre in categorias %}<a href="{% url 'catalogo' %}?categoria={{ valor|urlencode }}{% if busqueda %}&amp;q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if categoria_activa == valor %}is-active{% endif %}" {% if categoria_activa == valor %}aria-current="page"{% endif %}>{{ nombre }}</a>{% endfor %}
+        <span class="catalog-category-blob" data-category-blob aria-hidden="true"></span>
+        <a href="{% url 'catalogo' %}{% if busqueda %}?q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if not categoria_activa %}is-active{% endif %}" {% if not categoria_activa %}aria-current="page"{% endif %}><span class="catalog-filter-label">Todos</span></a>
+        {% for valor, nombre in categorias %}<a href="{% url 'catalogo' %}?categoria={{ valor|urlencode }}{% if busqueda %}&amp;q={{ busqueda|urlencode }}{% endif %}" class="catalog-filter {% if categoria_activa == valor %}is-active{% endif %}" {% if categoria_activa == valor %}aria-current="page"{% endif %}><span class="catalog-filter-label">{{ nombre }}</span></a>{% endfor %}
       </div>
     </div>
 
@@ -54,4 +55,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=filters-20260914-2" defer></script>{% endblock %}
+{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=category-blob-20260916" defer></script>{% endblock %}

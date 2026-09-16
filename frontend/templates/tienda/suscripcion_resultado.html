@@ -1,0 +1,10 @@
+{% extends 'tienda/base.html' %}{% load static %}{% block navigation %}{% endblock %}{% block title %}Tu suscripción — Misso{% endblock %}
+{% block extra_css %}<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><link rel="stylesheet" href="{% static 'css/inicio.css' %}"><link rel="stylesheet" href="{% static 'css/informacion_suscripcion.css' %}"><link rel="stylesheet" href="{% static 'css/formulario_suscripcion.css' %}?v=subscriptions-20260915">{% endblock %}
+{% block content %}<div class="home-page subscription-info-page subscription-form-page"><div class="subscription-top">{% include 'tienda/includes/bubble_nav.html' with nav_class='subscription-nav' %}</div><section class="subscription-form-layout subscription-result" data-status="{{ sub.estado }}" data-status-url="{% url 'suscripcion_estado' sub.referencia_publica %}">
+{% if sub.estado == 'activa' %}<h1>Tu suscripción está <em>activa ♡</em></h1><p>Ya sos parte de Misso. Te enviaremos la confirmación y tus preferencias por email.</p>
+{% elif sub.estado == 'pendiente' %}<h1>Estamos confirmando <em>tu suscripción.</em></h1><p>Estamos confirmando tu suscripción con Mercado Pago. Puede demorar unos momentos.</p><a class="subscription-help-link" href="{% url 'suscripcion_resultado' sub.referencia_publica %}">Actualizar estado ↗</a>
+{% elif sub.estado == 'pausada' %}<h1>Tu suscripción está <em>pausada.</em></h1><p>Podés consultar su estado en Mercado Pago.</p>
+{% elif sub.estado == 'cancelada' %}<h1>Tu suscripción está <em>cancelada.</em></h1><p>Si necesitás ayuda, contactanos.</p>
+{% else %}<h1>No pudimos confirmar <em>la suscripción.</em></h1><p>Contactanos para ayudarte a revisar el estado.</p>{% endif %}
+<a class="subscription-help-link" href="{% url 'inicio' %}">Ir a Misso ↗</a><a class="subscription-help-link" href="{% url 'informacion_suscripcion' %}#terminos">Términos y Condiciones ↗</a></section></div>{% endblock %}
+{% block extra_js %}<script src="{% static 'js/suscripcion_resultado.js' %}" defer></script>{% endblock %}

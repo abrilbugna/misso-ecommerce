@@ -164,13 +164,29 @@ body:has(.catalog-page) > nav {
 .catalog-product-link:focus-visible,
 .catalog-promo-link:focus-visible { outline: 2px solid var(--wine-dark); outline-offset: 3px; }
 .catalog-filters {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   min-width: 0;
+  isolation: isolate;
+}
+.catalog-category-blob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 0;
+  height: 0;
+  border-radius: 999px;
+  background: var(--wine);
+  pointer-events: none;
+  visibility: hidden;
+  will-change: transform, width;
 }
 .catalog-filter {
+  position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -189,10 +205,30 @@ body:has(.catalog-page) > nav {
   white-space: nowrap;
   transition: transform .35s cubic-bezier(.2,.9,.2,1.3), background .25s, color .25s;
 }
+.catalog-filter-label {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
 .catalog-filter:hover { transform: translateY(-2px); background: var(--rose-light); color: var(--wine-dark); }
 .catalog-filter:active { transform: scale(.97); }
 .catalog-filter.is-active { border-color: var(--wine); background: var(--wine); color: var(--cream); }
 .catalog-filter.is-active:hover { background: var(--burgundy); color: var(--cream); }
+.catalog-filters.has-category-blob .catalog-category-blob { visibility: visible; }
+.catalog-filters.has-category-blob .catalog-filter,
+.catalog-filters.has-category-blob .catalog-filter:hover,
+.catalog-filters.has-category-blob .catalog-filter:active,
+.catalog-filters.has-category-blob .catalog-filter.is-active,
+.catalog-filters.has-category-blob .catalog-filter.is-active:hover {
+  background: transparent;
+  transform: none;
+}
+.catalog-filters.has-category-blob .catalog-filter.is-active { color: var(--wine-dark); }
+.catalog-filters.has-category-blob .catalog-filter.is-blob-target {
+  border-color: transparent;
+  color: var(--cream);
+}
+.catalog-filters.has-category-blob .catalog-filter:focus-visible { z-index: 3; }
 
 .catalog-grid {
   display: grid;
@@ -400,6 +436,7 @@ body:has(.catalog-page) > nav {
   .catalog-empty-link,
   .catalog-promo-link span,
   .catalog-empty-link span { transform: none !important; transition: none !important; }
+  .catalog-category-blob { will-change: auto; }
   .catalog-filters { scroll-behavior: auto; }
 }
 

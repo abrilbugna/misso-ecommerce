@@ -1,0 +1,14 @@
+{% extends 'panel/base.html' %}{% load static %}
+{% block title %}Entrar{% endblock %}{% block body_class %}panel-login-body{% endblock %}
+{% block shell %}
+<main id="panel-content" class="panel-login">
+  <div class="panel-login-editorial" aria-hidden="true"><span class="panel-eyebrow">MISSO / DETRÁS DE CADA DETALLE</span><p>Un pequeño<br>universo.<br><em>Todo tuyo.</em></p><span class="panel-login-star">✦</span></div>
+  <section class="panel-login-card">
+    <a class="panel-brand" href="{% url 'inicio' %}">misso</a><img class="panel-login-mark" src="{% static 'img/letram.svg' %}" width="84" height="84" alt="">
+    <span class="panel-eyebrow">ADMINISTRACIÓN</span><h1>Qué lindo<br><em>verte de nuevo.</em></h1>
+    {% include 'panel/includes/messages.html' %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">{% include 'panel/includes/form.html' %}<button class="panel-button" type="submit">Entrar <span>↗</span></button></form>
+    <a class="panel-link" href="{% url 'inicio' %}">Volver a Misso ↗</a>
+  </section>
+</main>
+{% endblock %}

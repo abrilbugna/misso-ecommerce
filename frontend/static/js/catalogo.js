@@ -10,6 +10,122 @@
     const initialOrder = new Map(cards.map((card, index) => [card, index]));
     const activeCategory = root.querySelector('.catalog-filter.is-active');
     const categoryScroller = root.querySelector('.catalog-filters');
+    const categoryLinks = categoryScroller ? [...categoryScroller.querySelectorAll('.catalog-filter')] : [];
+    const categoryBlob = categoryScroller?.querySelector('[data-category-blob]');
+
+    const setupCategoryBlob = () => {
+      if (!window.gsap || !categoryScroller || !categoryBlob || !activeCategory || !categoryLinks.length) return;
+
+      const { gsap } = window;
+      const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const hoverPreference = window.matchMedia('(hover: hover) and (pointer: fine)');
+      let visualTarget = activeCategory;
+      let hoverTarget = null;
+      let resizeFrame = 0;
+      let resizeObserver = null;
+      const removeListeners = [];
+
+      const listen = (target, type, handler, options) => {
+        target.addEventListener(type, handler, options);
+        removeListeners.push(() => target.removeEventListener(type, handler, options));
+      };
+
+      const getTargetBounds = target => {
+        const targetRect = target.getBoundingClientRect();
+        const scrollerRect = categoryScroller.getBoundingClientRect();
+        const renderedScale = categoryScroller.offsetWidth
+          ? scrollerRect.width / categoryScroller.offsetWidth
+          : 1;
+        const scale = renderedScale || 1;
+
+        return {
+          x: (targetRect.left - scrollerRect.left) / scale + categoryScroller.scrollLeft - categoryScroller.clientLeft,
+          y: (targetRect.top - scrollerRect.top) / scale + categoryScroller.scrollTop - categoryScroller.clientTop,
+          width: targetRect.width / scale,
+          height: targetRect.height / scale
+        };
+      };
+
+      const markTarget = target => {
+        categoryLinks.forEach(link => link.classList.toggle('is-blob-target', link === target));
+      };
+
+      const moveBlob = (target, animate = true) => {
+        if (!target?.isConnected) return;
+        if (animate && target === visualTarget) return;
+        visualTarget = target;
+        markTarget(target);
+        const bounds = getTargetBounds(target);
+        const properties = { ...bounds, overwrite: 'auto' };
+
+        if (animate && !motionPreference.matches) {
+          gsap.to(categoryBlob, { ...properties, duration: .45, ease: 'power3.out' });
+        } else {
+          gsap.set(categoryBlob, properties);
+        }
+      };
+
+      // Measure first, then replace the server-rendered active background atomically.
+      moveBlob(activeCategory, false);
+      categoryScroller.classList.add('has-category-blob');
+
+      if (hoverPreference.matches) {
+        categoryLinks.forEach(link => {
+          listen(link, 'pointerenter', () => {
+            hoverTarget = link;
+            moveBlob(link);
+          });
+        });
+        listen(categoryScroller, 'pointerleave', () => {
+          hoverTarget = null;
+          moveBlob(activeCategory);
+        });
+        // One reset per wheel/trackpad gesture; the blob itself scrolls with the links.
+        listen(categoryScroller, 'scroll', () => {
+          if (!hoverTarget) return;
+          hoverTarget = null;
+          moveBlob(activeCategory);
+        }, { passive: true });
+      }
+
+      categoryLinks.forEach(link => {
+        listen(link, 'focus', () => moveBlob(link));
+        listen(link, 'click', () => moveBlob(link));
+      });
+      listen(categoryScroller, 'focusout', event => {
+        if (!categoryScroller.contains(event.relatedTarget)) moveBlob(activeCategory);
+      });
+
+      const placeCurrentTarget = () => {
+        resizeFrame = 0;
+        moveBlob(visualTarget?.isConnected ? visualTarget : activeCategory, false);
+      };
+      const schedulePlacement = () => {
+        if (resizeFrame) return;
+        resizeFrame = window.requestAnimationFrame(placeCurrentTarget);
+      };
+      resizeObserver = 'ResizeObserver' in window ? new ResizeObserver(schedulePlacement) : null;
+      if (resizeObserver) {
+        resizeObserver.observe(categoryScroller);
+        categoryLinks.forEach(link => resizeObserver.observe(link));
+      } else {
+        listen(window, 'resize', schedulePlacement, { passive: true });
+      }
+      const handleMotionPreference = () => {
+        if (motionPreference.matches) gsap.killTweensOf(categoryBlob);
+        moveBlob(visualTarget, false);
+      };
+      if (motionPreference.addEventListener) listen(motionPreference, 'change', handleMotionPreference);
+
+      window.addEventListener('pagehide', () => {
+        if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+        resizeObserver?.disconnect();
+        removeListeners.forEach(remove => remove());
+        gsap.killTweensOf(categoryBlob);
+      }, { once: true });
+    };
+
+    setupCategoryBlob();
 
     // Keep a category selected after navigation without moving the page vertically.
     if (activeCategory && categoryScroller && window.matchMedia('(max-width: 767px)').matches) {

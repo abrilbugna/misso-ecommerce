@@ -16,6 +16,13 @@
 
     videos.forEach(video => {
       if (!video) return;
+      const fitFrame = () => {
+        if (video.videoWidth && video.videoHeight) {
+          video.closest('[data-intro-slide]').style.setProperty('--intro-video-ratio', `${video.videoWidth} / ${video.videoHeight}`);
+        }
+      };
+      video.addEventListener('loadedmetadata', fitFrame);
+      fitFrame();
       const ready = () => video.classList.add('is-ready');
       if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) ready();
       else video.addEventListener('loadeddata', ready);
@@ -95,7 +102,9 @@
   }
   initIntroCarousel();
   if (!root || !window.gsap || !window.ScrollTrigger) {
-    document.documentElement.classList.remove('misso-intro-pending');
+    window.clearTimeout(window.missoIntroFallback);
+    document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
+    window.unlockIntroScroll?.();
     return;
   }
   const { gsap, ScrollTrigger } = window;
@@ -220,12 +229,16 @@
     const overlay = document.querySelector('.hero-intro-mark');
     const logo = overlay?.querySelector('.hero-intro-logo');
     const headlineLines = gsap.utils.toArray('.hero-copy-line > span');
-    const badges = gsap.utils.toArray('.hero-badge');
-    const handwritten = document.querySelector('.hero-handwritten');
-    const arrowPath = handwritten?.querySelector('path');
+    const badges = gsap.utils.toArray('.hero-badge').filter(badge => window.getComputedStyle(badge).display !== 'none');
     const photo = document.querySelector('.hero-product-link');
+    const priceShimmer = document.querySelector('.hero-price-shimmer');
+    const personalizedNumber = document.querySelector('.hero-badge-personalized-number');
+    const personalizedProgress = document.querySelector('.hero-badge-personalized-progress');
+    const personalizedLabel = document.querySelector('.hero-badge-personalized-label');
     if (!overlay || !logo || !photo || !product) {
-      html.classList.remove('misso-intro-pending');
+      window.clearTimeout(window.missoIntroFallback);
+      html.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
+      window.unlockIntroScroll?.();
       return;
     }
 
@@ -236,6 +249,7 @@
       const reducedIntro = gsap.timeline({ onComplete: () => {
         window.clearTimeout(window.missoIntroFallback);
         html.classList.remove('misso-intro-pending', 'misso-intro-running');
+        window.unlockIntroScroll?.();
       } });
       reducedIntro.to(logo, { opacity: 1, duration: .14 })
         .to(logo, { opacity: 0, duration: .18 }, .30)
@@ -252,28 +266,61 @@
     gsap.set(product, { autoAlpha: 0, y: mobile ? 26 : 58, scale: .97 });
     gsap.set(photo, { clipPath: 'inset(100% 0 0 0)' });
     badges.forEach((badge, index) => gsap.set(badge, { autoAlpha: 0, scale: .78, rotation: index % 2 ? 5 : -5 }));
-    gsap.set(handwritten, { autoAlpha: 0, y: 10, rotation: -12 });
-    if (arrowPath) {
-      const length = arrowPath.getTotalLength();
-      gsap.set(arrowPath, { strokeDasharray: length, strokeDashoffset: length });
-    }
     gsap.set('.hero-bottomline', { autoAlpha: 0, y: 10 });
+    const canCountPersonalizedBadge = !mobile && personalizedNumber && personalizedProgress && personalizedLabel;
+    let personalizedBadgePlayed = false;
+    if (canCountPersonalizedBadge) {
+      gsap.set(personalizedProgress, { width: '0%' });
+      gsap.set(personalizedLabel, { autoAlpha: 0, y: 5 });
+    }
+    const playPersonalizedBadge = () => {
+      if (!canCountPersonalizedBadge || personalizedBadgePlayed || window.innerWidth < 768 || !html.classList.contains('misso-intro-running')) return;
+      personalizedBadgePlayed = true;
+      const counter = { value: 0 };
+      personalizedNumber.textContent = '0%';
+      personalizedProgress.style.width = '0%';
+      gsap.timeline()
+        .to(counter, {
+          value: 100,
+          duration: .7,
+          ease: 'power2.inOut',
+          onUpdate: () => {
+            personalizedNumber.textContent = `${Math.round(counter.value)}%`;
+            personalizedProgress.style.width = `${counter.value}%`;
+          },
+          onComplete: () => {
+            personalizedNumber.textContent = '100%';
+            personalizedProgress.style.width = '100%';
+          }
+        })
+        .to(personalizedLabel, { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, '-=.34');
+    };
     html.classList.remove('misso-intro-pending');
 
+    let intro;
+    const finishOnPageHide = () => {
+      if (!introComplete && intro) intro.progress(1);
+    };
     const finish = () => {
       if (introComplete) return;
       introComplete = true;
+      window.removeEventListener('pagehide', finishOnPageHide);
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-running');
-      gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-handwritten, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
+      gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
       gsap.set('.hero-copy-line', { overflow: 'visible' });
-      if (arrowPath) gsap.set(arrowPath, { clearProps: 'strokeDasharray,strokeDashoffset' });
+      if (!personalizedBadgePlayed) {
+        if (personalizedProgress) gsap.set(personalizedProgress, { clearProps: 'width' });
+        if (personalizedLabel) gsap.set(personalizedLabel, { clearProps: 'opacity,visibility,transform' });
+      }
       scrollArrowMotion?.play();
+      window.unlockIntroScroll?.();
       initProductMotion(mobile);
       ScrollTrigger.refresh();
     };
 
-    const intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish }).timeScale(1.4);
+    intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish }).timeScale(1.4);
+    window.addEventListener('pagehide', finishOnPageHide, { once: true });
     addLogoDrawing(intro, logo, mobile);
     intro.addLabel('hero', 1.95)
       .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 'hero+=0.00')
@@ -287,11 +334,10 @@
       .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 'hero+=1.01' : 'hero+=0.66')
       .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut', onComplete: () => gsap.set(photo, { clearProps: 'clipPath', overflow: 'visible' }) }, mobile ? 'hero+=1.01' : 'hero+=0.66')
       .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 'hero+=0.70' : 'hero+=0.83')
-      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28 }, mobile ? 'hero+=0.81' : 'hero+=0.95')
+      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28, onComplete: () => priceShimmer?.classList.add('is-shimmering') }, mobile ? 'hero+=0.81' : 'hero+=0.95')
       .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 'hero+=0.91' : 'hero+=1.04')
       .to(badges, { autoAlpha: 1, scale: 1, rotation: 0, stagger: .07, duration: .34, ease: 'back.out(1.3)' }, mobile ? 'hero+=1.18' : 'hero+=1.19')
-      .to(handwritten, { autoAlpha: 1, y: 0, rotation: -8, duration: .27 }, 'hero+=1.34');
-    if (arrowPath) intro.to(arrowPath, { strokeDashoffset: 0, duration: .45, ease: 'power2.inOut' }, 'hero+=1.37');
+      .call(playPersonalizedBadge, [], 'hero+=1.38');
     intro.to('.hero-bottomline', { autoAlpha: 1, y: 0, duration: .25 }, 'hero+=1.60');
     return () => {
       if (!introComplete) intro.progress(1);
@@ -397,7 +443,7 @@
     gsap.from('.intro-copy > *', { y: 55, opacity: 0, stagger: .11, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: '.intro-copy', start: 'top 78%' } });
     gsap.from('.intro-image-wrap', { y: 80, rotation: 4, opacity: 0, duration: 1.1, ease: 'power3.out', scrollTrigger: { trigger: '.intro-grid', start: 'top 78%' } });
     gsap.from('.intro-notification', { y: -18, scale: .96, opacity: 0, duration: .5, delay: .45, ease: 'back.out(1.3)', scrollTrigger: { trigger: '.intro-grid', start: 'top 78%' } });
-    gsap.to('.intro-image-wrap video, .intro-image-wrap img', { yPercent: -8, ease: 'none', scrollTrigger: { trigger: '.intro-grid', start: 'top bottom', end: 'bottom top', scrub: true } });
+    // Animate the stack wrapper, keeping each complete video flush with its card.
   }
 
   function initBenefitsScroll(config, autoplay = false) {
@@ -432,7 +478,7 @@
       const start = index * slot;
       gsap.set(card, { xPercent: xStart, yPercent: yStart, rotation: rotation * (autoplay ? 1.2 : 1.6), scale: autoplay ? .91 : .82, opacity: 1, zIndex: index + 3 });
       if (autoplay) {
-        // A single eased arrival, a readable pause, and an overlapping exit keep the mobile loop fluid.
+        // A single eased arrival, a readable pause, and an overlapping exit keep the loop fluid.
         tl.to(card, { xPercent: 0, yPercent: 0, rotation: rotation * .15, scale: 1, duration: slot * .42, ease: 'power3.out' }, start);
         tl.to(card, { xPercent: xEnd, yPercent: yEnd, rotation: -rotation * .85, scale: .94, duration: slot * .36, ease: 'power2.in' }, start + slot * .73);
       } else {
@@ -550,6 +596,7 @@
       introComplete = true;
       window.clearTimeout(window.missoIntroFallback);
       document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running');
+      window.unlockIntroScroll?.();
       scrollArrowMotion?.play();
       if (!reducedMotion) initProductMotion(window.innerWidth < 768);
       return;
@@ -570,8 +617,8 @@
   initHeroArrows();
   initNavWordmark();
   initBrandIntro();
-  mm.add('(min-width: 992px)', () => initBenefitsScroll({ distanceX: 250, distanceY: 190, rotation: 11 }));
-  mm.add('(min-width: 768px) and (max-width: 991px)', () => initBenefitsScroll({ distanceX: 215, distanceY: 160, rotation: 8 }));
+  mm.add('(min-width: 992px)', () => initBenefitsScroll({ distanceX: 250, distanceY: 190, rotation: 11 }, true));
+  mm.add('(min-width: 768px) and (max-width: 991px)', () => initBenefitsScroll({ distanceX: 215, distanceY: 160, rotation: 8 }, true));
   mm.add('(max-width: 767px)', () => initBenefitsScroll({ distanceX: 150, distanceY: 135, rotation: 5 }, true));
   initButtonInteractions();
   initOutroProducts();

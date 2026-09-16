@@ -4,13 +4,12 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
-from .forms import CheckoutForm, PreferenciasSuscripcionForm
+from .forms import CheckoutForm
 from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
 import mercadopago
 from django.conf import settings
 from django.http import JsonResponse
 import json
-from urllib.parse import quote
 
 
 MERCADOPAGO_RECARGO = Decimal('0.10')
@@ -68,28 +67,6 @@ def inicio(request):
 def informacion_suscripcion(request):
     return render(request, 'tienda/informacion_suscripcion.html')
 
-
-def comenzar_suscripcion(request):
-    form = PreferenciasSuscripcionForm(request.POST if request.method == 'POST' else None)
-    if request.method == 'POST' and form.is_valid():
-        respuestas = form.cleaned_data
-        talle = dict(form.fields['talle'].choices)[respuestas['talle']]
-        tipo = dict(form.fields['tipo_prenda'].choices).get(respuestas.get('tipo_prenda'), 'A elección de Misso')
-        estilo = dict(form.fields['estilo'].choices).get(respuestas.get('estilo'), 'A elección de Misso')
-        mensaje = '\n'.join([
-            'Hola Misso, quiero empezar mi suscripción mensual. Estas son mis preferencias:',
-            f"Es para: {'mí' if respuestas['destino'] == 'mismo' else 'un regalo'}",
-            f'Talle: {talle}',
-            f'Tipo de prenda: {tipo}',
-            f'Colores que prefiero: {respuestas["color_preferido"] or "Sin preferencia"}',
-            f'Colores que prefiero evitar: {respuestas["color_evitar"] or "Ninguno"}',
-            f'Estilo: {estilo}',
-            f'Carta para regalo: {respuestas["carta"] or "No, gracias"}',
-            f'Otros detalles: {respuestas["comentarios"] or "Ninguno"}',
-            'Quiero coordinar el pago y el envío.',
-        ])
-        return redirect(f'https://wa.me/543517727224?text={quote(mensaje)}')
-    return render(request, 'tienda/formulario_suscripcion.html', {'form': form})
 
 
 def catalogo(request):

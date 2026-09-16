@@ -1,0 +1,10 @@
+<section class="panel-color-block" data-form-row data-color-block>
+  {{ form.non_field_errors }}{% for field in form %}{% include 'panel/includes/field.html' %}{% endfor %}
+  {% if empty_sizes %}<p class="panel-notice warning">Este color no tiene talles configurados.</p>{% endif %}
+  <div data-formset data-prefix="{{ sizes.prefix }}" data-max="4" class="panel-size-set">
+    {{ sizes.management_form }}{{ sizes.non_form_errors }}<div data-rows>{% for size in sizes %}{% include 'panel/includes/size.html' with form=size %}{% endfor %}</div>
+    <template data-empty>{% include 'panel/includes/size.html' with form=sizes.empty_form %}</template>
+    <button type="button" class="panel-button secondary small" data-add>+ Agregar talle</button>
+  </div>
+  {% if not form.instance.pk %}<button type="button" class="panel-remove" data-discard-row>Descartar color nuevo</button>{% else %}<p class="panel-hint">Los colores y talles guardados se conservan para proteger pedidos y carritos. Usá stock 0 para dejar una variante sin disponibilidad.</p>{% endif %}
+</section>

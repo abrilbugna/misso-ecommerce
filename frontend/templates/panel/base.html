@@ -1,0 +1,37 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>{% block title %}Panel{% endblock %} · Misso</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}"><link rel="stylesheet" href="{% static 'css/panel.css' %}">
+  <script src="{% static 'js/panel.js' %}" defer></script>
+</head>
+<body class="panel-body {% block body_class %}{% endblock %}">
+<a class="panel-skip" href="#panel-content">Saltar al contenido</a>
+{% block shell %}
+<header class="panel-header">
+  <a class="panel-brand" href="{% url 'panel:inicio' %}" aria-label="Misso, inicio del panel">misso<span>PANEL / ADMINISTRACIÓN</span></a>
+  <div class="panel-header-actions"><a class="panel-link" href="{% url 'inicio' %}" target="_blank" rel="noopener">Ver tienda ↗</a><span class="panel-user">{{ request.user.get_short_name|default:request.user.username }}</span><form action="{% url 'panel:logout' %}" method="post">{% csrf_token %}<button class="panel-button secondary small" type="submit">Cerrar sesión ↗</button></form></div>
+</header>
+<div class="panel-layout">
+  <aside class="panel-sidebar">
+    <div class="panel-sidebar-caption">EL UNIVERSO MISSO <span aria-hidden="true">✦</span></div>
+    <nav class="panel-nav" aria-label="Administración">
+      <a href="{% url 'panel:inicio' %}" {% if section == 'inicio' %}aria-current="page"{% endif %}><span>01</span> Inicio <b>↗</b></a>
+      {% if perms.tienda.view_producto %}<a href="{% url 'panel:productos' %}" {% if section == 'productos' %}aria-current="page"{% endif %}><span>02</span> Productos <b>↗</b></a>{% endif %}
+      {% if perms.tienda.view_orden %}<a href="{% url 'panel:pedidos' %}" {% if section == 'pedidos' %}aria-current="page"{% endif %}><span>03</span> Pedidos <b>↗</b></a>{% endif %}
+      {% if perms.tienda.view_codigopromocional %}<a href="{% url 'panel:promociones' %}" {% if section == 'promociones' %}aria-current="page"{% endif %}><span>04</span> Promociones <b>↗</b></a>{% endif %}
+      {% if perms.tienda.view_opcionenvio %}<a href="{% url 'panel:envios' %}" {% if section == 'envios' %}aria-current="page"{% endif %}><span>05</span> Envíos <b>↗</b></a>{% endif %}
+      {% if perms.tienda.view_suscripcion %}<a href="{% url 'panel:suscripciones' %}" {% if section == 'suscripciones' %}aria-current="page"{% endif %}><span>06</span> Suscripciones <b>↗</b></a>{% endif %}
+    </nav>
+    <div class="panel-sidebar-note"><img src="{% static 'img/letram.svg' %}" alt="" width="80" height="80"><p>Cada detalle<br><em>cuenta.</em></p><a href="{% url 'admin:index' %}">Panel técnico ↗</a></div>
+  </aside>
+  <main id="panel-content" class="panel-main">
+    {% include 'panel/includes/messages.html' %}
+    {% block content %}{% endblock %}
+    <div class="panel-bottom">MISSO <span>Hecho con intención. Gestionado con amor.</span> ✦</div>
+  </main>
+</div>
+{% endblock %}
+</body></html>

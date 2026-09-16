@@ -1,0 +1,5 @@
+{% extends 'tienda/emails/suscripcion_base.html' %}
+{% block heading %}Nueva suscripción en Misso ♡{% endblock %}
+{% block intro %}<h2 style="font-size:15px;color:#8b2035;">NUEVA SUSCRIPCIÓN</h2><p><strong>Cliente:</strong> {{ sub.nombre }}<br>Email: {{ sub.email }}<br>Teléfono: {{ sub.telefono }}</p>{% endblock %}
+{% block technical %}<p>ID local: {{ sub.pk }}<br>Mercado Pago: {{ sub.mp_preapproval_id }}</p>{% endblock %}
+{% block cta %}<p style="text-align:center;"><a href="{{ panel_url }}" style="display:inline-block;background:#efb6c8;color:#4a0d22;text-decoration:none;padding:14px 22px;border-radius:24px;">VER EN PANEL →</a></p>{% endblock %}

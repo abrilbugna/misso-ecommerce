@@ -66,3 +66,12 @@
 }
 @media(max-width:340px){.subscription-size-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.subscription-submit.misso-pill-button{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.subscription-choice span,.subscription-form-page .subscription-help-link{transition:none}.subscription-choice:hover span,.subscription-form-page .subscription-help-link:hover{transform:none}}
+
+.subscription-acceptance{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.5}
+.subscription-acceptance input{flex:none;width:18px;height:18px;margin-top:2px;accent-color:var(--wine)}
+.subscription-acceptance a{text-decoration:underline}
+.subscription-form-page .errorlist{color:var(--wine);font-size:13px;list-style:none;padding:8px 0;overflow-wrap:anywhere}
+.subscription-submit:disabled{opacity:.65;cursor:wait}
+.subscription-result{min-height:60svh;display:flex;flex-direction:column;justify-content:center;gap:24px;overflow-wrap:anywhere}
+.subscription-result h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,7vw,5.5rem);line-height:1;color:var(--wine-dark)}
+.subscription-result p{line-height:1.6}

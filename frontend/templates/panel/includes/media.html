@@ -1,0 +1,4 @@
+<div class="panel-media-row" data-form-row>
+  <div class="panel-media-preview" data-preview-container>{% if kind == 'image' and form.instance.pk %}<img src="{{ form.instance.imagen.url }}" alt="Imagen actual del producto" loading="lazy">{% elif kind == 'video' and form.instance.pk %}<video controls preload="metadata" src="{{ form.instance.video.url }}"></video>{% else %}<span>+ {{ kind|yesno:'Archivo,Archivo' }}</span>{% endif %}</div>
+  <div class="panel-media-fields">{{ form.non_field_errors }}{% for field in form %}{% include 'panel/includes/field.html' %}{% endfor %}{% if not form.instance.pk %}<button class="panel-remove" type="button" data-discard-row>Descartar archivo nuevo</button>{% endif %}</div>
+</div>
