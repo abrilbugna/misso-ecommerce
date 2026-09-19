@@ -17,6 +17,7 @@
       handlePageHide: null,
       handleError: null,
       handleRejection: null,
+      stateObserver: null,
     };
     const lockProperties = ['--misso-intro-lock-top', '--misso-intro-lock-left', '--misso-intro-scrollbar-width'];
 
@@ -29,6 +30,8 @@
     };
 
     window.unlockIntroScroll = () => {
+      lockState.stateObserver?.disconnect();
+      lockState.stateObserver = null;
       html.classList.remove('misso-intro-scroll-lock', 'misso-intro-scrollbar-compensated');
       if (!lockState.locked) {
         restoreLockProperties();
@@ -83,6 +86,14 @@
       }
       html.classList.add('misso-intro-scroll-lock');
       lockState.locked = true;
+      // Releasing the presentation must also release scrolling, even if a
+      // cached animation script only removes its presentation classes.
+      lockState.stateObserver = new MutationObserver(() => {
+        if (!html.matches('.misso-intro-pending, .misso-intro-running, .misso-intro-waiting')) {
+          window.unlockIntroScroll();
+        }
+      });
+      lockState.stateObserver.observe(html, { attributes: true, attributeFilter: ['class'] });
       lockState.handlePageHide = () => releaseIntro();
       lockState.handleError = () => releaseIntro();
       lockState.handleRejection = () => releaseIntro();
@@ -220,5 +231,5 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}" defer></script>
-<script src="{% static 'js/inicio.js' %}?v=price-shimmer-700ms-20260916" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=intro-scroll-release-20260919" defer></script>
 {% endblock %}

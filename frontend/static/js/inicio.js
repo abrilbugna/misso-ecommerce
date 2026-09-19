@@ -307,6 +307,7 @@
       window.removeEventListener('pagehide', finishOnPageHide);
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-running');
+      window.unlockIntroScroll?.();
       gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
       gsap.set('.hero-copy-line', { overflow: 'visible' });
       if (!personalizedBadgePlayed) {
@@ -314,7 +315,6 @@
         if (personalizedLabel) gsap.set(personalizedLabel, { clearProps: 'opacity,visibility,transform' });
       }
       scrollArrowMotion?.play();
-      window.unlockIntroScroll?.();
       initProductMotion(mobile);
       ScrollTrigger.refresh();
     };
