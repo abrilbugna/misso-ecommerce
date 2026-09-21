@@ -112,7 +112,7 @@
   }
 </script>
 <link rel="preload" href="{% static 'img/letram.svg' %}" as="fetch" crossorigin>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=price-shimmer-700ms-20260916">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=collection-chat-20260921-1">
 {% endblock %}
 {% block content %}
 <div class="home-page">
@@ -131,36 +131,29 @@
         <a class="hero-shop misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="hero-shop-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span><span class="misso-pill-label">Tienda</span></a>
       </div>
     </nav>
-    <div class="hero-brand-mask"><h1 id="hero-title" class="hero-wordmark">misso</h1></div>
-    <div class="mobile-product-stage" id="beneficios" aria-label="La suscripción Misso">
-      <div class="hero-product-ring" aria-hidden="true"></div>
-      <div class="hero-badges">
-        <div class="hero-badge hero-badge-one"><strong>${{ subscription_price_compact }}</strong><span>por mes</span></div>
-        <div class="hero-badge hero-badge-two hero-badge-delivery"><strong>Envío gratis</strong><span>incluido</span></div>
-        <div class="hero-badge hero-badge-three">
-          <div class="hero-badge-three-desktop">
-            <span class="hero-badge-personalized-a11y">100% personalizada</span>
-            <div class="hero-badge-personalized-visual" aria-hidden="true">
-              <strong class="hero-badge-personalized-number">100%</strong>
-              <span class="hero-badge-personalized-track"><span class="hero-badge-personalized-progress"></span></span>
-              <span class="hero-badge-personalized-label">personalizada</span>
-            </div>
-          </div>
-          <div class="hero-badge-three-mobile"><strong>Elegido</strong><span>para vos</span></div>
+    <div class="collection-backdrop" aria-hidden="true"></div>
+    <div class="collection-scene">
+      <p class="collection-kicker">MISSO / TU PRÓXIMO FAVORITO</p>
+      <h1 id="hero-title" class="collection-title"><span>NUEVA</span><span>COLECCIÓN</span></h1>
+      <div class="collection-product" data-product-motion>
+        <div class="collection-product-float">
+          <a href="{% url 'catalogo' %}" class="collection-product-link" aria-label="Descubrir el conjunto en la tienda">
+            <img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1790017642/image-removebg-preview_4_ffmbbn.png" width="447" height="558" alt="Conjunto rosa de top y short de la nueva colección de Misso" fetchpriority="high">
+          </a>
         </div>
       </div>
-      <div class="hero-product" data-product-motion>
-        <a href="{% url 'catalogo' %}" class="hero-product-link" aria-label="Explorar la tienda"><img src="https://res.cloudinary.com/ddsobe4fw/image/upload/v1789352751/Imagen_de_Codex_13_sept_2026_11_24_35_p.m._ldyyhq.png" alt="Campaña Misso" fetchpriority="high"></a>
-      </div>
+      <ul class="collection-notices" aria-label="Descubrí Misso">
+        <li class="collection-notice"><span><i aria-hidden="true">✧</i> Ropa deportiva</span></li>
+        <li class="collection-notice"><span><i aria-hidden="true">♡</i> Tu próximo favorito</span></li>
+        <li class="collection-notice"><span><i aria-hidden="true">✳</i> 100% industria nacional</span></li>
+        <li class="collection-notice"><span><i aria-hidden="true">↗</i> Descubrí Misso</span></li>
+      </ul>
     </div>
-    <div class="hero-message" id="como-funciona">
-      <span class="hero-message-kicker">Suscripción de ropa interior {% include 'tienda/includes/icon.html' with icon='sparkle' %}</span>
-      <h2><span class="hero-copy-line"><span>Un conjunto</span></span><span class="hero-copy-line hero-copy-line-inline"><span>cada</span><span><em>mes.</em></span></span></h2>
-      <p>Recibís en tu domicilio un conjunto o pack de bombachas por mes, por solo:</p>
-      <div class="hero-price"><strong class="hero-price-shimmer" data-price="${{ subscription_price_display }}">${{ subscription_price_display }}</strong><span>/ mes</span></div>
-      <a class="hero-subscribe misso-pill-button misso-pill-right" href="{% url 'comenzar_suscripcion' %}"><span class="misso-pill-label">Suscribirme</span><span class="hero-subscribe-arrow misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
+    <div class="collection-actions">
+      <a class="collection-cta misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="misso-pill-label">DESCUBRIR COLECCIÓN</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a>
+      <a class="collection-subscription" href="{% url 'comenzar_suscripcion' %}">¿Un conjunto cada mes? Conocé la suscripción ↗</a>
     </div>
-    <div class="hero-bottomline"><a href="#universo">Deslizá para más info <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
+    <div class="hero-bottomline"><a href="#universo">Más de Misso <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
   </section>
 
   <section class="brand-intro" id="universo" aria-labelledby="intro-title">
@@ -231,5 +224,5 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}" defer></script>
-<script src="{% static 'js/inicio.js' %}?v=intro-scroll-release-20260919" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=collection-chat-20260921-1" defer></script>
 {% endblock %}

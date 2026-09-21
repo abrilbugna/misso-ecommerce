@@ -228,14 +228,10 @@
     const html = document.documentElement;
     const overlay = document.querySelector('.hero-intro-mark');
     const logo = overlay?.querySelector('.hero-intro-logo');
-    const headlineLines = gsap.utils.toArray('.hero-copy-line > span');
-    const badges = gsap.utils.toArray('.hero-badge').filter(badge => window.getComputedStyle(badge).display !== 'none');
-    const photo = document.querySelector('.hero-product-link');
-    const priceShimmer = document.querySelector('.hero-price-shimmer');
-    const personalizedNumber = document.querySelector('.hero-badge-personalized-number');
-    const personalizedProgress = document.querySelector('.hero-badge-personalized-progress');
-    const personalizedLabel = document.querySelector('.hero-badge-personalized-label');
-    if (!overlay || !logo || !photo || !product) {
+    const headlineLines = gsap.utils.toArray('.collection-title > span');
+    const notices = gsap.utils.toArray('.collection-notice');
+    // The original logo presentation must not depend on the hero's markup.
+    if (!overlay || !logo) {
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
       window.unlockIntroScroll?.();
@@ -243,6 +239,7 @@
     }
 
     html.classList.add('misso-intro-running');
+    gsap.set(overlay, { clearProps: 'opacity,visibility,transform' });
     gsap.set(logo, { opacity: 0, y: 0, scale: 1 });
     if (reducedMotion) {
       logo.querySelector('.hero-intro-ink').removeAttribute('mask');
@@ -256,45 +253,15 @@
         .call(() => html.classList.remove('misso-intro-pending'), [], .34);
       return;
     }
-    gsap.set('.hero-nav', { autoAlpha: 0 });
-    gsap.set('.hero-social, .hero-nav-actions a', { autoAlpha: 0, y: -12 });
-    gsap.set(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 0 });
-    gsap.set('.hero-message-kicker', { autoAlpha: 0, y: mobile ? 10 : 15 });
-    gsap.set(headlineLines, { autoAlpha: 0, yPercent: 110 });
-    gsap.set('.hero-message p, .hero-price, .hero-subscribe', { autoAlpha: 0, y: mobile ? 10 : 15 });
-    gsap.set('.hero-product-ring', { autoAlpha: 0, scale: .82 });
-    gsap.set(product, { autoAlpha: 0, y: mobile ? 26 : 58, scale: .97 });
-    gsap.set(photo, { clipPath: 'inset(100% 0 0 0)' });
-    badges.forEach((badge, index) => gsap.set(badge, { autoAlpha: 0, scale: .78, rotation: index % 2 ? 5 : -5 }));
-    gsap.set('.hero-bottomline', { autoAlpha: 0, y: 10 });
-    const canCountPersonalizedBadge = !mobile && personalizedNumber && personalizedProgress && personalizedLabel;
-    let personalizedBadgePlayed = false;
-    if (canCountPersonalizedBadge) {
-      gsap.set(personalizedProgress, { width: '0%' });
-      gsap.set(personalizedLabel, { autoAlpha: 0, y: 5 });
-    }
-    const playPersonalizedBadge = () => {
-      if (!canCountPersonalizedBadge || personalizedBadgePlayed || window.innerWidth < 768 || !html.classList.contains('misso-intro-running')) return;
-      personalizedBadgePlayed = true;
-      const counter = { value: 0 };
-      personalizedNumber.textContent = '0%';
-      personalizedProgress.style.width = '0%';
-      gsap.timeline()
-        .to(counter, {
-          value: 100,
-          duration: .7,
-          ease: 'power2.inOut',
-          onUpdate: () => {
-            personalizedNumber.textContent = `${Math.round(counter.value)}%`;
-            personalizedProgress.style.width = `${counter.value}%`;
-          },
-          onComplete: () => {
-            personalizedNumber.textContent = '100%';
-            personalizedProgress.style.width = '100%';
-          }
-        })
-        .to(personalizedLabel, { autoAlpha: 1, y: 0, duration: .4, ease: 'power2.out' }, '-=.34');
-    };
+    const entranceElements = [
+      ...headlineLines, ...notices, product,
+      ...root.querySelectorAll('.hero-nav, .collection-backdrop, .collection-kicker, .collection-actions, .hero-bottomline'),
+    ];
+    gsap.set(entranceElements, { autoAlpha: 0 });
+    gsap.set(headlineLines, { y: mobile ? 18 : 32 });
+    gsap.set(product, { y: mobile ? 35 : 70, scale: .88, rotation: -3 });
+    gsap.set(notices, { y: 15, scale: .85 });
+    gsap.set('.collection-actions', { y: 12 });
     html.classList.remove('misso-intro-pending');
 
     let intro;
@@ -308,12 +275,7 @@
       window.clearTimeout(window.missoIntroFallback);
       html.classList.remove('misso-intro-running');
       window.unlockIntroScroll?.();
-      gsap.set('.hero-intro-mark, .hero-nav, .hero-social, .hero-nav-actions a, .hero-brand-mask, .hero-nav-wordmark, .hero-message-kicker, .hero-copy-line > span, .hero-message p, .hero-price, .hero-subscribe, .hero-product-ring, .hero-product, .hero-product-link, .hero-badge, .hero-bottomline', { clearProps: 'opacity,visibility,transform,clipPath' });
-      gsap.set('.hero-copy-line', { overflow: 'visible' });
-      if (!personalizedBadgePlayed) {
-        if (personalizedProgress) gsap.set(personalizedProgress, { clearProps: 'width' });
-        if (personalizedLabel) gsap.set(personalizedLabel, { clearProps: 'opacity,visibility,transform' });
-      }
+      gsap.set([overlay, ...entranceElements], { clearProps: 'opacity,visibility,transform' });
       scrollArrowMotion?.play();
       initProductMotion(mobile);
       ScrollTrigger.refresh();
@@ -322,25 +284,24 @@
     intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish }).timeScale(1.4);
     window.addEventListener('pagehide', finishOnPageHide, { once: true });
     addLogoDrawing(intro, logo, mobile);
+    // Original handoff from 7a93b4c: overlap the hero with the logo's soft exit.
+    // Keep the original drawing/shimmers and the collection's entrance unchanged.
     intro.addLabel('hero', 1.95)
-      .to('.hero-nav', { autoAlpha: 1, duration: .01 }, 'hero+=0.00')
-      .to(mobile ? '.hero-brand-mask' : '.hero-nav-wordmark', { autoAlpha: 1, duration: .22 }, 'hero+=0.06')
-      .to('.hero-social', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 'hero+=0.02')
-      .to('.hero-nav-actions a', { autoAlpha: 1, y: 0, stagger: .06, duration: .34 }, 'hero+=0.11')
-      .to('.hero-message-kicker', { autoAlpha: 1, y: 0, duration: .29 }, 'hero+=0.22')
-      .to(headlineLines, { autoAlpha: 1, yPercent: 0, stagger: .085, duration: .43, ease: 'power4.out' }, 'hero+=0.32')
-      .set('.hero-copy-line', { overflow: 'visible' }, 'hero+=0.94')
-      .to('.hero-product-ring', { autoAlpha: 1, scale: 1, duration: .48 }, mobile ? 'hero+=0.97' : 'hero+=0.61')
-      .to(product, { autoAlpha: 1, y: 0, scale: 1, duration: .55, ease: 'power3.out' }, mobile ? 'hero+=1.01' : 'hero+=0.66')
-      .to(photo, { clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut', onComplete: () => gsap.set(photo, { clearProps: 'clipPath', overflow: 'visible' }) }, mobile ? 'hero+=1.01' : 'hero+=0.66')
-      .to('.hero-message p', { autoAlpha: 1, y: 0, duration: .3 }, mobile ? 'hero+=0.70' : 'hero+=0.83')
-      .to('.hero-price', { autoAlpha: 1, y: 0, duration: .28, onComplete: () => priceShimmer?.classList.add('is-shimmering') }, mobile ? 'hero+=0.81' : 'hero+=0.95')
-      .to('.hero-subscribe', { autoAlpha: 1, y: 0, duration: .32 }, mobile ? 'hero+=0.91' : 'hero+=1.04')
-      .to(badges, { autoAlpha: 1, scale: 1, rotation: 0, stagger: .07, duration: .34, ease: 'back.out(1.3)' }, mobile ? 'hero+=1.18' : 'hero+=1.19')
-      .call(playPersonalizedBadge, [], 'hero+=1.38');
-    intro.to('.hero-bottomline', { autoAlpha: 1, y: 0, duration: .25 }, 'hero+=1.60');
+      .to('.collection-backdrop', { autoAlpha: 1, duration: .42 }, 'hero')
+      .to('.hero-nav', { autoAlpha: 1, duration: .35 }, 'hero')
+      .to('.collection-kicker', { autoAlpha: 1, duration: .35 }, 'hero+=.10')
+      .to(headlineLines, { autoAlpha: 1, y: 0, stagger: .14, duration: .8 }, 'hero+=.16')
+      .to(product, { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 1.54, ease: 'power4.out' }, 'hero+=.40')
+      .to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05')
+      .to('.collection-actions', { autoAlpha: 1, y: 0, duration: .55 }, 'hero+=1.55')
+      .to('.hero-bottomline', { autoAlpha: 1, duration: .35 }, 'hero+=1.75');
     return () => {
-      if (!introComplete) intro.progress(1);
+      if (!introComplete) {
+        intro.progress(1);
+        // matchMedia may already have reverted the timeline and suppressed its
+        // onComplete callback. Always release the existing intro lock on resize.
+        finish();
+      }
     };
   }
 
@@ -358,15 +319,119 @@
     window.addEventListener('pagehide', hideOnLeave);
   }
 
-  function initProductMotion(mobile) {
-    if (!product) return;
-    const trigger = { trigger: '.campaign-hero', start: 'top top', end: 'bottom top', scrub: true };
-    gsap.to(product, { yPercent: mobile ? -3 : -7, rotation: mobile ? 2 : 4, ease: 'none', scrollTrigger: { ...trigger } });
-    gsap.to('.hero-product-ring', { scale: mobile ? 1.025 : 1.07, ease: 'none', scrollTrigger: { ...trigger } });
-    if (!mobile) {
-      gsap.to('.hero-message', { yPercent: -5, ease: 'none', scrollTrigger: { ...trigger } });
-      gsap.to('.hero-badge', { yPercent: index => index % 2 ? -7 : 7, ease: 'none', scrollTrigger: { ...trigger } });
-    }
+  let productMotionCleanup;
+  function initProductMotion() {
+    productMotionCleanup?.();
+    const motionMedia = gsap.matchMedia();
+    motionMedia.add('(prefers-reduced-motion: no-preference)', () => {
+      const float = root.querySelector('.collection-product-float');
+      const link = root.querySelector('.collection-product-link');
+      if (!float || !link) return;
+      const ambient = gsap.timeline({ repeat: -1, yoyo: true })
+        .to(float, { y: -8, duration: 3.4, ease: 'sine.inOut' });
+      const notes = gsap.utils.toArray('.collection-notice');
+      const noteMotions = notes.map((note, index) => gsap.to(note, {
+        y: index % 2 ? 3 : -4, duration: 2.8 + index * .4,
+        delay: index * .25, repeat: -1, yoyo: true, ease: 'sine.inOut',
+      }));
+      const pause = () => { ambient.pause(); noteMotions.forEach(tween => tween.pause()); };
+      let inView = true;
+      const resume = () => {
+        if (document.hidden || !inView) return pause();
+        ambient.resume(); noteMotions.forEach(tween => tween.resume());
+      };
+      const observer = new IntersectionObserver(entries => { inView = entries[0].isIntersecting; resume(); });
+      observer.observe(product);
+      document.addEventListener('visibilitychange', resume);
+      window.addEventListener('pagehide', pause);
+      window.addEventListener('pageshow', resume);
+      const hoverMedia = gsap.matchMedia();
+      // The outer notice keeps its entrance/float; only its inner bubble is magnetic.
+      hoverMedia.add('(min-width: 768px) and (hover: hover) and (pointer: fine)', () => {
+        const hero = root.querySelector('.campaign-hero');
+        const magnets = notes.map(note => {
+          const bubble = note.querySelector(':scope > span');
+          return {
+            note,
+            x: gsap.quickTo(bubble, 'x', { duration: .3, ease: 'power3.out', overwrite: 'auto' }),
+            y: gsap.quickTo(bubble, 'y', { duration: .3, ease: 'power3.out', overwrite: 'auto' }),
+          };
+        });
+        let frame = 0;
+        let pointer;
+        const update = () => {
+          frame = 0;
+          // Read stable outer boxes first, so the attraction cannot chase itself.
+          const offsets = magnets.map(({ note }) => {
+            const rect = note.getBoundingClientRect();
+            const dx = pointer.x - (rect.left + rect.width / 2);
+            const dy = pointer.y - (rect.top + rect.height / 2);
+            const distance = Math.hypot(dx, dy);
+            const pull = Math.max(0, 1 - distance / 120);
+            const amount = Math.min(8, distance * pull * .3);
+            return distance ? [dx / distance * amount, dy / distance * amount] : [0, 0];
+          });
+          magnets.forEach((magnet, index) => {
+            magnet.x(offsets[index][0]);
+            magnet.y(offsets[index][1]);
+          });
+        };
+        const reset = () => {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          magnets.forEach(magnet => { magnet.x(0); magnet.y(0); });
+        };
+        const move = event => {
+          if (event.pointerType !== 'mouse') return;
+          pointer = { x: event.clientX, y: event.clientY };
+          if (!frame) frame = requestAnimationFrame(update);
+        };
+        hero.addEventListener('pointermove', move, { passive: true });
+        hero.addEventListener('pointerleave', reset);
+        hero.addEventListener('pointercancel', reset);
+        window.addEventListener('resize', reset);
+        window.addEventListener('scroll', reset, { passive: true });
+        window.addEventListener('blur', reset);
+        window.addEventListener('pagehide', reset);
+        return () => {
+          cancelAnimationFrame(frame);
+          hero.removeEventListener('pointermove', move);
+          hero.removeEventListener('pointerleave', reset);
+          hero.removeEventListener('pointercancel', reset);
+          window.removeEventListener('resize', reset);
+          window.removeEventListener('scroll', reset);
+          window.removeEventListener('blur', reset);
+          window.removeEventListener('pagehide', reset);
+        };
+      });
+      hoverMedia.add('(hover: hover) and (pointer: fine)', () => {
+        const x = gsap.quickTo(link, 'x', { duration: .6, ease: 'power3.out' });
+        const y = gsap.quickTo(link, 'y', { duration: .6, ease: 'power3.out' });
+        const rotation = gsap.quickTo(link, 'rotation', { duration: .6, ease: 'power3.out' });
+        const move = event => {
+          const rect = product.getBoundingClientRect();
+          const px = gsap.utils.clamp(-1, 1, (event.clientX - rect.left) / rect.width * 2 - 1);
+          const py = gsap.utils.clamp(-1, 1, (event.clientY - rect.top) / rect.height * 2 - 1);
+          x(px * 5); y(py * 4); rotation(px * 1.2);
+        };
+        const leave = () => { x(0); y(0); rotation(0); };
+        product.addEventListener('pointermove', move);
+        product.addEventListener('pointerleave', leave);
+        window.addEventListener('resize', leave);
+        return () => {
+          product.removeEventListener('pointermove', move);
+          product.removeEventListener('pointerleave', leave);
+          window.removeEventListener('resize', leave);
+        };
+      });
+      return () => {
+        hoverMedia.revert(); observer.disconnect();
+        document.removeEventListener('visibilitychange', resume);
+        window.removeEventListener('pagehide', pause);
+        window.removeEventListener('pageshow', resume);
+      };
+    });
+    productMotionCleanup = () => motionMedia.revert();
   }
 
   function initHeroArrows() {
