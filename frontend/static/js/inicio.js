@@ -229,7 +229,10 @@
     const overlay = document.querySelector('.hero-intro-mark');
     const logo = overlay?.querySelector('.hero-intro-logo');
     const headlineLines = gsap.utils.toArray('.collection-title > span');
-    const notices = gsap.utils.toArray('.collection-notice');
+    const notices = gsap.utils.toArray('.collection-notice').filter(notice => {
+      const container = notice.closest('.collection-notices');
+      return getComputedStyle(notice).display !== 'none' && getComputedStyle(container).display !== 'none';
+    });
     // The original logo presentation must not depend on the hero's markup.
     if (!overlay || !logo) {
       window.clearTimeout(window.missoIntroFallback);
@@ -293,7 +296,7 @@
       .to(headlineLines, { autoAlpha: 1, y: 0, stagger: .14, duration: .8 }, 'hero+=.16')
       .to(product, { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 1.54, ease: 'power4.out' }, 'hero+=.40')
       .to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05')
-      .to('.collection-actions', { autoAlpha: 1, y: 0, duration: .55 }, 'hero+=1.55')
+      .to('.collection-actions', { autoAlpha: 1, y: 0, duration: .55, onComplete: () => document.querySelector('.collection-cta')?.classList.add('is-shimmering') }, 'hero+=1.55')
       .to('.hero-bottomline', { autoAlpha: 1, duration: .35 }, 'hero+=1.75');
     return () => {
       if (!introComplete) {
@@ -329,7 +332,10 @@
       if (!float || !link) return;
       const ambient = gsap.timeline({ repeat: -1, yoyo: true })
         .to(float, { y: -8, duration: 3.4, ease: 'sine.inOut' });
-      const notes = gsap.utils.toArray('.collection-notice');
+      const notes = gsap.utils.toArray('.collection-notice').filter(note => {
+        const container = note.closest('.collection-notices');
+        return getComputedStyle(note).display !== 'none' && getComputedStyle(container).display !== 'none';
+      });
       const noteMotions = notes.map((note, index) => gsap.to(note, {
         y: index % 2 ? 3 : -4, duration: 2.8 + index * .4,
         delay: index * .25, repeat: -1, yoyo: true, ease: 'sine.inOut',
