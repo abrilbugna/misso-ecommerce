@@ -25,7 +25,7 @@ body:has(.home-page)>nav{display:none}
 @media(max-width:1199px){.home-page .hero-nav{gap:8px}.home-page .hero-nav-pills a{padding:0 12px;font-size:10px}}
 @media(max-width:991px) and (min-width:768px){.home-page .hero-nav{height:106px;grid-template-columns:1fr auto}.home-page .hero-nav-pills{grid-column:1/-1;grid-row:2}}
 @media(max-width:767px){.home-page .hero-nav{position:relative;inset:auto;order:0;display:flex;justify-content:space-between;gap:10px;height:auto;min-height:68px;padding:15px clamp(14px,4vw,22px)}.home-page .hero-nav-pills{display:none}.home-page .hero-socials,.home-page .hero-nav-actions{gap:6px}.home-page .hero-social,.home-page .hero-cart{width:36px;height:36px}.home-page .hero-social svg{width:18px;height:18px}.home-page .hero-shop{height:38px;gap:6px;padding:4px 12px 4px 4px;font-size:10px}.home-page .hero-shop-arrow{width:30px;height:30px;font-size:18px}
-.home-page .hero-bottomline{position:relative;inset:auto;order:4;margin:14px 20px 0;justify-content:flex-end;font-size:9px}.home-page .hero-bottomline>span{display:none}}
+}
 @media(max-width:340px){.home-page .hero-social,.home-page .hero-cart{width:33px;height:33px}.home-page .hero-shop{padding-right:9px;font-size:9px}}
 
 .home-page .campaign-hero *{font-family:'Coolvetica Rg',sans-serif}
@@ -126,12 +126,6 @@ body:has(.home-page)>nav{display:none}
 }
 @media(max-width:390px){.home-page .outro-products{margin-top:0}}
 
-
-@media(max-width:767px){
-  .home-page .hero-bottomline{margin:14px 20px 0;justify-content:center}
-  .home-page .hero-bottomline a{gap:12px;text-align:center}
-  .home-page .scroll-arrow{display:inline-flex;animation:misso-scroll-arrow 1.15s ease-in-out infinite}
-}
 
 @keyframes misso-scroll-arrow{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
 
@@ -272,7 +266,6 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
 @media(max-width:767px){
   .home-page{--home-content-gap:calc(3 * var(--home-space-unit))}
   .home-page .hero-nav{margin-block:0}
-  .home-page .hero-bottomline{margin-block:0}
   /* Preserve the intentional overlap of the ribbon and headline. */
   .home-page .home-outro{gap:0}
   .home-page .home-outro > .eyebrow{margin-bottom:var(--home-edge-space)}
@@ -324,24 +317,64 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   .home-page .collection-notice:nth-child(4){right:2%}
 }
 @media(max-width:767px){
-  .home-page .campaign-hero{min-height:100svh;padding:8px 0 22px}
-  .home-page .collection-scene{flex:none;align-self:center;width:100%;height:clamp(470px,calc(100svh - 260px),600px);min-height:0;margin:16px 0 0}
-  .home-page .collection-kicker{margin:0;font-size:8px;letter-spacing:.2em}
-  .home-page .collection-title{inset:28px auto auto;left:50%;width:100%;transform:translateX(-50%);font-size:clamp(4.3rem,20vw,7rem);line-height:.98;letter-spacing:-.06em}
-  .home-page .collection-product{inset:92px 0 28px;width:92%;max-width:440px;margin-inline:auto}
+  /* Free viewport space surrounds the composition; it never separates the
+     product from its CTA. Intrinsic rows can grow on short screens. */
+  .home-page .campaign-hero{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto minmax(20px,1fr) auto auto auto minmax(0,1fr);
+    min-height:100svh;
+    padding:8px 0 max(24px,env(safe-area-inset-bottom));
+  }
+  .home-page .hero-nav{grid-area:1 / 1}
+  .home-page .collection-scene{
+    grid-area:3 / 1;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto auto;
+    row-gap:clamp(16px,2svh,20px);
+    width:100%;
+    height:auto;
+    min-height:0;
+    margin:0;
+  }
+  .home-page .collection-kicker{grid-area:1 / 1;margin:0;font-size:8px;letter-spacing:.2em;text-align:center}
+  .home-page .collection-title{grid-area:2 / 1;align-self:start;position:relative;inset:auto;width:100%;transform:none;font-size:clamp(4.3rem,20vw,7rem);line-height:.98;letter-spacing:-.06em}
+  /* Compensate the italic font's measured ink overhang, in font-relative units,
+     so each line's visible center follows the product's center at every size. */
+  .home-page .collection-title>span{padding-inline-end:.08em}
+  .home-page .collection-title>span:last-child{padding-inline-end:.21em}
+  .home-page .collection-product{
+    grid-area:2 / 1;
+    align-self:start;
+    position:relative;
+    inset:auto;
+    width:92%;
+    max-width:440px;
+    height:auto;
+    aspect-ratio:447 / 558;
+    margin:64px auto 0;
+  }
   .home-page .collection-notices,.home-page .collection-notice{display:none}
-  .home-page .collection-notice:nth-child(n){position:relative;inset:auto;--note-angle:0deg;font-size:clamp(7px,1.9vw,10px);letter-spacing:.025em}
-  .home-page .collection-notice>span{justify-content:center;gap:5px;padding:9px 6px;min-height:33px;border-radius:14px}
-  .home-page .collection-notice i{font-size:17px}
-  .home-page .collection-actions{align-self:center;width:100%;margin:18px 0 0;gap:12px;text-align:center}
-  .home-page .collection-subscription{display:block;width:100%;font-size:10px;text-align:center}
-  .home-page .hero-bottomline{align-self:center;width:100%;margin-top:14px;font-size:8px;text-align:center}
+  /* The original PNG's transparent bottom inset supplies the visual CTA gap. */
+  .home-page .collection-actions{grid-area:4 / 1;align-self:start;width:100%;margin:0;gap:0;text-align:center}
+  .home-page .collection-cta.misso-pill-button{width:min(176px,calc(100% - 32px));padding-inline:0}
+  .home-page .collection-cta .misso-pill-arrow{display:none}
+  .home-page .collection-subscription{display:none}
+  .home-page .hero-bottomline{grid-area:5 / 1;align-self:start;width:100%;margin:clamp(16px,2svh,20px) 0 0;justify-content:center;font-size:8px;text-align:center}
+  .home-page .hero-bottomline a{flex-direction:column;gap:8px;text-align:center}
+  .home-page .scroll-arrow{display:inline-flex}
+  @media(prefers-reduced-motion:no-preference){
+    .home-page:not(.motion-ready) .scroll-arrow{animation:misso-scroll-arrow 1.15s ease-in-out infinite}
+  }
+  .home-page .collection-cta .misso-pill-label{position:relative;width:100%;overflow:visible;color:var(--wine-dark)}
+  /* Share the storefront wordmark's continuous 3.4s loop from bubble_nav.css. */
+  .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoTextShimmer 3.4s linear infinite}
 }
-@media(max-width:767px){
-  .home-page .collection-cta .misso-pill-label{position:relative;overflow:visible;color:var(--wine-dark)}
-  .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoCollectionCtaShimmer 4.8s ease-in-out infinite}
+@media(max-width:340px){
+  /* Keep the title's font size; tighten tracking to leave room for its slant. */
+  .home-page .collection-title{letter-spacing:-.08em}
 }
-@keyframes missoCollectionCtaShimmer{0%,55%{background-position:140% 0}75%,100%{background-position:-140% 0}}
 @media(prefers-reduced-motion:reduce){.home-page .collection-cta.is-shimmering .misso-pill-label::after{animation:none;background:none}}
 @font-face{font-family:'NimbusSanL';src:url('../fonts/NimbusSanL-RegIta.otf') format('opentype');font-style:italic;font-weight:400;font-display:swap}
 @media(prefers-reduced-motion:reduce){.home-page .collection-notice:hover>span{transform:none}}

@@ -8,9 +8,12 @@
   root.classList.add('pill-motion-ready');
 
   const mm = gsap.matchMedia();
-  mm.add('(hover: hover) and (pointer: fine)', () => {
+  mm.add({ canHover: '(hover: hover) and (pointer: fine)', mobile: '(max-width: 767px)' }, context => {
+    if (!context.conditions.canHover) return;
     const listeners = [];
     buttons.forEach(button => {
+      // The home mobile CTA is a single bubble, with no circle to swap.
+      if (context.conditions.mobile && button.matches('.home-page .collection-cta')) return;
       const circle = button.querySelector('.misso-pill-arrow');
       const label = button.querySelector('.misso-pill-label');
       const icon = circle?.querySelector('svg');

@@ -229,6 +229,9 @@
     const overlay = document.querySelector('.hero-intro-mark');
     const logo = overlay?.querySelector('.hero-intro-logo');
     const headlineLines = gsap.utils.toArray('.collection-title > span');
+    const collectionActions = root.querySelector('.collection-actions');
+    const heroBottomline = root.querySelector('.hero-bottomline');
+    const lowerHeroBlock = [collectionActions, heroBottomline].filter(Boolean);
     const notices = gsap.utils.toArray('.collection-notice').filter(notice => {
       const container = notice.closest('.collection-notices');
       return getComputedStyle(notice).display !== 'none' && getComputedStyle(container).display !== 'none';
@@ -258,13 +261,14 @@
     }
     const entranceElements = [
       ...headlineLines, ...notices, product,
-      ...root.querySelectorAll('.hero-nav, .collection-backdrop, .collection-kicker, .collection-actions, .hero-bottomline'),
+      ...root.querySelectorAll('.hero-nav, .collection-backdrop, .collection-kicker'),
+      ...lowerHeroBlock,
     ];
     gsap.set(entranceElements, { autoAlpha: 0 });
     gsap.set(headlineLines, { y: mobile ? 18 : 32 });
-    gsap.set(product, { y: mobile ? 35 : 70, scale: .88, rotation: -3 });
-    gsap.set(notices, { y: 15, scale: .85 });
-    gsap.set('.collection-actions', { y: 12 });
+    gsap.set(product, { y: mobile ? 60 : 80 });
+    if (notices.length) gsap.set(notices, { y: 15, scale: .85 });
+    gsap.set(lowerHeroBlock, { y: mobile ? 60 : 80 });
     html.classList.remove('misso-intro-pending');
 
     let intro;
@@ -288,16 +292,18 @@
     window.addEventListener('pagehide', finishOnPageHide, { once: true });
     addLogoDrawing(intro, logo, mobile);
     // Original handoff from 7a93b4c: overlap the hero with the logo's soft exit.
-    // Keep the original drawing/shimmers and the collection's entrance unchanged.
+    // Keep the original drawing and shimmers while the product and lower CTA
+    // emerge upward in sequence.
     intro.addLabel('hero', 1.95)
       .to('.collection-backdrop', { autoAlpha: 1, duration: .42 }, 'hero')
       .to('.hero-nav', { autoAlpha: 1, duration: .35 }, 'hero')
       .to('.collection-kicker', { autoAlpha: 1, duration: .35 }, 'hero+=.10')
       .to(headlineLines, { autoAlpha: 1, y: 0, stagger: .14, duration: .8 }, 'hero+=.16')
-      .to(product, { autoAlpha: 1, y: 0, scale: 1, rotation: 0, duration: 1.54, ease: 'power4.out' }, 'hero+=.40')
-      .to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05')
-      .to('.collection-actions', { autoAlpha: 1, y: 0, duration: .55, onComplete: () => document.querySelector('.collection-cta')?.classList.add('is-shimmering') }, 'hero+=1.55')
-      .to('.hero-bottomline', { autoAlpha: 1, duration: .35 }, 'hero+=1.75');
+      .to(product, { autoAlpha: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 'hero+=.40');
+    if (notices.length) {
+      intro.to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05');
+    }
+    intro.to(lowerHeroBlock, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', onComplete: () => document.querySelector('.collection-cta')?.classList.add('is-shimmering') }, 'hero+=.80');
     return () => {
       if (!introComplete) {
         intro.progress(1);
