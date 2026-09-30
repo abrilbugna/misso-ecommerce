@@ -3,8 +3,9 @@ from django.db import transaction
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, CATEGORIA_ROPA_DEPORTIVA, ColorProducto, TalleProducto, CodigoPromocional
 from .forms import CheckoutForm
+from .subscription_access import public_subscription_required
 from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
 import mercadopago
 from django.conf import settings
@@ -61,9 +62,11 @@ def inicio(request):
     return render(request, 'tienda/inicio.html', {
         'categorias': categorias_con_imagen,
         'productos_inicio': productos_inicio[:12],
+        'sports_category': CATEGORIA_ROPA_DEPORTIVA,
     })
 
 
+@public_subscription_required
 def informacion_suscripcion(request):
     return render(request, 'tienda/informacion_suscripcion.html')
 

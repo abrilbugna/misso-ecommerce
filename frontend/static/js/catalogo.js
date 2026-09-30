@@ -6,7 +6,6 @@
     const grid = root.querySelector('.catalog-grid');
     const sort = root.querySelector('#catalog-sort-select');
     const cards = [...root.querySelectorAll('[data-catalog-card]')];
-    const promo = root.querySelector('[data-catalog-promo]');
     const initialOrder = new Map(cards.map((card, index) => [card, index]));
     const activeCategory = root.querySelector('.catalog-filter.is-active');
     const categoryScroller = root.querySelector('.catalog-filters');
@@ -150,9 +149,8 @@
         else difference = Number(b.dataset.relevance) - Number(a.dataset.relevance);
         return difference || initialOrder.get(a) - initialOrder.get(b);
       });
-      ordered.forEach((card, index) => {
+      ordered.forEach(card => {
         grid.appendChild(card);
-        if (index === 3 && promo) grid.appendChild(promo);
       });
       window.ScrollTrigger?.refresh();
     });
@@ -236,7 +234,6 @@
           onEnter: batch => gsap.to(batch, { autoAlpha: 1, y: 0, stagger: .08, duration: .7, ease: 'power3.out', clearProps: 'transform,opacity,visibility' })
         });
       }
-      if (promo) gsap.fromTo(promo, { autoAlpha: 0, scale: .97 }, { autoAlpha: 1, scale: 1, duration: .8, ease: 'power3.out', clearProps: 'transform,opacity,visibility', scrollTrigger: { trigger: promo, start: 'top 85%', once: true } });
 
     }
 

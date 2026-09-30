@@ -7,7 +7,6 @@ from django.core import signing
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.crypto import constant_time_compare
-from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from mercadopago.webhook import WebhookSignatureValidator, InvalidWebhookSignatureError
@@ -15,6 +14,7 @@ from .models import Suscripcion, EventoMercadoPago
 from .subscription_forms import SuscripcionForm
 from .subscription_services import create_intention, start_checkout
 from .subscription_api import MPSubscriptionError, resource_id
+from .subscription_access import public_subscription_required
 
 logger = logging.getLogger(__name__)
 TOPICS = {'subscription_preapproval', 'subscription_authorized_payment', 'payment'}
@@ -32,7 +32,7 @@ def submission_key(request):
     return request.session['subscription_submission_key']
 
 
-@never_cache
+@public_subscription_required
 @require_http_methods(['GET', 'POST'])
 def comenzar(request):
     key = submission_key(request)
@@ -72,7 +72,7 @@ def comenzar(request):
         'subscription_amount': settings.MP_SUBSCRIPTION_AMOUNT, 'subscription_currency': settings.MP_SUBSCRIPTION_CURRENCY}, status=status)
 
 
-@never_cache
+@public_subscription_required
 @require_GET
 def resultado(request, referencia):
     sub = get_object_or_404(Suscripcion, referencia_publica=referencia)
@@ -82,7 +82,7 @@ def resultado(request, referencia):
     return response
 
 
-@never_cache
+@public_subscription_required
 @require_GET
 def estado(request, referencia):
     sub = get_object_or_404(Suscripcion, referencia_publica=referencia)

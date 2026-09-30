@@ -19,7 +19,7 @@ from .subscription_emails import send_welcome
 from .subscription_forms import PREGUNTAS
 
 
-@override_settings(MP_SUBSCRIPTION_ENABLED=True, MP_SUBSCRIPTION_AMOUNT=Decimal('25000'), MP_SUBSCRIPTION_CURRENCY='ARS',
+@override_settings(SUBSCRIPTIONS_PUBLIC_ENABLED=True, MP_SUBSCRIPTION_ENABLED=True, MP_SUBSCRIPTION_AMOUNT=Decimal('25000'), MP_SUBSCRIPTION_CURRENCY='ARS',
                    MP_SUBSCRIPTION_MODE='test', MP_SUBSCRIPTION_TEST_ACCESS_TOKEN='test-credential', PUBLIC_BASE_URL='https://misso.ar',
                    MP_SUBSCRIPTION_PLAN_ID='', MP_WEBHOOK_SECRET='secret-for-tests', SITE_URL='https://misso.ar',
                    MISSO_ADMIN_EMAIL='staff@example.test', RESEND_API_KEY='fake', MERCADOPAGO_ACCESS_TOKEN='fake',
@@ -226,6 +226,17 @@ class SubscriptionTests(TestCase):
         self.api.get_subscription.return_value = self.remote(sub)
         sync_subscription('mp-sub-1')
         self.assertFalse(EmailSuscripcion.objects.exists())
+
+    def test_public_pause_keeps_historical_webhooks_without_welcome_emails(self):
+        sub = self.intention()
+        self.api.create_pending.reset_mock()
+        with override_settings(SUBSCRIPTIONS_PUBLIC_ENABLED=False):
+            self.activate(sub)
+            self.assertEqual(sub.estado, 'activa')
+            self.assertIsNotNone(EventoMercadoPago.objects.get().procesado_at)
+            self.assertFalse(EmailSuscripcion.objects.exists())
+            self.send.assert_not_called()
+            self.api.create_pending.assert_not_called()
 
     def test_pause_cancel_reactivate_no_new_welcome(self):
         sub = self.intention(); self.activate(sub)

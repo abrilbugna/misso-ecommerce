@@ -32,6 +32,8 @@ def money(value):
 
 
 def create_intention(form, key):
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        raise MPSubscriptionError('subscriptions_public_disabled')
     data = form.cleaned_data
     with transaction.atomic():
         sub, created = Suscripcion.objects.get_or_create(submission_key=key, defaults={
@@ -83,6 +85,8 @@ def recover_checkout(sub):
 
 
 def start_checkout(sub):
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        raise MPSubscriptionError('subscriptions_public_disabled')
     if not settings.MP_SUBSCRIPTION_ENABLED:
         raise MPSubscriptionError('subscriptions_disabled')
     if not settings.MP_SUBSCRIPTION_AMOUNT.is_finite() or settings.MP_SUBSCRIPTION_AMOUNT <= 0 or settings.MP_SUBSCRIPTION_CURRENCY != 'ARS':

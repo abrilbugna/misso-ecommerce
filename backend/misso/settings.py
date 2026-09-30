@@ -124,6 +124,8 @@ if _public_origin.scheme == 'https' and _public_origin.hostname:
     ALLOWED_HOSTS.append(_public_origin.hostname)
     CSRF_TRUSTED_ORIGINS = [f'https://{_public_origin.netloc}']
 
+# Public enrollment is independent from historical billing/webhook processing.
+SUBSCRIPTIONS_PUBLIC_ENABLED = os.getenv('SUBSCRIPTIONS_PUBLIC_ENABLED', 'False').strip().lower() == 'true'
 MP_SUBSCRIPTION_ENABLED = os.getenv('MP_SUBSCRIPTION_ENABLED', 'False').lower() == 'true'
 MP_SUBSCRIPTION_AMOUNT = Decimal(os.getenv('MP_SUBSCRIPTION_AMOUNT', '25000'))
 MP_SUBSCRIPTION_CURRENCY = os.getenv('MP_SUBSCRIPTION_CURRENCY', 'ARS')

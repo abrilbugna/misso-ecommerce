@@ -14,6 +14,8 @@ def cart_count(request):
 def subscription_offer(request):
     """The public amount and the API use the same commercial setting."""
     from django.conf import settings
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        return {}
     amount = settings.MP_SUBSCRIPTION_AMOUNT
     whole, fraction = f'{amount:.2f}'.split('.')
     display = format(int(whole), ',').replace(',', '.')

@@ -161,8 +161,7 @@ body:has(.catalog-page) > nav {
 .catalog-sort select:focus-visible,
 .catalog-filter:focus-visible,
 .catalog-empty-link:focus-visible,
-.catalog-product-link:focus-visible,
-.catalog-promo-link:focus-visible { outline: 2px solid var(--wine-dark); outline-offset: 3px; }
+.catalog-product-link:focus-visible { outline: 2px solid var(--wine-dark); outline-offset: 3px; }
 .catalog-filters {
   position: relative;
   display: flex;
@@ -285,24 +284,6 @@ body:has(.catalog-page) > nav {
 .catalog-product:hover .catalog-cta-icon { transform: translate(3px,-3px); }
 .catalog-no-image { display: grid; place-items: center; height: 100%; color: var(--wine); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
 
-.catalog-subscription {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 100%;
-  padding: clamp(26px, 3vw, 44px);
-  border-radius: 22px;
-  background: var(--wine);
-  color: var(--cream);
-}
-.catalog-promo-kicker { display: inline-flex; align-items: center; gap: 5px; color: var(--rose-light); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
-.catalog-promo-kicker .misso-icon { width: 13px; height: 13px; }
-.catalog-subscription h2 { margin: 25px 0 17px; font-size: clamp(2.5rem, 3.8vw, 4.8rem); font-weight: 400; letter-spacing: -.065em; line-height: .95; }
-.catalog-subscription p { max-width: 300px; font-size: 14px; line-height: 1.45; }
-.catalog-promo-price { margin-top: 20px; font-family: 'Cormorant Garamond', serif; font-size: 2.3rem; }
-.catalog-promo-price small { font-family: 'Coolvetica Rg', sans-serif; font-size: 11px; letter-spacing: .1em; }
-.catalog-promo-link,
 .catalog-empty-link {
   display: inline-flex;
   align-items: center;
@@ -318,16 +299,9 @@ body:has(.catalog-page) > nav {
   text-transform: uppercase;
   transition: transform .35s cubic-bezier(.2,.9,.2,1.3), background .25s, color .25s;
 }
-.catalog-promo-link { margin-top: 24px; color: var(--cream); }
-.catalog-promo-link:hover { transform: translateY(-2px); background: var(--cream); color: var(--wine); }
-.catalog-promo-link span,
 .catalog-empty-link span { display: inline-flex; align-items: center; line-height: 1; transition: transform .3s; }
-.catalog-promo-link .misso-icon,
 .catalog-empty-link .misso-icon { width: 17px; height: 17px; }
-.catalog-promo-link:hover span,
 .catalog-empty-link:hover span { transform: translate(3px,-3px); }
-.catalog-promo-doodle { position: absolute; right: 9%; bottom: 5%; color: var(--rose-light); opacity: .3; transform: rotate(15deg); pointer-events: none; }
-.catalog-promo-doodle .misso-icon { width: 64px; height: 64px; }
 
 .catalog-empty {
   grid-column: 1 / -1;
@@ -405,15 +379,12 @@ body:has(.catalog-page) > nav {
   .catalog-filters::-webkit-scrollbar { display: none; }
   .catalog-filter { flex: 0 0 auto; width: max-content; white-space: nowrap; min-height: 34px; padding: 7px 12px; font-size: 9px; }
   .catalog-grid { gap: 30px 12px; padding-block: 22px 70px; }
-  .catalog-product-media,
-  .catalog-subscription { border-radius: 18px; }
+  .catalog-product-media { border-radius: 18px; }
   .catalog-product-info { padding-top: 10px; }
   .catalog-product-category { font-size: 9px; }
   .catalog-product-info h2 { margin: 5px 0 8px; font-size: 1.13rem; }
   .catalog-price { font-size: 1.4rem; }
   .catalog-cta { font-size: 9px; }
-  .catalog-subscription { grid-column: 1 / -1; min-height: 300px; }
-  .catalog-subscription h2 { font-size: clamp(2.2rem, 8vw, 3.6rem); }
 }
 @media (max-width: 370px) {
   .catalog-grid { grid-template-columns: minmax(0, 1fr); }
@@ -432,9 +403,7 @@ body:has(.catalog-page) > nav {
   .catalog-product-media img,
   .catalog-filter,
   .catalog-cta-icon,
-  .catalog-promo-link,
   .catalog-empty-link,
-  .catalog-promo-link span,
   .catalog-empty-link span { transform: none !important; transition: none !important; }
   .catalog-category-blob { will-change: auto; }
   .catalog-filters { scroll-behavior: auto; }

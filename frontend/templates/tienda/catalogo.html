@@ -10,7 +10,7 @@
 </script>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
-<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=category-blob-20260916">
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=products-only-20260930-1">
 {% endblock %}
 {% block content %}
 <div class="home-page catalog-page">
@@ -45,9 +45,6 @@
           <div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio }}</span><span class="catalog-cta">Ver producto <span class="catalog-cta-icon" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span></div></div>
         </a>
       </article>
-      {% if forloop.counter == 4 %}
-      <aside class="catalog-subscription" data-catalog-promo><span class="catalog-promo-kicker">La sorpresa mensual <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span></span><h2>¿No sabés<br>cuál elegir?</h2><p>Dejá que misso elija por vos. Un conjunto distinto cada mes, pensado según tus preferencias.</p><div class="catalog-promo-price">$25.000 <small>/ mes</small></div><a href="{% url 'inicio' %}#suscripcion" class="catalog-promo-link">Ver suscripción <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a><span class="catalog-promo-doodle" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='burst' %}</span></aside>
-      {% endif %}
       {% empty %}
       <div class="catalog-empty" role="status"><span class="catalog-empty-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span><h2>Todavía no hay<br><em>misso por acá.</em></h2><p>No hay productos en esta categoría todavía.</p><a href="{% url 'catalogo' %}" class="catalog-empty-link">Ver todos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a></div>
       {% endfor %}
@@ -55,4 +52,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=category-blob-20260916" defer></script>{% endblock %}
+{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=products-only-20260930-1" defer></script>{% endblock %}

@@ -1,12 +1,15 @@
 from django.db import models
 import cloudinary.models
 
+CATEGORIA_ROPA_DEPORTIVA = 'ropa-deportiva'
+
 CATEGORIAS = [
     ('conjuntos armados', 'Conjuntos armados'),
     ('bralettes', 'Bralettes'),
     ('bombachas', 'Bombachas'),
     ('babydoll', 'Babydolls'),
     ('otros', 'Otros'),
+    (CATEGORIA_ROPA_DEPORTIVA, 'Ropa deportiva'),
 ]
 
 class OpcionEnvio(models.Model):

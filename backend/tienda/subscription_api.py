@@ -126,6 +126,8 @@ class SubscriptionAPI:
         return self.request('GET', '/preapproval/search', params={'external_reference': reference, 'limit': 100})
 
     def create_pending(self, sub):
+        if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+            raise MPSubscriptionError('subscriptions_public_disabled')
         # Associated plans require card_token_id + authorized; do not silently mix flows.
         if settings.MP_SUBSCRIPTION_PLAN_ID:
             raise MPSubscriptionError('associated_plan_requires_card_token')

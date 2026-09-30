@@ -112,11 +112,11 @@
   }
 </script>
 <link rel="preload" href="{% static 'img/letram.svg' %}" as="fetch" crossorigin>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=hero-mobile-svh-20260930-1">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=products-only-20260930-1">
 {% endblock %}
 {% block content %}
 <div class="home-page">
-  <section class="campaign-hero" id="suscripcion" aria-labelledby="hero-title">
+  <section class="campaign-hero" id="coleccion" aria-labelledby="hero-title">
     <div class="hero-intro-mark" aria-hidden="true" data-logo-src="{% static 'img/letram.svg' %}"></div>
     <nav class="hero-nav" aria-label="Navegación de inicio">
       <div class="hero-socials" aria-label="Redes de Misso">
@@ -124,7 +124,7 @@
         <a class="hero-social" href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.5-4.9A8.5 8.5 0 1 1 20.5 11.6Z"/><path d="M8.4 7.8c-.3-.3-.8-.3-1.1 0-.5.5-.7 1.2-.5 1.9.8 2.8 3.2 5.2 6 6 .7.2 1.5 0 1.9-.5.3-.3.3-.8 0-1.1l-1.1-1c-.3-.3-.7-.3-1.1-.1l-.7.5c-1.2-.6-2.2-1.6-2.8-2.8l.5-.7c.2-.4.2-.8-.1-1.1Z"/></svg></span></a>
       </div>
       <div class="hero-nav-pills">
-        <a class="hero-nav-wordmark" href="#suscripcion" aria-label="Misso, volver al inicio"><span class="hero-nav-wordmark-text">Misso</span></a>
+        <a class="hero-nav-wordmark" href="#coleccion" aria-label="Misso, volver al inicio"><span class="hero-nav-wordmark-text">Misso</span></a>
       </div>
       <div class="hero-nav-actions">
         <a class="hero-cart" href="{% url 'ver_carrito' %}" aria-label="Ver carrito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="hero-cart-count">{{ cart_count|default:0 }}</span></a>
@@ -151,7 +151,6 @@
     </div>
     <div class="collection-actions">
       <a class="collection-cta misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="misso-pill-label" data-shimmer-text="VER PRODUCTOS">VER PRODUCTOS</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span></a>
-      <a class="collection-subscription" href="{% url 'comenzar_suscripcion' %}">¿Un conjunto cada mes? Conocé la suscripción ↗</a>
     </div>
     <div class="hero-bottomline"><a href="#universo">Deslizá para más <span class="scroll-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-down' %}</span></a></div>
   </section>
@@ -159,7 +158,7 @@
   <section class="brand-intro" id="universo" aria-labelledby="intro-title">
     <div class="intro-marquee" aria-hidden="true"><span>misso · misso · misso · </span></div>
     <div class="intro-grid">
-      <div class="intro-copy"><p class="eyebrow">Suscripción mensual seleccionada...</p><h2 id="intro-title">Especialmente<br><em>para vos.</em></h2><p>Rellenas un formulario con tus preferencias antes de suscribirte y nosotras nos encargamos de lo demás!</p><a class="intro-info-button misso-pill-button misso-pill-right" href="{% url 'informacion_suscripcion' %}" aria-label="Más información sobre la suscripción"><span class="misso-pill-label">Más info</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a></div>
+      <div class="intro-copy"><p class="eyebrow">Nueva línea en camino...</p><h2 id="intro-title">Preparamos<br><em>algo nuevo.</em></h2><p>Muy pronto llega una nueva colección de ropa deportiva a Misso.</p><a class="intro-info-button misso-pill-button misso-pill-right" href="{% url 'catalogo' %}?categoria={{ sports_category|urlencode }}"><span class="misso-pill-label">Ver ropa deportiva</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a></div>
       <div class="intro-image-wrap intro-carousel" role="region" aria-roledescription="carrusel" aria-label="Videos de Misso">
         <div class="intro-carousel-slide is-active" data-intro-slide data-stack-position="front" aria-label="Notificación 1 de 3">
           <img class="intro-video-fallback" src="https://res.cloudinary.com/ddsobe4fw/video/upload/so_1,f_jpg,q_auto/v1789349219/WhatsApp_Video_2026-09-13_at_22.24.00_i9ex6g.jpg" alt="" loading="lazy">

@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def queue_welcome(sub):
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        return
     context = {'sub': sub, 'logo_url': LOGO_URL, 'home_url': public_url('inicio'),
                'panel_url': public_url('panel:suscripcion_detalle', pk=sub.pk)}
     for kind, recipient, subject in [('cliente', sub.email, '¡Ya sos parte de Misso! ♡'),
@@ -27,6 +29,8 @@ def queue_welcome(sub):
 
 
 def send_welcome(email_id):
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        return
     now = timezone.now()
     # Persist before the remote side effect; SQL rollback cannot unsend an email.
     EmailSuscripcion.objects.filter(pk=email_id, primer_intento_at__isnull=True).update(primer_intento_at=now)
@@ -68,4 +72,6 @@ def send_welcome(email_id):
 
 
 def due_emails():
+    if not settings.SUBSCRIPTIONS_PUBLIC_ENABLED:
+        return EmailSuscripcion.objects.none()
     return EmailSuscripcion.objects.filter(enviado_at__isnull=True, revision_manual=False).filter(Q(proximo_intento_at__isnull=True) | Q(proximo_intento_at__lte=timezone.now()))

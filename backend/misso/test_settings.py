@@ -4,4 +4,5 @@ DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memor
 MERCADOPAGO_ACCESS_TOKEN = 'test-not-a-credential'
 RESEND_API_KEY = 'test-not-a-credential'
 MP_SUBSCRIPTION_ENABLED = False
+SUBSCRIPTIONS_PUBLIC_ENABLED = False
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'

@@ -42,7 +42,7 @@ body:has(.home-page)>nav{display:none}
 .home-page .misso-pill-label,.home-page .misso-pill-arrow{position:absolute;top:0;display:flex;align-items:center;justify-content:center;height:100%;border-radius:100px;white-space:nowrap;line-height:1}
 .home-page .misso-pill-label{left:0;z-index:3;width:calc(100% - 52px);background:var(--cream);color:var(--wine-dark);transform:none;transition:background .25s ease}
 .home-page .misso-pill-arrow{right:0;z-index:2;width:44px;border-radius:50%;background:var(--cream);color:var(--wine-dark);transform:none}
-.home-page .intro-info-button.misso-pill-button{width:190px;height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;--pill-hover-label:var(--blush)}
+.home-page .intro-info-button.misso-pill-button{width:min(260px,100%);height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;--pill-hover-label:var(--blush)}
 .home-page .intro-info-button .misso-pill-arrow{width:48px}
 .home-page .intro-info-button .misso-pill-label{width:calc(100% - 56px)}
 .home-page .intro-info-button .misso-pill-label,.home-page .intro-info-button .misso-pill-arrow{background:var(--rose-light)}
@@ -298,12 +298,10 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
 .home-page .collection-notice:nth-child(2){right:3%;top:30%;--note-angle:5deg}
 .home-page .collection-notice:nth-child(3){left:3%;top:73%;--note-angle:3deg}
 .home-page .collection-notice:nth-child(4){right:8%;top:76%;--note-angle:-5deg}
-.home-page .collection-actions{position:relative;z-index:4;display:flex;flex-direction:column;align-items:center;gap:18px;margin:16px 16px 0}
+.home-page .collection-actions{position:relative;z-index:4;display:flex;flex-direction:column;align-items:center;gap:0;margin:16px 16px 0}
 .home-page .collection-cta.misso-pill-button{width:min(300px,100%);height:48px;padding:0;color:var(--wine-dark);font-size:11px;letter-spacing:.09em}
 .home-page .collection-cta .misso-pill-arrow{width:48px}
 .home-page .collection-cta .misso-pill-label{width:calc(100% - 56px)}
-.home-page .collection-subscription{font-size:12px;color:var(--rose-light);text-align:center;line-height:1.5;text-underline-offset:4px}
-.home-page .collection-subscription:hover{text-decoration:underline}
 .home-page .hero-bottomline{position:relative;inset:auto;z-index:4;display:flex;justify-content:center;margin:20px 0 0;font-size:9px}
 @media(min-width:768px) and (hover:hover) and (pointer:fine){.home-page .collection-notice:hover>span{background:var(--blush)}}
 @media(min-width:768px) and (max-width:1024px){
@@ -379,7 +377,6 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   .home-page .collection-actions{grid-area:4 / 1;align-self:start;width:100%;margin:0;gap:0;text-align:center}
   .home-page .collection-cta.misso-pill-button{width:min(176px,calc(100% - 32px));padding-inline:0}
   .home-page .collection-cta .misso-pill-arrow{display:none}
-  .home-page .collection-subscription{display:none}
   .home-page .hero-bottomline{grid-area:5 / 1;align-self:start;width:100%;margin:var(--hero-gap) 0 0;justify-content:center;font-size:8px;line-height:12px;text-align:center}
   .home-page .hero-bottomline a{flex-direction:column;gap:8px;text-align:center}
   .home-page .scroll-arrow{display:inline-flex}

@@ -9,6 +9,7 @@ from .views import _confirmar_pago_mercadopago
 
 
 @override_settings(
+    SUBSCRIPTIONS_PUBLIC_ENABLED=False,
     MERCADOPAGO_ACCESS_TOKEN='test-token',
     SITE_URL='https://misso.ar',
 )
