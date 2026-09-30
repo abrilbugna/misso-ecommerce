@@ -317,28 +317,47 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   .home-page .collection-notice:nth-child(4){right:2%}
 }
 @media(max-width:767px){
-  /* Free viewport space surrounds the composition; it never separates the
-     product from its CTA. Intrinsic rows can grow on short screens. */
+  /* Budget the whole first screen, including the in-flow header. svh stays
+     stable as Safari's bars move; vh is only the legacy CSS fallback.
+     The product keeps its aspect ratio, but cannot force the intrinsic grid
+     rows beyond the small viewport. No entrance transforms enter this budget. */
   .home-page .campaign-hero{
+    --hero-viewport:100vh;
+    --hero-gap:12px;
+    --hero-top-gap:12px;
+    --hero-header-height:48px;
+    --hero-product-offset:64px;
+    --hero-top-inset:max(8px,env(safe-area-inset-top,0px));
+    --hero-bottom-inset:max(16px,env(safe-area-inset-bottom,0px));
+    /* Reserve both flexible outer rows, plus kicker 12px, CTA 48px and
+       scroll cue 44px (including arrow travel). */
+    --hero-product-height:calc(var(--hero-viewport) - var(--hero-top-inset) - var(--hero-bottom-inset) - var(--hero-header-height) - var(--hero-top-gap) - var(--hero-top-gap) - var(--hero-gap) - var(--hero-gap) - var(--hero-product-offset) - 104px);
     display:grid;
     grid-template-columns:minmax(0,1fr);
-    grid-template-rows:auto minmax(20px,1fr) auto auto auto minmax(0,1fr);
-    min-height:100svh;
-    padding:8px 0 max(24px,env(safe-area-inset-bottom));
+    grid-template-rows:auto minmax(var(--hero-top-gap),1fr) auto auto auto minmax(0,1fr);
+    min-height:var(--hero-viewport);
+    padding:var(--hero-top-inset) 0 var(--hero-bottom-inset);
   }
-  .home-page .hero-nav{grid-area:1 / 1}
+  @supports(height:100svh){
+    .home-page .campaign-hero{
+      --hero-viewport:100svh;
+      --hero-gap:clamp(10px,1.8svh,16px);
+      --hero-top-gap:clamp(12px,2svh,20px);
+    }
+  }
+  .home-page .hero-nav{grid-area:1 / 1;height:var(--hero-header-height);min-height:var(--hero-header-height)}
   .home-page .collection-scene{
     grid-area:3 / 1;
     display:grid;
     grid-template-columns:minmax(0,1fr);
     grid-template-rows:auto auto;
-    row-gap:clamp(16px,2svh,20px);
+    row-gap:var(--hero-gap);
     width:100%;
     height:auto;
     min-height:0;
     margin:0;
   }
-  .home-page .collection-kicker{grid-area:1 / 1;margin:0;font-size:8px;letter-spacing:.2em;text-align:center}
+  .home-page .collection-kicker{grid-area:1 / 1;margin:0;font-size:8px;line-height:12px;letter-spacing:.2em;text-align:center}
   .home-page .collection-title{grid-area:2 / 1;align-self:start;position:relative;inset:auto;width:100%;transform:none;font-size:clamp(4.3rem,20vw,7rem);line-height:.98;letter-spacing:-.06em}
   /* Compensate the italic font's measured ink overhang, in font-relative units,
      so each line's visible center follows the product's center at every size. */
@@ -349,11 +368,11 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
     align-self:start;
     position:relative;
     inset:auto;
-    width:92%;
+    width:min(92%,calc(var(--hero-product-height) * 447 / 558));
     max-width:440px;
     height:auto;
     aspect-ratio:447 / 558;
-    margin:64px auto 0;
+    margin:var(--hero-product-offset) auto 0;
   }
   .home-page .collection-notices,.home-page .collection-notice{display:none}
   /* The original PNG's transparent bottom inset supplies the visual CTA gap. */
@@ -361,7 +380,7 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   .home-page .collection-cta.misso-pill-button{width:min(176px,calc(100% - 32px));padding-inline:0}
   .home-page .collection-cta .misso-pill-arrow{display:none}
   .home-page .collection-subscription{display:none}
-  .home-page .hero-bottomline{grid-area:5 / 1;align-self:start;width:100%;margin:clamp(16px,2svh,20px) 0 0;justify-content:center;font-size:8px;text-align:center}
+  .home-page .hero-bottomline{grid-area:5 / 1;align-self:start;width:100%;margin:var(--hero-gap) 0 0;justify-content:center;font-size:8px;line-height:12px;text-align:center}
   .home-page .hero-bottomline a{flex-direction:column;gap:8px;text-align:center}
   .home-page .scroll-arrow{display:inline-flex}
   @media(prefers-reduced-motion:no-preference){
@@ -371,7 +390,12 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   /* Share the storefront wordmark's continuous 3.4s loop from bubble_nav.css. */
   .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoTextShimmer 3.4s linear infinite}
 }
+@media(max-width:767px) and (max-height:750px){
+  /* Reclaim spacing before reducing the featured outfit on short viewports. */
+  .home-page .campaign-hero{--hero-product-offset:52px;--hero-top-gap:12px}
+}
 @media(max-width:340px){
+  .home-page .campaign-hero{--hero-header-height:44px}
   /* Keep the title's font size; tighten tracking to leave room for its slant. */
   .home-page .collection-title{letter-spacing:-.08em}
 }
