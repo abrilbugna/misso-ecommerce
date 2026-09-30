@@ -384,8 +384,9 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
     .home-page:not(.motion-ready) .scroll-arrow{animation:misso-scroll-arrow 1.15s ease-in-out infinite}
   }
   .home-page .collection-cta .misso-pill-label{position:relative;width:100%;overflow:visible;color:var(--wine-dark)}
-  /* Share the storefront wordmark's continuous 3.4s loop from bubble_nav.css. */
-  .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoTextShimmer 3.4s linear infinite}
+  /* Keep the light sweep's speed; trim its off-screen travel between passes. */
+  @keyframes missoCtaShimmer{from{background-position:120% 0}to{background-position:-20% 0}}
+  .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoCtaShimmer 1.7s linear infinite}
 }
 @media(max-width:767px) and (max-height:750px){
   /* Reclaim spacing before reducing the featured outfit on short viewports. */

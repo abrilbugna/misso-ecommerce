@@ -527,10 +527,14 @@
     const section = document.querySelector('.benefits-scroll');
     if (!section || !cards.length) return;
     const path = section.querySelector('.benefits-doodle path');
-    const originalPath = path?.getAttribute('d');
+    const length = path?.getTotalLength() || 0;
+    const trailLength = length * .3;
     if (path) {
-      const length = path.getTotalLength() + (autoplay ? 250 : 0);
-      gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+      gsap.set(path, {
+        strokeDasharray: autoplay ? `${trailLength} ${length + trailLength}` : length,
+        strokeDashoffset: autoplay ? trailLength : length,
+        autoRound: false,
+      });
     }
     const slot = autoplay ? 2.2 : 1 / cards.length;
     const duration = slot * cards.length;
@@ -569,35 +573,26 @@
       if (decor) tl.fromTo(decor, { rotation: -rotation * 7 }, { rotation: rotation * 7, ease: autoplay ? 'sine.inOut' : 'none', duration: slot }, start);
     });
     if (autoplay) {
+      // One dash enters head-first and leaves tail-last on the unchanged curve.
+      // Include the last card's overlapping exit without extending its timeline.
+      // Owning this tween in tl shares its repeat delay, viewport pause and revert.
+      if (path) tl.to(path, { strokeDashoffset: -length, duration: tl.duration(), ease: 'none', autoRound: false }, 0);
       const scenery = gsap.timeline({ paused: true });
       scenery.to('.benefits-heading', { yPercent: -12, opacity: .5, duration: 1.3, ease: 'power2.out' }, 0);
-      if (path) scenery.to(path, { strokeDashoffset: 0, duration: 2.4, ease: 'power1.inOut' }, 0);
-      const wave = { phase: 0 };
-      const lineMotion = path && gsap.to(wave, {
-        phase: Math.PI * 2,
-        duration: 8,
-        ease: 'none',
-        repeat: -1,
-        paused: true,
-        onUpdate: () => {
-          const sway = Math.sin(wave.phase);
-          const ripple = Math.sin(wave.phase * 2);
-          path.setAttribute('d', `M-60 ${495 + 14 * sway} C190 ${80 + 55 * ripple} 275 ${830 - 65 * sway} 535 ${400 + 28 * ripple} S780 ${100 + 50 * sway} 1070 ${390 - 18 * ripple}`);
-        },
-      });
-      const play = () => { scenery.play(); lineMotion?.play(); tl.play(); };
-      ScrollTrigger.create({
+      const play = () => { scenery.play(); tl.play(); };
+      const visibilityTrigger = ScrollTrigger.create({
         trigger: section,
         start: 'top 80%',
         end: 'bottom 20%',
         onEnter: play,
         onEnterBack: play,
-        onLeave: () => { tl.pause(); lineMotion?.pause(); },
-        onLeaveBack: () => { tl.pause(0); lineMotion?.pause(); },
+        onLeave: () => { tl.pause(); },
+        onLeaveBack: () => { tl.pause(0); },
       });
       return () => {
-        lineMotion?.kill();
-        if (path && originalPath) path.setAttribute('d', originalPath);
+        visibilityTrigger.kill();
+        tl.kill();
+        scenery.kill();
       };
     }
   }
