@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import (CATEGORIAS, CATEGORIA_ROPA_DEPORTIVA, Carrito, ItemCarrito,
-                     Producto, Orden, Suscripcion, EmailSuscripcion)
+                     Producto, Orden, Suscripcion, EmailSuscripcion, ImagenProducto)
 from .subscription_api import MPSubscriptionError, SubscriptionAPI
 from .subscription_services import create_intention, start_checkout
 from .subscription_emails import queue_welcome, send_welcome, due_emails
@@ -44,6 +44,24 @@ class PublicStorefrontTests(TestCase):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)
         self.assertContains(response, f'href="{reverse("catalogo")}?categoria={CATEGORIA_ROPA_DEPORTIVA}"')
+
+    def test_home_reuses_one_outro_with_real_product_links(self):
+        product = self.products[0]
+        ImagenProducto.objects.create(producto=product, imagen='tests/home-product')
+        response = self.client.get(reverse('inicio'))
+        self.assertContains(response, 'class="home-outro"', count=1)
+        self.assertContains(response, 'class="outro-products-track"', count=1)
+        self.assertContains(response, 'class="hero-nav"', count=1)
+        self.assertContains(response, 'Tu próximo favorito te espera', count=1)
+        self.assertContains(response, 'Ver todos los productos', count=1)
+        self.assertContains(response, f'class="outro-product" href="{reverse("detalle", args=[product.pk])}"')
+        # The server retains the mobile order; the desktop breakpoint moves this
+        # same node before animations initialize, without a second product loop.
+        html = response.content.decode()
+        self.assertLess(html.index('class="campaign-hero"'), html.index('class="brand-intro"'))
+        self.assertLess(html.index('class="benefits-scroll"'), html.index('class="home-outro"'))
+        self.assertContains(response, 'NUEVA')
+        self.assertContains(response, 'COLECCIÓN')
 
     def test_public_pages_and_shared_footer_have_no_subscription_references(self):
         session = self.client.session

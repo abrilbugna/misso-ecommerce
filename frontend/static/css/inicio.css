@@ -28,7 +28,7 @@ body:has(.home-page)>nav{display:none}
 }
 @media(max-width:340px){.home-page .hero-social,.home-page .hero-cart{width:33px;height:33px}.home-page .hero-shop{padding-right:9px;font-size:9px}}
 
-.home-page .campaign-hero *{font-family:'Coolvetica Rg',sans-serif}
+.home-page .campaign-hero :where(:not(.home-outro, .home-outro *)){font-family:'Coolvetica Rg',sans-serif}
 /* La burbuja rosa queda sin wordmark central. */
 .home-page .hero-nav-pills{display:none!important}
 @media(min-width:768px){
@@ -400,3 +400,85 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
 @media(prefers-reduced-motion:reduce){.home-page .collection-cta.is-shimmering .misso-pill-label::after{animation:none;background:none}}
 @font-face{font-family:'NimbusSanL';src:url('../fonts/NimbusSanL-RegIta.otf') format('opentype');font-style:italic;font-weight:400;font-display:swap}
 @media(prefers-reduced-motion:reduce){.home-page .collection-notice:hover>span{transform:none}}
+
+/* The shared outro keeps its existing desktop composition. */
+@media(min-width:1024px){
+  .home-page.outro-hero .campaign-hero{min-height:100svh;padding:90px 0 0;background:var(--wine-dark)}
+  .home-page.outro-hero .campaign-hero::before,
+  .home-page.outro-hero .collection-backdrop,
+  .home-page.outro-hero .collection-scene,
+  .home-page.outro-hero .collection-actions,
+  .home-page.outro-hero .hero-bottomline{display:none}
+  .home-page.outro-hero .campaign-hero > .home-outro{
+    flex:1;min-height:calc(100svh - 90px);width:100%;
+    padding:clamp(24px,4svh,48px) 0;
+    gap:clamp(24px,3.5svh,38px);
+  }
+  .home-page.outro-hero .home-outro h2{margin:0;font-size:clamp(88px,min(11vw,17svh),192px)}
+  .home-page.outro-hero .outro-product{width:clamp(190px,min(19vw,28svh),275px)}
+  html.misso-intro-pending .home-page.outro-hero .home-outro{visibility:hidden}
+  html.misso-intro-pending .home-page.outro-hero .campaign-hero,
+  html.misso-intro-running .home-page.outro-hero .campaign-hero{background:#7c2846}
+}
+
+/* The desktop welcome uses the shop's existing brand shimmer. */
+@media(min-width:1024px){
+  .home-page .hero-nav .hero-nav-pills{display:flex!important}
+  .home-page .hero-nav .hero-nav-wordmark .hero-nav-wordmark-text{font-family:inherit;text-shadow:none}
+}
+
+/* Burgundy footer only on the desktop home page. */
+@media(min-width:1024px){
+  body:has(.campaign-hero) > footer{background:var(--wine-dark);border-top-color:var(--wine-dark);color:var(--cream)}
+  body:has(.campaign-hero) > footer a{color:var(--cream)}
+  body:has(.campaign-hero) > footer a:hover{color:var(--rose-light)}
+}
+
+/* Full semantic text reserves each line; only the aria-hidden copy is typed. */
+.home-page .outro-type-visual,.home-page .outro-type-cursor{display:none}
+@media(max-width:767px) and (prefers-reduced-motion:no-preference), (min-width:1024px) and (prefers-reduced-motion:no-preference){
+  html.misso-intro-running .home-page.outro-hero .home-outro{visibility:hidden}
+  html.misso-home-entering .home-page :is(.hero-nav,.hero-nav .hero-social,.hero-nav .hero-nav-wordmark,.hero-nav .hero-cart,.hero-nav .hero-shop,.outro-products,.outro-catalog-link){opacity:0;visibility:hidden}
+  html.misso-home-entering .home-page :is(.hero-nav .hero-social,.hero-nav .hero-nav-wordmark,.hero-nav .hero-cart,.hero-nav .hero-shop,.outro-catalog-link){translate:0 var(--home-entry-y,0px)}
+  html.misso-home-entering .home-page [data-outro-type]{display:inline-grid}
+  html.misso-home-entering .home-page .outro-type-source{grid-area:1 / 1;opacity:0}
+  html.misso-home-entering .home-page .outro-type-visual{display:block;grid-area:1 / 1;justify-self:start;text-align:left;white-space:pre}
+  html.misso-home-entering .home-page .outro-type-cursor{display:inline-block;position:relative;width:0;height:0;vertical-align:baseline;line-height:0;letter-spacing:0;pointer-events:none}
+  .home-page .outro-type-cursor::after{content:"";position:absolute;left:.04em;top:.05em;width:clamp(7px,.14em,18px);height:clamp(1px,.016em,2px);background:var(--rose-light)}
+  .home-page .outro-type-cursor.is-writing::after{animation:missoTypingCursor .38s steps(1,end) infinite}
+  @keyframes missoTypingCursor{0%,60%,100%{opacity:1}70%,90%{opacity:.25}}
+}
+
+/* Mobile welcome: keep the existing in-flow navigation, then let the content
+   fill the first screen. Short/landscape screens can grow and scroll naturally. */
+@media(max-width:767px){
+  .home-page.outro-hero .campaign-hero{
+    display:flex;flex-direction:column;min-height:var(--hero-viewport);
+    padding:var(--hero-top-inset) 0 0;background:var(--wine-dark);
+  }
+  .home-page.outro-hero .campaign-hero::before,
+  .home-page.outro-hero .collection-backdrop,
+  .home-page.outro-hero .collection-scene,
+  .home-page.outro-hero .collection-actions,
+  .home-page.outro-hero .hero-bottomline{display:none}
+  .home-page.outro-hero .campaign-hero > .home-outro{
+    flex:1;min-height:0;width:100%;
+    padding:clamp(28px,5svh,44px) 0 max(28px,env(safe-area-inset-bottom,0px));
+    gap:clamp(20px,4svh,32px);
+  }
+  .home-page.outro-hero .home-outro > .eyebrow{
+    top:auto;width:auto;max-width:calc(100% - 32px);margin:0;padding:0;
+    font-size:clamp(10px,2.5vw,11px);line-height:1.4;
+  }
+  .home-page.outro-hero .home-outro > h2{
+    top:auto;margin:0;padding:0 16px;font-size:clamp(88px,25vw,118px);
+  }
+  .home-page.outro-hero .outro-products{margin-top:0}
+  .home-page.outro-hero .outro-product{width:clamp(180px,62vw,260px)}
+  .home-page.outro-hero .home-outro > .outro-catalog-link{margin-top:0}
+  /* Preserve the original backdrop during the M drawing and its exit. */
+  html.misso-intro-pending .home-page.outro-hero .campaign-hero,
+  html.misso-intro-running .home-page.outro-hero .campaign-hero{background:#7c2846}
+  html.misso-intro-pending .home-page.outro-hero .campaign-hero::before,
+  html.misso-intro-running .home-page.outro-hero .campaign-hero::before{display:block}
+}

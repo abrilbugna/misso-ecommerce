@@ -105,6 +105,7 @@
     window.clearTimeout(window.missoIntroFallback);
     document.documentElement.classList.remove('misso-intro-pending', 'misso-intro-running', 'misso-intro-waiting');
     window.unlockIntroScroll?.();
+    window.restoreHomeEntrance?.();
     return;
   }
   const { gsap, ScrollTrigger } = window;
@@ -120,6 +121,119 @@
   let introStarted = false;
   let introComplete = false;
   let scrollArrowMotion;
+
+  function initHomeEntrance() {
+    const html = document.documentElement;
+    const section = root.querySelector('.home-outro');
+    const nav = root.querySelector('.hero-nav');
+    const outroHero = window.matchMedia('(max-width: 767px), (min-width: 1024px)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!section || !nav || !outroHero.matches || reduced.matches || !window.TextPlugin || !html.classList.contains('misso-home-entering')) {
+      window.restoreHomeEntrance?.();
+      return;
+    }
+    gsap.registerPlugin(window.TextPlugin);
+    const navItems = Array.from(nav.querySelectorAll('.hero-social, .hero-nav-wordmark, .hero-cart, .hero-shop'));
+    const products = section.querySelector('.outro-products');
+    const button = section.querySelector('.outro-catalog-link');
+    const movingPanels = [nav, products].filter(Boolean);
+    const controls = [...navItems, button].filter(Boolean);
+    const segments = ['eyebrow', 'first', 'second'].map(name => {
+      const slot = section.querySelector(`[data-outro-type="${name}"]`);
+      const text = slot.querySelector('.outro-type-source').textContent;
+      const visual = document.createElement('span');
+      const typed = document.createElement('span');
+      visual.className = 'outro-type-visual';
+      visual.setAttribute('aria-hidden', 'true');
+      visual.append(typed);
+      slot.append(visual);
+      return { visual, typed, text };
+    });
+    // A zero-width inline marker sits on the font's actual baseline. Its
+    // underscore follows the typed text naturally, including font/width changes.
+    const cursor = document.createElement('span');
+    cursor.className = 'outro-type-cursor is-writing';
+    cursor.setAttribute('aria-hidden', 'true');
+    let timeline;
+    let finished = false;
+    let inView = false;
+    let observer;
+    let introObserver;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      timeline?.kill();
+      observer?.disconnect();
+      introObserver?.disconnect();
+      outroHero.removeEventListener('change', onPreferenceChange);
+      reduced.removeEventListener('change', onPreferenceChange);
+      // Only the entrance owns these panel transforms. Pill hover/press tweens
+      // own control transforms, so their independent translate is cleared instead.
+      if (timeline) {
+        gsap.set(movingPanels, { clearProps: 'opacity,visibility,transform' });
+        gsap.set(controls, { clearProps: 'opacity,visibility,--home-entry-y' });
+      }
+      cursor.remove();
+      segments.forEach(({ visual }) => visual.remove());
+      window.finishHomeEntrance = null;
+      window.restoreHomeEntrance?.();
+    };
+    window.finishHomeEntrance = finish;
+    const onPreferenceChange = () => {
+      if (!outroHero.matches || reduced.matches) {
+        finish();
+        if (reduced.matches) window.abortMissoIntro?.();
+      }
+    };
+    const start = () => {
+      if (finished || timeline) return;
+      if (!html.classList.contains('misso-home-entering')) return finish();
+      if (!inView || html.matches('.misso-intro-pending, .misso-intro-running, .misso-intro-waiting')) return;
+      observer?.disconnect();
+      introObserver.disconnect();
+      window.clearTimeout(window.missoEntranceFallback);
+      window.missoEntranceFallback = window.setTimeout(finish, 7000);
+      // This single timeline starts after the unchanged logo drawing has
+      // finished and released scrolling. It never touches the looping track.
+      timeline = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: finish });
+      gsap.set(nav, { autoAlpha: 0, y: -12, scale: .985 });
+      gsap.set(navItems, { autoAlpha: 0, '--home-entry-y': '5px' });
+      if (products) gsap.set(products, { autoAlpha: 0, y: 24 });
+      if (button) gsap.set(button, { autoAlpha: 0, '--home-entry-y': '16px' });
+      timeline.to(nav, { autoAlpha: 1, y: 0, scale: 1, duration: .32 }, 0)
+        .to(navItems, { autoAlpha: 1, '--home-entry-y': '0px', stagger: .05, duration: .2 }, .09)
+        .addLabel('eyebrow', .2)
+        .addLabel('title', 1.03)
+        .addLabel('written', 1.93);
+      const write = (segment, duration, at) => {
+        timeline.call(() => segment.visual.append(cursor), [], at)
+          .to(segment.typed, { text: { value: segment.text }, duration, ease: 'none' }, at);
+      };
+      write(segments[0], .75, 'eyebrow');
+      write(segments[1], .45, 'title');
+      write(segments[2], .45, 'title+=.45');
+      if (products) timeline.to(products, { autoAlpha: 1, y: 0, duration: .38 }, 'written-=.1');
+      if (button) timeline.to(button, { autoAlpha: 1, '--home-entry-y': '0px', duration: .3 }, 'written+=.12');
+      timeline.call(() => cursor.classList.remove('is-writing'), [], 'written')
+        .to(cursor, { opacity: 0, duration: .09, repeat: 3, yoyo: true, ease: 'none' }, 'written')
+        .to(cursor, { opacity: 0, duration: .12, ease: 'power1.out' });
+    };
+    outroHero.addEventListener('change', onPreferenceChange);
+    reduced.addEventListener('change', onPreferenceChange);
+    introObserver = new MutationObserver(start);
+    introObserver.observe(html, { attributes: true, attributeFilter: ['class'] });
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(entries => {
+        inView = entries[0].isIntersecting;
+        start();
+      });
+      observer.observe(section);
+    } else {
+      inView = true;
+      start();
+    }
+  }
+  initHomeEntrance();
 
   // letram.svg is a filled silhouette, not an open pen path. These guides only
   // expose its ink: every visible edge still comes from the fetched original.
@@ -228,13 +342,14 @@
     const html = document.documentElement;
     const overlay = document.querySelector('.hero-intro-mark');
     const logo = overlay?.querySelector('.hero-intro-logo');
-    const headlineLines = gsap.utils.toArray('.collection-title > span');
+    const outroHero = window.matchMedia('(max-width: 767px), (min-width: 1024px)').matches;
+    const headlineLines = outroHero ? [] : gsap.utils.toArray('.collection-title > span');
     const collectionActions = root.querySelector('.collection-actions');
     const heroBottomline = root.querySelector('.hero-bottomline');
-    const lowerHeroBlock = [collectionActions, heroBottomline].filter(Boolean);
+    const lowerHeroBlock = outroHero ? [] : [collectionActions, heroBottomline].filter(Boolean);
     const notices = gsap.utils.toArray('.collection-notice').filter(notice => {
       const container = notice.closest('.collection-notices');
-      return getComputedStyle(notice).display !== 'none' && getComputedStyle(container).display !== 'none';
+      return !outroHero && getComputedStyle(notice).display !== 'none' && getComputedStyle(container).display !== 'none';
     });
     // The original logo presentation must not depend on the hero's markup.
     if (!overlay || !logo) {
@@ -259,16 +374,16 @@
         .call(() => html.classList.remove('misso-intro-pending'), [], .34);
       return;
     }
-    const entranceElements = [
+    const entranceElements = outroHero ? [] : [
       ...headlineLines, ...notices, product,
       ...root.querySelectorAll('.hero-nav, .collection-backdrop, .collection-kicker'),
       ...lowerHeroBlock,
     ];
-    gsap.set(entranceElements, { autoAlpha: 0 });
-    gsap.set(headlineLines, { y: mobile ? 18 : 32 });
-    gsap.set(product, { y: mobile ? 60 : 80 });
+    if (entranceElements.length) gsap.set(entranceElements, { autoAlpha: 0 });
+    if (headlineLines.length) gsap.set(headlineLines, { y: mobile ? 18 : 32 });
+    if (!outroHero) gsap.set(product, { y: mobile ? 60 : 80 });
     if (notices.length) gsap.set(notices, { y: 15, scale: .85 });
-    gsap.set(lowerHeroBlock, { y: mobile ? 60 : 80 });
+    if (lowerHeroBlock.length) gsap.set(lowerHeroBlock, { y: mobile ? 60 : 80 });
     html.classList.remove('misso-intro-pending');
 
     let intro;
@@ -294,16 +409,18 @@
     // Original handoff from 7a93b4c: overlap the hero with the logo's soft exit.
     // Keep the original drawing and shimmers while the product and lower CTA
     // emerge upward in sequence.
-    intro.addLabel('hero', 1.95)
-      .to('.collection-backdrop', { autoAlpha: 1, duration: .42 }, 'hero')
-      .to('.hero-nav', { autoAlpha: 1, duration: .35 }, 'hero')
-      .to('.collection-kicker', { autoAlpha: 1, duration: .35 }, 'hero+=.10')
-      .to(headlineLines, { autoAlpha: 1, y: 0, stagger: .14, duration: .8 }, 'hero+=.16')
-      .to(product, { autoAlpha: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 'hero+=.40');
-    if (notices.length) {
-      intro.to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05');
+    if (!outroHero) {
+      intro.addLabel('hero', 1.95)
+        .to('.collection-backdrop', { autoAlpha: 1, duration: .42 }, 'hero')
+        .to('.hero-nav', { autoAlpha: 1, duration: .35 }, 'hero')
+        .to('.collection-kicker', { autoAlpha: 1, duration: .35 }, 'hero+=.10')
+        .to(headlineLines, { autoAlpha: 1, y: 0, stagger: .14, duration: .8 }, 'hero+=.16')
+        .to(product, { autoAlpha: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 'hero+=.40');
+      if (notices.length) {
+        intro.to(notices, { autoAlpha: 1, y: 0, scale: 1, stagger: .14, duration: .7, ease: 'back.out(1.2)' }, 'hero+=1.05');
+      }
+      intro.to(lowerHeroBlock, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', onComplete: () => document.querySelector('.collection-cta')?.classList.add('is-shimmering') }, 'hero+=.80');
     }
-    intro.to(lowerHeroBlock, { autoAlpha: 1, y: 0, duration: 1.1, ease: 'power3.out', onComplete: () => document.querySelector('.collection-cta')?.classList.add('is-shimmering') }, 'hero+=.80');
     return () => {
       if (!introComplete) {
         intro.progress(1);
@@ -332,7 +449,7 @@
   function initProductMotion() {
     productMotionCleanup?.();
     const motionMedia = gsap.matchMedia();
-    motionMedia.add('(prefers-reduced-motion: no-preference)', () => {
+    motionMedia.add('(min-width: 768px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference)', () => {
       const float = root.querySelector('.collection-product-float');
       const link = root.querySelector('.collection-product-link');
       if (!float || !link) return;
@@ -447,7 +564,9 @@
   }
 
   function initHeroArrows() {
-    scrollArrowMotion = gsap.to('.scroll-arrow', { y: 5, duration: .8, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: !introComplete });
+    mm.add('(min-width: 768px) and (max-width: 1023px)', () => {
+      scrollArrowMotion = gsap.to('.scroll-arrow', { y: 5, duration: .8, repeat: -1, yoyo: true, ease: 'sine.inOut', paused: !introComplete });
+    });
     mm.add('(hover: hover) and (pointer: fine)', () => {
       const listeners = [];
       document.querySelectorAll('.hero-social').forEach((button, index) => {
@@ -598,7 +717,9 @@
   }
 
   function initButtonInteractions() {
-    gsap.from('.home-outro > *:not(.outro-mark)', { y: 35, opacity: 0, stagger: .12, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: '.home-outro', start: 'top 72%' } });
+    mm.add('(min-width: 768px) and (max-width: 1023px)', () => {
+      gsap.from('.home-outro > *:not(.outro-mark)', { y: 35, opacity: 0, stagger: .12, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: '.home-outro', start: 'top 72%' } });
+    });
     mm.add('(min-width: 992px) and (pointer: fine)', () => {
       const listeners = [];
       cards.forEach(card => {
@@ -674,7 +795,12 @@
       return;
     }
     if (reducedMotion) { initHeroAnimation(window.innerWidth < 768); return; }
-    mm.add('(min-width: 768px)', () => {
+    mm.add('(min-width: 1024px)', () => {
+      if (introStarted) { initProductMotion(); return; }
+      introStarted = true;
+      return initHeroAnimation(false);
+    });
+    mm.add('(min-width: 768px) and (max-width: 1023px)', () => {
       if (introStarted) { initProductMotion(false); return; }
       introStarted = true;
       return initHeroAnimation(false);

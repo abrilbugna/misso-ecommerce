@@ -8,6 +8,20 @@
   {
     const html = document.documentElement;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Reserve the complete, accessible text before first paint. Fail open if
+    // the deferred animation bundle or plugin cannot initialize.
+    window.restoreHomeEntrance = () => {
+      html.classList.remove('misso-home-entering');
+      window.clearTimeout(window.missoEntranceFallback);
+      window.finishHomeEntrance?.();
+    };
+    if (!reducedMotion && window.matchMedia('(max-width: 767px), (min-width: 1024px)').matches) {
+      html.classList.add('misso-home-entering');
+      window.missoEntranceFallback = window.setTimeout(window.restoreHomeEntrance, 10000);
+      ['error', 'unhandledrejection', 'pagehide'].forEach(event => {
+        window.addEventListener(event, window.restoreHomeEntrance, { once: true });
+      });
+    }
     const lockState = {
       locked: false,
       scrollX: 0,
@@ -58,6 +72,7 @@
         });
       }
       window.unlockIntroScroll();
+      window.restoreHomeEntrance();
     }
 
     window.lockIntroScroll = () => {
@@ -103,7 +118,9 @@
     };
 
     window.abortMissoIntro = releaseIntro;
-    html.classList.add('misso-intro-pending');
+    if (!reducedMotion || !window.matchMedia('(max-width: 767px), (min-width: 1024px)').matches) {
+      html.classList.add('misso-intro-pending');
+    }
     window.lockIntroScroll();
     window.missoIntroFallback = window.setTimeout(releaseIntro, 6500);
     document.addEventListener('DOMContentLoaded', () => {
@@ -112,7 +129,7 @@
   }
 </script>
 <link rel="preload" href="{% static 'img/letram.svg' %}" as="fetch" crossorigin>
-<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=cta-shimmer-20260930-2">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}?v=responsive-entrance-20261015-1">
 {% endblock %}
 {% block content %}
 <div class="home-page">
@@ -124,7 +141,7 @@
         <a class="hero-social" href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de Misso"><span class="hero-social-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.5-4.9A8.5 8.5 0 1 1 20.5 11.6Z"/><path d="M8.4 7.8c-.3-.3-.8-.3-1.1 0-.5.5-.7 1.2-.5 1.9.8 2.8 3.2 5.2 6 6 .7.2 1.5 0 1.9-.5.3-.3.3-.8 0-1.1l-1.1-1c-.3-.3-.7-.3-1.1-.1l-.7.5c-1.2-.6-2.2-1.6-2.8-2.8l.5-.7c.2-.4.2-.8-.1-1.1Z"/></svg></span></a>
       </div>
       <div class="hero-nav-pills">
-        <a class="hero-nav-wordmark" href="#coleccion" aria-label="Misso, volver al inicio"><span class="hero-nav-wordmark-text">Misso</span></a>
+        <a class="hero-nav-wordmark" href="#coleccion" aria-label="Misso, volver al inicio"><span class="hero-nav-wordmark-text shop-brand-shimmer is-shimmering">Misso</span></a>
       </div>
       <div class="hero-nav-actions">
         <a class="hero-cart" href="{% url 'ver_carrito' %}" aria-label="Ver carrito"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="hero-cart-count">{{ cart_count|default:0 }}</span></a>
@@ -204,8 +221,8 @@
   {% endif %}
 
   <section class="home-outro" aria-labelledby="outro-title">
-    <span class="eyebrow">Tu próximo favorito te espera</span>
-    <h2 id="outro-title">Encontrá<br><em>el tuyo.</em></h2>
+    <span class="eyebrow"><span data-outro-type="eyebrow"><span class="outro-type-source">Tu próximo favorito te espera</span></span></span>
+    <h2 id="outro-title"><span data-outro-type="first"><span class="outro-type-source">Encontrá</span></span><br><em><span data-outro-type="second"><span class="outro-type-source">el tuyo.</span></span></em></h2>
     {% if productos_inicio %}<div class="outro-products" aria-label="Explorá los productos de Misso">
       <div class="outro-products-track">
         <div class="outro-products-group">
@@ -218,10 +235,32 @@
     <a class="outro-catalog-link misso-pill-button misso-pill-right" href="{% url 'catalogo' %}"><span class="misso-pill-label">Ver todos los productos</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></a>
   </section>
 </div>
+<script>
+  // Move the existing section before deferred animations run; never clone it.
+  {
+    const home = document.querySelector('.home-page');
+    const hero = home.querySelector('.campaign-hero');
+    const outro = home.querySelector('.home-outro');
+    const anchor = document.createComment('Original outro position');
+    outro.before(anchor);
+    const outroHero = window.matchMedia('(max-width: 767px), (min-width: 1024px)');
+    const placeOutro = () => {
+      home.classList.toggle('outro-hero', outroHero.matches);
+      if (outroHero.matches) hero.append(outro);
+      else anchor.after(outro);
+      outro.querySelector('#outro-title').setAttribute('aria-level', outroHero.matches ? '1' : '2');
+      hero.setAttribute('aria-labelledby', outroHero.matches ? 'outro-title' : 'hero-title');
+      window.ScrollTrigger?.refresh();
+    };
+    placeOutro();
+    outroHero.addEventListener('change', placeOutro);
+  }
+</script>
 {% endblock %}
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/TextPlugin.min.js" defer></script>
 <script src="{% static 'js/pill-buttons.js' %}?v=hero-mobile-bubble-20260922-1" defer></script>
-<script src="{% static 'js/inicio.js' %}?v=benefits-trail-20260930-1" defer></script>
+<script src="{% static 'js/inicio.js' %}?v=responsive-entrance-20261015-1" defer></script>
 {% endblock %}
