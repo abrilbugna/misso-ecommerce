@@ -2,12 +2,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from tienda import views, subscription_views
+from tienda import views, subscription_views, newsletter
 
 urlpatterns = [
     path('panel/', include('tienda.panel_urls')),
     path('admin/', admin.site.urls),
     path('', views.inicio, name='inicio'),
+    path('newsletter/registrar/', newsletter.registrar_newsletter, name='registrar_newsletter'),
     path('suscripcion/comenzar/', subscription_views.comenzar, name='comenzar_suscripcion'),
     path('suscripcion/resultado/<uuid:referencia>/', subscription_views.resultado, name='suscripcion_resultado'),
     path('suscripcion/resultado/<uuid:referencia>/estado/', subscription_views.estado, name='suscripcion_estado'),

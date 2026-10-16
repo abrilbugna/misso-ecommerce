@@ -37,9 +37,6 @@
 .subscription-contact-button.misso-pill-button{width:244px;height:48px;margin-top:14px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .subscription-contact-button .misso-pill-arrow{width:48px}
 .subscription-contact-button .misso-pill-label{width:calc(100% - 56px)}
-body:has(.subscription-info-page) footer{background:var(--wine-dark);border-top-color:rgba(255,245,241,.2);color:var(--cream)}
-body:has(.subscription-info-page) footer a{color:var(--rose-light)}
-body:has(.subscription-info-page) footer a:hover{color:var(--cream)}
 
 @media(max-width:767px){
   .subscription-faq,.subscription-terms{display:block;padding:78px 24px}

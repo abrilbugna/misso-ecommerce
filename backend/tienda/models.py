@@ -56,6 +56,21 @@ class CodigoPromocional(models.Model):
             return min(self.descuento_fijo, total)
         return 0
 
+
+class NewsletterContacto(models.Model):
+    email = models.EmailField(unique=True)
+    consentimiento_comercial = models.BooleanField(default=False)
+    consentimiento_fecha = models.DateTimeField()
+    activo = models.BooleanField(default=True)
+    codigo_promocional = models.OneToOneField(
+        CodigoPromocional, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='contacto_newsletter',
+    )
+    creado = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)

@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/pill-buttons.css' %}?v=shared-footer-20261016-1">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=home-desktop-no-rose-pill-20261016-1">
     <link rel="stylesheet" href="{% static 'css/bubble_nav.css' %}?v=brand-shimmer-20261015-1">
 </head>
 <body>
@@ -18,21 +20,43 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <div class="footer-main">
-            <div class="footer-contact">
-                <span>Contactanos</span>
-                <a href="mailto:missocba@gmail.com">missocba@gmail.com</a>
-                <a href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer">WhatsApp · +54 351 772-7224</a>
-                <a href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer">Instagram · @misso.cba</a>
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div class="site-footer-top">
+                <div class="site-footer-intro">
+                    <h2>Suscribite para novedades</h2>
+                </div>
+                <form class="site-footer-form" action="{% url 'registrar_newsletter' %}" method="post" data-newsletter-form>
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="site-footer-form-row">
+                        <label class="site-footer-visually-hidden" for="newsletter-email">Tu correo electrónico</label>
+                        <input id="newsletter-email" name="email" type="email" placeholder="Tu correo electrónico" autocomplete="email" maxlength="254" required>
+                        <button class="site-footer-submit misso-pill-button misso-pill-right" type="submit" name="consentimiento" value="1"><span class="misso-pill-label">Suscribirme</span><span class="misso-pill-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5M8 5h11v11"/></svg></span></button>
+                    </div>
+                    <input class="site-footer-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+                    <p class="site-footer-form-message" data-newsletter-message role="status" aria-live="polite">{% for message in messages %}{% if 'newsletter' in message.tags %}{{ message }}{% endif %}{% endfor %}</p>
+                </form>
             </div>
-        </div>
-        <div class="footer-actions">
-            <a href="#">Seguir pedido</a>
+            <div class="site-footer-rule" aria-hidden="true"></div>
+            <div class="site-footer-wordmark" aria-label="misso">misso</div>
+            <div class="site-footer-bottom">
+                <a class="site-footer-tracking" href="https://wa.me/543517727224?text=Hola%20Misso%2C%20quiero%20consultar%20el%20estado%20de%20mi%20pedido" target="_blank" rel="noopener noreferrer">SEGUIR PEDIDO <span class="site-footer-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+                <div class="site-footer-contact">
+                    <div class="site-footer-contact-copy"><span>¿NECESITÁS AYUDA?</span><strong>CONTACTANOS <span class="site-footer-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></strong></div>
+                    <div class="site-footer-socials">
+                        <a href="https://instagram.com/misso.cba" target="_blank" rel="noopener noreferrer" aria-label="Instagram de MISSO">{% include 'tienda/includes/icon.html' with icon='instagram' %}</a>
+                        <a href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp de MISSO"><svg class="misso-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.5 11.6a8.5 8.5 0 0 1-12.4 7.5L3 20.5l1.5-4.9A8.5 8.5 0 1 1 20.5 11.6Z"/><path d="M8.4 7.8c-.3-.3-.8-.3-1.1 0-.5.5-.7 1.2-.5 1.9.8 2.8 3.2 5.2 6 6 .7.2 1.5 0 1.9-.5.3-.3.3-.8 0-1.1l-1.1-1c-.3-.3-.7-.3-1.1-.1l-.7.5c-1.2-.6-2.2-1.6-2.8-2.8l.5-.7c.2-.4.2-.8-.1-1.1Z"/></svg></a>
+                        <a href="mailto:missocba@gmail.com" aria-label="Enviar correo a MISSO">{% include 'tienda/includes/icon.html' with icon='mail' %}</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script src="{% static 'js/bubble_nav.js' %}" defer></script>
+    <script src="{% static 'js/footer.js' %}?v=submit-consent-20261016-1" defer></script>
+    <script src="{% static 'js/pill-buttons.js' %}?v=shared-footer-20261016-1" defer></script>
 
     {% block extra_js %}{% endblock %}
 </body>

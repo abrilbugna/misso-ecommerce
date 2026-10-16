@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto, CodigoPromocional
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto, CodigoPromocional, NewsletterContacto
 from .email_utils import enviar_comprobante_cliente
 
 class TalleProductoInline(admin.TabularInline):
@@ -59,6 +59,18 @@ class CodigoPromocionalAdmin(admin.ModelAdmin):
     search_fields = ['codigo']
     fields = ['codigo', 'descuento_porcentaje', 'descuento_fijo', 'activo', 'usos_maximos', 'usos_actuales', 'fecha_expiracion']
     readonly_fields = ['usos_actuales']
+
+
+@admin.register(NewsletterContacto)
+class NewsletterContactoAdmin(admin.ModelAdmin):
+    list_display = ['email', 'activo', 'codigo_promocional', 'consentimiento_comercial', 'consentimiento_fecha', 'creado']
+    list_editable = ['activo']
+    list_filter = ['activo', 'consentimiento_comercial']
+    search_fields = ['email']
+    readonly_fields = ['email', 'codigo_promocional', 'consentimiento_comercial', 'consentimiento_fecha', 'creado']
+
+    def has_add_permission(self, request):
+        return False
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):

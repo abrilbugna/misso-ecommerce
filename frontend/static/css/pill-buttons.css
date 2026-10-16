@@ -1,0 +1,63 @@
+/* Shared bubble button used by the home CTAs and the footer newsletter. */
+:is(.home-page, .site-footer) .misso-pill-button {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  overflow: visible;
+  isolation: isolate;
+  background: transparent;
+  transform-origin: center;
+  vertical-align: middle;
+}
+:is(.home-page, .site-footer) .misso-pill-label,
+:is(.home-page, .site-footer) .misso-pill-arrow {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-radius: 100px;
+  white-space: nowrap;
+  line-height: 1;
+}
+:is(.home-page, .site-footer) .misso-pill-label {
+  left: 0;
+  z-index: 3;
+  width: calc(100% - 52px);
+  background: var(--cream);
+  color: var(--wine-dark);
+  transform: none;
+  transition: background .25s ease;
+}
+:is(.home-page, .site-footer) .misso-pill-arrow {
+  right: 0;
+  z-index: 2;
+  width: 44px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--wine-dark);
+  transform: none;
+}
+:is(.home-page, .site-footer) .misso-pill-arrow svg {
+  position: absolute;
+  display: block;
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+:is(.home-page, .site-footer):not(.pill-motion-ready) .misso-pill-button:hover .misso-pill-label {
+  background: var(--rose-light);
+}
+:is(.home-page, .site-footer) .misso-pill-button:focus-visible {
+  outline: 2px solid var(--cream);
+  outline-offset: 4px;
+}
+:is(.home-page, .site-footer).pill-motion-ready .misso-pill-label { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  :is(.home-page, .site-footer) :is(.misso-pill-label, .misso-pill-arrow, .misso-pill-arrow svg) { transform: none !important; }
+  :is(.home-page, .site-footer) .misso-pill-button:hover .misso-pill-label { background: var(--rose-light); }
+}

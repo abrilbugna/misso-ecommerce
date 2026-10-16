@@ -4,11 +4,14 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.test import Client
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from .models import (CATEGORIAS, CATEGORIA_ROPA_DEPORTIVA, Carrito, ItemCarrito,
-                     Producto, Orden, Suscripcion, EmailSuscripcion, ImagenProducto)
+                     Producto, Orden, OpcionEnvio, Suscripcion, EmailSuscripcion, ImagenProducto, NewsletterContacto, CodigoPromocional)
 from .subscription_api import MPSubscriptionError, SubscriptionAPI
 from .subscription_services import create_intention, start_checkout
 from .subscription_emails import queue_welcome, send_welcome, due_emails
@@ -31,7 +34,7 @@ class PublicStorefrontTests(TestCase):
     def assert_product_only(self, response):
         self.assertEqual(response.status_code, 200)
         self.assertNotRegex(response.content.decode().lower(),
-                            r'suscrip|suscrib|preapproval|preferencias|25\.000|25k')
+                            r'preapproval|preferencias|25\.000|25k|suscripci[oó]n mensual|/suscripcion/')
 
     def test_home_preserves_hero_and_videos_with_sports_cta(self):
         response = self.client.get(reverse('inicio'))
@@ -44,6 +47,12 @@ class PublicStorefrontTests(TestCase):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)
         self.assertContains(response, f'href="{reverse("catalogo")}?categoria={CATEGORIA_ROPA_DEPORTIVA}"')
+        self.assertContains(response, '<h2>Suscribite para novedades</h2>')
+        self.assertContains(response, 'type="submit" name="consentimiento" value="1"')
+        self.assertNotContains(response, 'Quiero recibir novedades')
+        self.assertNotContains(response, 'RECIBÍ UN 10% OFF')
+        self.assertNotContains(response, 'ACEPTO RECIBIR NOVEDADES Y COMUNICACIONES COMERCIALES DE MISSO.')
+        self.assertNotContains(response, 'Novedades de MISSO, directo en tu correo')
 
     def test_home_reuses_one_outro_with_real_product_links(self):
         product = self.products[0]
@@ -77,7 +86,10 @@ class PublicStorefrontTests(TestCase):
                 response = self.client.get(url)
                 self.assert_product_only(response)
                 self.assertContains(response, 'mailto:missocba@gmail.com')
-                self.assertContains(response, 'Seguir pedido')
+                self.assertContains(response, 'SEGUIR PEDIDO')
+                self.assertContains(response, 'action="/newsletter/registrar/"')
+                self.assertContains(response, 'https://instagram.com/misso.cba')
+                self.assertContains(response, 'https://wa.me/543517727224')
 
     def test_product_prices_show_whole_pesos_with_thousands_separator(self):
         product = self.products[0]
@@ -97,6 +109,7 @@ class PublicStorefrontTests(TestCase):
         checkout = self.client.get(reverse('checkout'))
         self.assertContains(checkout, 'id="resumen-total-valor">$24.000</span>')
         self.assertContains(checkout, 'data-total="24000.00"')
+
 
     def test_all_public_subscription_routes_redirect_without_disclosing_history(self):
         for reference in (self.sub.referencia_publica, uuid.uuid4()):
@@ -187,3 +200,95 @@ class PublicStorefrontTests(TestCase):
                            ('suscripcion_resultado', [self.sub.referencia_publica]),
                            ('suscripcion_estado', [self.sub.referencia_publica])]:
             self.assertEqual(self.client.get(reverse(name, args=args)).status_code, 200)
+
+
+@override_settings(ALLOWED_HOSTS=['testserver'], SUBSCRIPTIONS_PUBLIC_ENABLED=False)
+class NewsletterTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def post(self, data, **kwargs):
+        return self.client.post(reverse('registrar_newsletter'), data,
+                                HTTP_X_REQUESTED_WITH='XMLHttpRequest', **kwargs)
+
+    def test_saves_consent_and_normalizes_email_without_duplicates(self):
+        response = self.post({'email': '  HOLA@Example.COM ', 'consentimiento': '1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['ok'])
+        contacto = NewsletterContacto.objects.get()
+        self.assertEqual(contacto.email, 'hola@example.com')
+        self.assertTrue(contacto.consentimiento_comercial)
+        self.assertIsNotNone(contacto.consentimiento_fecha)
+        codigo = contacto.codigo_promocional
+        self.assertIsNotNone(codigo)
+        self.assertEqual(codigo.descuento_porcentaje, Decimal('10.00'))
+        self.assertEqual(codigo.usos_maximos, 1)
+        self.assertIn(codigo.codigo, response.json()['message'])
+        self.post({'email': 'hola@example.com', 'consentimiento': '1'})
+        self.assertEqual(NewsletterContacto.objects.count(), 1)
+        self.assertEqual(CodigoPromocional.objects.count(), 1)
+
+    def test_rejects_invalid_email_missing_consent_and_honeypot(self):
+        for data in ({'email': 'incorrecto', 'consentimiento': '1'},
+                     {'email': 'hola@example.com'},
+                     {'email': 'hola@example.com', 'consentimiento': '1', 'website': 'bot'}):
+            with self.subTest(data=data):
+                self.assertEqual(self.post(data).status_code, 400)
+        self.assertFalse(NewsletterContacto.objects.exists())
+
+    def test_limits_repeated_posts_and_requires_csrf(self):
+        for _ in range(6):
+            self.assertEqual(self.post({'email': 'incorrecto'}).status_code, 400)
+        self.assertEqual(self.post({'email': 'hola@example.com', 'consentimiento': '1'}).status_code, 429)
+        self.assertFalse(NewsletterContacto.objects.exists())
+        csrf_client = Client(enforce_csrf_checks=True)
+        self.assertEqual(csrf_client.post(reverse('registrar_newsletter'), {
+            'email': 'hola@example.com', 'consentimiento': '1',
+        }).status_code, 403)
+
+    def test_normal_form_post_redirects_with_saved_confirmation(self):
+        response = self.client.post(reverse('registrar_newsletter'), {
+            'email': 'hola@example.com', 'consentimiento': '1', 'next': '/tienda/',
+        }, follow=True)
+        self.assertRedirects(response, reverse('catalogo'))
+        self.assertContains(response, NewsletterContacto.objects.get().codigo_promocional.codigo)
+        self.assertEqual(NewsletterContacto.objects.count(), 1)
+
+    def test_newsletter_code_reduces_real_order_once(self):
+        self.post({'email': 'hola@example.com', 'consentimiento': '1'})
+        codigo = NewsletterContacto.objects.get().codigo_promocional
+        producto = Producto.objects.create(nombre='Conjunto', precio=Decimal('12000.00'))
+        envio = OpcionEnvio.objects.create(nombre='Retiro', costo=0)
+        session = self.client.session
+        session.save()
+        cart = Carrito.objects.create(session_key=session.session_key)
+        ItemCarrito.objects.create(carrito=cart, producto=producto, cantidad=1)
+        response = self.client.post(reverse('aplicar_codigo'),
+                                    data='{"codigo":"' + codigo.codigo + '"}',
+                                    content_type='application/json')
+        self.assertTrue(response.json()['valido'])
+        self.assertEqual(response.json()['descuento'], 1200)
+        with patch('tienda.views.enviar_notificacion_tienda'), patch('tienda.views.enviar_comprobante_cliente'):
+            response = self.client.post(reverse('checkout'), {
+                'nombre': 'Cliente', 'email': 'hola@example.com', 'telefono': '3511234567',
+                'direccion': 'Córdoba', 'envio': envio.pk, 'metodo_pago': 'transferencia',
+            })
+        self.assertEqual(response.status_code, 302)
+        orden = Orden.objects.latest('pk')
+        self.assertEqual(orden.descuento, Decimal('1200.00'))
+        self.assertEqual(orden.total, Decimal('10800.00'))
+        codigo.refresh_from_db()
+        self.assertEqual(codigo.usos_actuales, 1)
+        self.assertFalse(codigo.es_valido())
+
+    def test_existing_inactive_contact_can_opt_in_again(self):
+        contacto = NewsletterContacto.objects.create(
+            email='hola@example.com', consentimiento_comercial=False,
+            consentimiento_fecha=timezone.now(), activo=False,
+        )
+        response = self.post({'email': 'hola@example.com', 'consentimiento': '1'})
+        self.assertTrue(response.json()['ok'])
+        contacto.refresh_from_db()
+        self.assertTrue(contacto.activo)
+        self.assertTrue(contacto.consentimiento_comercial)
+        self.assertEqual(NewsletterContacto.objects.count(), 1)
