@@ -37,7 +37,7 @@
   <div class="detalle-info">
     <span class="purchase-kicker">Misso / {{ producto.get_categoria_display }}</span>
     <h1 class="detalle-nombre">{{ producto.nombre }}</h1>
-    <p class="detalle-precio">${{ producto.precio }}</p>
+    <p class="detalle-precio">${{ producto.precio|floatformat:"0g" }}</p>
     {% if producto.descripcion %}
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
     {% endif %}

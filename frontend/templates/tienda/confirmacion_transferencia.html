@@ -14,7 +14,7 @@
     <span class="purchase-kicker">03 / Transferencia bancaria</span>
     <h1>Pedido <em>recibido.</em></h1>
     <p class="purchase-result-lead">Gracias, {{ orden.nombre }}. Guardamos tu pedido <strong>#{{ orden.pk }}</strong>. Para terminar, transferí el total y envianos el comprobante.</p>
-    <div class="total-transferencia"><span>Total a transferir</span><strong>${{ orden.total }}</strong></div>
+    <div class="total-transferencia"><span>Total a transferir</span><strong>${{ orden.total|floatformat:"0g" }}</strong></div>
 
     <div class="datos-transferencia">
         <span class="purchase-kicker">Datos de pago</span><h2>Transferí <em>a Misso.</em></h2>

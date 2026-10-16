@@ -79,6 +79,25 @@ class PublicStorefrontTests(TestCase):
                 self.assertContains(response, 'mailto:missocba@gmail.com')
                 self.assertContains(response, 'Seguir pedido')
 
+    def test_product_prices_show_whole_pesos_with_thousands_separator(self):
+        product = self.products[0]
+        product.precio = Decimal('12000.00')
+        product.save(update_fields=['precio'])
+        catalog = self.client.get(reverse('catalogo'))
+        self.assertContains(catalog, 'class="catalog-price">$12.000</span>')
+        self.assertContains(catalog, 'data-price="12000.00"')
+        self.assertContains(self.client.get(reverse('detalle', args=[product.pk])),
+                            'class="detalle-precio">$12.000</p>')
+
+        session = self.client.session
+        session.save()
+        cart = Carrito.objects.create(session_key=session.session_key)
+        ItemCarrito.objects.create(carrito=cart, producto=product, cantidad=2)
+        self.assertContains(self.client.get(reverse('ver_carrito')), '2 × $12.000')
+        checkout = self.client.get(reverse('checkout'))
+        self.assertContains(checkout, 'id="resumen-total-valor">$24.000</span>')
+        self.assertContains(checkout, 'data-total="24000.00"')
+
     def test_all_public_subscription_routes_redirect_without_disclosing_history(self):
         for reference in (self.sub.referencia_publica, uuid.uuid4()):
             urls = [reverse('informacion_suscripcion'), reverse('comenzar_suscripcion'),

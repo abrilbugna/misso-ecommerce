@@ -30,7 +30,7 @@
                         <p class="item-precio">Color: {{ item.color.nombre }}</p>
                     {% endif %}
                     {% if item.talle %}<p class="item-precio">Talle: {{ item.talle.talle }}</p>{% endif %}
-                    <p class="item-precio">{{ item.cantidad }} × ${{ item.producto.precio }}</p>
+                    <p class="item-precio">{{ item.cantidad }} × ${{ item.producto.precio|floatformat:"0g" }}</p>
                 </div>
                 <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar" aria-label="Eliminar {{ item.producto.nombre }}">{% include 'tienda/includes/icon.html' with icon='close' %}</a>
             </div>
@@ -58,17 +58,17 @@
 
             <div class="resumen-linea">
                 <span>Subtotal</span>
-                <span>${{ total }}</span>
+                <span>${{ total|floatformat:"0g" }}</span>
             </div>
             {% if descuento %}
             <div class="resumen-descuento">
                 <span>Descuento</span>
-                <span>− ${{ descuento }}</span>
+                <span>− ${{ descuento|floatformat:"0g" }}</span>
             </div>
             {% endif %}
             <div class="resumen-total">
                 <span>Total</span>
-                <span>${{ total_con_descuento }}</span>
+                <span>${{ total_con_descuento|floatformat:"0g" }}</span>
             </div>
             <a href="{% url 'checkout' %}" class="btn misso-pill-button misso-pill-right"><span class="misso-pill-label">Finalizar compra</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
         </div>

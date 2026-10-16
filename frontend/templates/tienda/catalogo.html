@@ -42,7 +42,7 @@
             {% with url=producto.get_imagen_url %}{% if url %}<img src="{{ url }}" alt="{{ producto.nombre }}" loading="lazy">{% else %}<div class="catalog-no-image">Sin imagen</div>{% endif %}{% endwith %}
             <span class="catalog-product-index">{{ forloop.counter|stringformat:'02d' }}</span>
           </div>
-          <div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio }}</span><span class="catalog-cta">Ver producto <span class="catalog-cta-icon" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span></div></div>
+          <div class="catalog-product-info"><span class="catalog-product-category">{{ producto.get_categoria_display }}</span><h2>{{ producto.nombre }}</h2><div class="catalog-product-bottom"><span class="catalog-price">${{ producto.precio|floatformat:"0g" }}</span><span class="catalog-cta">Ver producto <span class="catalog-cta-icon" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></span></div></div>
         </a>
       </article>
       {% empty %}

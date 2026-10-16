@@ -15,7 +15,7 @@
     <span class="purchase-kicker">03 / Pago seguro</span>
     <h1>Un paso <em>más.</em></h1>
     <p class="purchase-result-lead">Tu pedido <strong>#{{ orden.pk }}</strong> está listo, {{ orden.nombre }}. Continuá en Mercado Pago para completar el pago.</p>
-    <div class="total"><span>Total del pedido</span><strong>${{ orden.total }}</strong></div>
+    <div class="total"><span>Total del pedido</span><strong>${{ orden.total|floatformat:"0g" }}</strong></div>
     <a href="{{ mp_url }}" class="btn-mp misso-pill-button misso-pill-right"><span class="misso-pill-label">Ir a pagar</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
     <p class="aviso">{% include 'tienda/includes/icon.html' with icon='lock' %} El pago se completa de forma segura en Mercado Pago.</p>
 </div>

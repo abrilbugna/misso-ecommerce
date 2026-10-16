@@ -1,5 +1,5 @@
 {% extends 'tienda/base.html' %}
-{% load static %}
+{% load static l10n %}
 {% block title %}Checkout — Misso{% endblock %}
 
 {% block extra_css %}
@@ -64,7 +64,7 @@
             {% for item in items %}
             <div class="resumen-item">
                 <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
-                <span>${{ item.subtotal }}</span>
+                <span>${{ item.subtotal|floatformat:"0g" }}</span>
             </div>
             {% endfor %}
             <div class="resumen-envio">
@@ -74,7 +74,7 @@
             {% if codigo_aplicado %}
             <div class="resumen-descuento">
                 <span>Descuento ({{ codigo_aplicado }})</span>
-                <span>− ${{ descuento }}</span>
+                <span>− ${{ descuento|floatformat:"0g" }}</span>
             </div>
             {% endif %}
             <div class="recargo-mp" id="resumen-recargo-mp">
@@ -83,7 +83,7 @@
             </div>
             <div class="resumen-total">
                 <span>Total</span>
-                <span id="resumen-total-valor">${{ total_con_descuento }}</span>
+                <span id="resumen-total-valor">${{ total_con_descuento|floatformat:"0g" }}</span>
             </div>
         </div>
     </div>
@@ -91,7 +91,7 @@
 
 <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&loading=async"></script>
 
-<script src="{% static 'js/checkout.js' %}" data-total="{{ total_con_descuento }}"></script>
+<script src="{% static 'js/checkout.js' %}?v=prices-20261016-1" data-total="{{ total_con_descuento|unlocalize }}"></script>
 
 {% endblock %}
 {% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}{% endblock %}

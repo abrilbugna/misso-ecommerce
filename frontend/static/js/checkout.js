@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const spanTotal = document.getElementById('resumen-total-valor');
     const divRecargo = document.getElementById('resumen-recargo-mp');
     const spanRecargo = document.getElementById('resumen-recargo-valor');
-    const subtotalConDescuento = parseFloat(total.replace(',', '.'));
+    const subtotalConDescuento = parseFloat(total);
+    const formatoPrecio = new Intl.NumberFormat('es-AR', { maximumFractionDigits: 0 });
     const ES_CORREO = /correo\s*argentino/i;
 
     function filtrarPagoSegunEnvio() {
@@ -76,13 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const textoEnvio = selectEnvio.options[selectEnvio.selectedIndex]?.text || '';
         const matchEnvio = textoEnvio.match(/\$([\d.]+)/);
         const costoEnvio = matchEnvio ? parseFloat(matchEnvio[1]) : 0;
-        spanEnvio.textContent = costoEnvio > 0 ? '$' + costoEnvio.toLocaleString('es-AR') : 'Se calcula al elegir';
+        spanEnvio.textContent = costoEnvio > 0 ? '$' + formatoPrecio.format(costoEnvio) : 'Se calcula al elegir';
         const mpSeleccionado = document.querySelector('input[name="metodo_pago"]:checked')?.value === 'mercadopago';
         const baseTotal = subtotalConDescuento + costoEnvio;
         const recargo = mpSeleccionado ? Math.round(baseTotal * 0.10 * 100) / 100 : 0;
         divRecargo.classList.toggle('visible', mpSeleccionado);
-        spanRecargo.textContent = '$' + recargo.toLocaleString('es-AR');
-        spanTotal.textContent = '$' + (baseTotal + recargo).toLocaleString('es-AR');
+        spanRecargo.textContent = '$' + formatoPrecio.format(recargo);
+        spanTotal.textContent = '$' + formatoPrecio.format(baseTotal + recargo);
     }
 
     if (selectEnvio) {

@@ -427,12 +427,10 @@ body:has(.home-page) > footer{padding-block:var(--home-edge-space)}
   .home-page .hero-nav .hero-nav-wordmark .hero-nav-wordmark-text{font-family:inherit;text-shadow:none}
 }
 
-/* Burgundy footer only on the desktop home page. */
-@media(min-width:1024px){
-  body:has(.campaign-hero) > footer{background:var(--wine-dark);border-top-color:var(--wine-dark);color:var(--cream)}
-  body:has(.campaign-hero) > footer a{color:var(--cream)}
-  body:has(.campaign-hero) > footer a:hover{color:var(--rose-light)}
-}
+/* Burgundy footer on the home page at every viewport width. */
+body:has(.campaign-hero) > footer{background:var(--wine-dark);border-top-color:var(--wine-dark);color:var(--cream)}
+body:has(.campaign-hero) > footer a{color:var(--cream)}
+body:has(.campaign-hero) > footer a:hover{color:var(--rose-light)}
 
 /* Full semantic text reserves each line; only the aria-hidden copy is typed. */
 .home-page .outro-type-visual,.home-page .outro-type-cursor{display:none}
