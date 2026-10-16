@@ -1,7 +1,7 @@
 {% extends 'tienda/base.html' %}
 {% load static %}
 
-{% block title %}Pedido confirmado — Misso{% endblock %}
+{% block title %}Pedido recibido — Misso{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/confirmacion.css' %}"><link rel="stylesheet" href="{% static 'css/purchase.css' %}">{% endblock %}
 
 {% block content %}
@@ -9,7 +9,7 @@
     <div class="purchase-result-orbit" aria-hidden="true"></div>
     <div class="check" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='check' %}</div>
     <span class="purchase-kicker">03 / Tu pedido está en marcha</span>
-    <h1>Pedido <em>confirmado.</em></h1>
+    <h1>Pedido <em>{% if orden.pagado %}confirmado.{% else %}recibido.{% endif %}</em></h1>
     <p class="purchase-result-lead">Gracias, {{ orden.nombre }}. Recibimos tu pedido y pronto te escribimos para coordinar la entrega.</p>
     <div class="purchase-result-card">
         <div class="purchase-result-row"><span>Número de pedido</span><strong>#{{ orden.pk }}</strong></div>

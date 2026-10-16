@@ -17,7 +17,8 @@ from .panel_access import panel_required
 from .panel_forms import (PanelLoginForm, LOW_STOCK_LIMIT, ProductoFilterForm, OrdenFilterForm,
                           OrdenForm, PromocionForm, EnvioForm)
 from .panel_services import ProductoEditor, order_revision, update_order
-from .email_utils import enviar_comprobante_cliente
+from .panel_forms import OrderEmailActionForm
+from .order_emails import request_order_email
 
 logger = logging.getLogger(__name__)
 
@@ -52,11 +53,11 @@ def page_context(request, queryset):
 def inicio(request):
     context = {'section': 'inicio', 'low_limit': LOW_STOCK_LIMIT}
     if request.user.has_perm('tienda.view_producto'):
-        context['products'] = Producto.objects.aggregate(total=Count('id'), active=Count('id', filter=Q(activo=True)), inactive=Count('id', filter=Q(activo=False)), featured=Count('id', filter=Q(destacado=True)))
+        context['products'] = Producto.objects.aggregate(total=Count('id'), active=Count('id', filter=Q(activo=True)), inactive=Count('id', filter=Q(activo=False)))
     if request.user.has_perm('tienda.view_talleproducto'):
         context['stock'] = TalleProducto.objects.aggregate(zero=Count('id', filter=Q(stock=0)), low=Count('id', filter=Q(stock__gt=0, stock__lte=LOW_STOCK_LIMIT)))
     if request.user.has_perm('tienda.view_orden'):
-        context['orders'] = Orden.objects.aggregate(total=Count('id'), pending=Count('id', filter=Q(estado='en_proceso')), finished=Count('id', filter=Q(estado='finalizado')), canceled=Count('id', filter=Q(estado='cancelado')), unpaid=Count('id', filter=Q(pagado=False) & ~Q(estado='cancelado')))
+        context['orders'] = Orden.objects.aggregate(pending=Count('id', filter=Q(estado='en_proceso')), unpaid=Count('id', filter=Q(pagado=False) & ~Q(estado='cancelado')))
         context['sales'] = Orden.objects.filter(pagado=True).exclude(estado='cancelado').aggregate(amount=Sum('total'))['amount'] or Decimal('0.00')
         context['recent_orders'] = Orden.objects.order_by('-creado')[:5]
     return render(request, 'panel/dashboard.html', context)
@@ -127,7 +128,7 @@ def producto_editar(request, pk=None):
 @panel_required('tienda.view_orden')
 def pedidos(request):
     form = OrdenFilterForm(request.GET)
-    orders = Orden.objects.order_by('-creado')
+    orders = Orden.objects.select_related('envio').prefetch_related('itemorden_set__producto').order_by('-creado')
     if form.is_valid():
         data = form.cleaned_data
         if data['q']:
@@ -141,6 +142,8 @@ def pedidos(request):
                 orders = orders.filter(**{key: data[key]})
         if data['pagado']:
             orders = orders.filter(pagado=data['pagado'] == '1')
+            if data['pagado'] == '0' and not data['estado']:
+                orders = orders.exclude(estado='cancelado')
         if data['desde']:
             orders = orders.filter(creado__date__gte=data['desde'])
         if data['hasta']:
@@ -154,7 +157,6 @@ def pedidos(request):
 @require_http_methods(['GET', 'POST'])
 def pedido_editar(request, pk):
     order = get_object_or_404(Orden.objects.select_related('envio', 'codigo_promo').prefetch_related('itemorden_set__producto', 'itemorden_set__color', 'itemorden_set__talle'), pk=pk)
-    previous_state = order.estado
     form = OrdenForm(request.POST if request.method == 'POST' else None, instance=order, initial={'revision': order_revision(order)})
     if request.method == 'POST':
         if not request.user.has_perm('tienda.change_orden'):
@@ -167,15 +169,33 @@ def pedido_editar(request, pk):
             except DatabaseError:
                 form.add_error(None, 'No pudimos actualizar el pedido. Volvé a intentarlo.')
             else:
-                if saved.estado == 'finalizado' and previous_state != 'finalizado':
-                    try:
-                        enviar_comprobante_cliente(saved)
-                    except Exception:
-                        messages.warning(request, 'Pedido guardado. No pudimos enviar el comprobante por email.')
                 messages.success(request, 'Pedido actualizado')
                 return redirect('panel:pedido_editar', pk=pk)
         messages.error(request, 'No pudimos guardar los cambios. Revisá el formulario.')
-    return render(request, 'panel/pedido_form.html', {'order': order, 'form': form, 'section': 'pedidos'})
+    if request.method == 'POST':
+        order.refresh_from_db()  # ModelForm validation must not display unsaved state as fact.
+    emails = list(order.emails.all())
+    latest = {email.tipo: email.pk for email in emails}
+    for email in emails:
+        email.is_latest = latest[email.tipo] == email.pk
+    return render(request, 'panel/pedido_form.html', {'order': order, 'form': form, 'section': 'pedidos', 'emails': emails, 'email_revision': order_revision(order)})
+
+
+@panel_required('tienda.view_orden', 'tienda.change_orden')
+@require_http_methods(['POST'])
+def pedido_email(request, pk):
+    get_object_or_404(Orden, pk=pk)
+    form = OrderEmailActionForm(request.POST)
+    if form.is_valid():
+        try:
+            request_order_email(pk, form.cleaned_data['email_id'], form.cleaned_data['revision'], form.cleaned_data['action'])
+        except ValidationError as exc:
+            messages.error(request, ' '.join(exc.messages))
+        else:
+            messages.success(request, 'Solicitud registrada. Consultá el estado de la notificación más abajo.')
+    else:
+        messages.error(request, 'Confirmá explícitamente la acción de correo.')
+    return redirect('panel:pedido_editar', pk=pk)
 
 
 @panel_required('tienda.view_codigopromocional')

@@ -88,14 +88,14 @@
   text-transform: none;
   transform: none;
 }
-:is(.site-bubble-nav, .home-page .hero-nav) .shop-brand-shimmer {
+:is(.site-bubble-nav, .home-page .hero-nav, .home-page .outro-catalog-mobile) .shop-brand-shimmer {
   display: block;
   color: var(--wine-dark);
   text-shadow: none;
   filter: none;
   -webkit-text-fill-color: var(--wine-dark);
 }
-:is(.site-bubble-nav, .home-page .hero-nav) .shop-brand-shimmer.is-shimmering {
+:is(.site-bubble-nav, .home-page .hero-nav, .home-page .outro-catalog-mobile) .shop-brand-shimmer.is-shimmering {
   background-image: linear-gradient(110deg,
     var(--wine-dark) 0%, var(--wine-dark) 41%,
     rgba(255,255,255,.14) 46%, rgba(255,245,241,.95) 49.5%,
@@ -113,7 +113,7 @@
   100% { background-position: -140% 0; }
 }
 @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
-  :is(.site-bubble-nav, .home-page .hero-nav) .shop-brand-shimmer.is-shimmering {
+  :is(.site-bubble-nav, .home-page .hero-nav, .home-page .outro-catalog-mobile) .shop-brand-shimmer.is-shimmering {
     background: none;
     -webkit-text-fill-color: var(--wine-dark);
     animation: none;
@@ -165,7 +165,7 @@
   .site-bubble-nav.hero-nav .hero-nav-pills a.hero-nav-wordmark { font-size: 29px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  :is(.site-bubble-nav, .home-page .hero-nav) .shop-brand-shimmer.is-shimmering { background: none; -webkit-text-fill-color: var(--wine-dark); animation: none; }
+  :is(.site-bubble-nav, .home-page .hero-nav, .home-page .outro-catalog-mobile) .shop-brand-shimmer.is-shimmering { background: none; -webkit-text-fill-color: var(--wine-dark); animation: none; }
   .site-bubble-nav .hero-social-bubble,
   .site-bubble-nav .hero-social svg,
   .site-bubble-nav .hero-cart svg { transition: none; }

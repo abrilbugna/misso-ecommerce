@@ -5,8 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, CATEGORIA_ROPA_DEPORTIVA, ColorProducto, TalleProducto, CodigoPromocional
 from .forms import CheckoutForm
+from .order_identity import dni_digest
+from django.views.decorators.debug import sensitive_post_parameters
 from .subscription_access import public_subscription_required
-from .email_utils import enviar_notificacion_tienda, enviar_comprobante_cliente
+from .order_emails import queue_initial
+from .order_services import confirm_verified_payment
+from .order_access import remember_checkout, can_access_order
 import mercadopago
 from django.conf import settings
 from django.http import JsonResponse
@@ -241,6 +245,7 @@ def eliminar_carrito(request, pk):
     return redirect('ver_carrito')
 
 
+@sensitive_post_parameters('dni')
 def checkout(request):
     if not request.session.session_key:
         return redirect('catalogo')
@@ -280,48 +285,49 @@ def checkout(request):
                 else total_sin_recargo
             )
 
-            orden = Orden.objects.create(
-                nombre=form.cleaned_data['nombre'],
-                email=form.cleaned_data['email'],
-                telefono=form.cleaned_data['telefono'],
-                direccion=form.cleaned_data['direccion'],
-                envio=envio,
-                metodo_pago=metodo_pago,
-                subtotal=subtotal,
-                descuento=descuento,
-                codigo_promo=codigo_obj,
-                total=total,
-                estado='en_proceso',
-            )
-
-            if codigo_obj:
-                codigo_obj.usos_actuales += 1
-                codigo_obj.save()
-                del request.session['codigo_promo']
-
-            items_guardados = []
-            for item in items:
-                item_orden = ItemOrden.objects.create(
-                    orden=orden,
-                    producto=item.producto,
-                    cantidad=item.cantidad,
-                    precio=item.producto.precio,
-                    color=item.color,
-                    talle=item.talle,
+            with transaction.atomic():
+                orden = Orden.objects.create(
+                    nombre=form.cleaned_data['nombre'],
+                    email=form.cleaned_data['email'],
+                    telefono=form.cleaned_data['telefono'],
+                    direccion=form.cleaned_data['direccion'],
+                    envio=envio,
+                    metodo_pago=metodo_pago,
+                    subtotal=subtotal,
+                    descuento=descuento,
+                    codigo_promo=codigo_obj,
+                    total=total,
+                    estado='en_proceso',
                 )
-                items_guardados.append(item_orden)
-                if item.talle:
-                    item.talle.stock = max(0, item.talle.stock - item.cantidad)
-                    item.talle.save()
+                orden.dni_hash = dni_digest(form.cleaned_data['dni'], orden.seguimiento_token)
+                orden.save(update_fields=['dni_hash'])
 
-            if metodo_pago != 'mercadopago':
-                try:
-                    enviar_notificacion_tienda(orden, items_guardados)
-                    enviar_comprobante_cliente(orden)
-                except Exception:
-                    pass
+                if codigo_obj:
+                    codigo_obj.usos_actuales += 1
+                    codigo_obj.save()
+                    del request.session['codigo_promo']
 
-            items.delete()
+                items_guardados = []
+                for item in items:
+                    item_orden = ItemOrden.objects.create(
+                        orden=orden,
+                        producto=item.producto,
+                        cantidad=item.cantidad,
+                        precio=item.producto.precio,
+                        color=item.color,
+                        talle=item.talle,
+                    )
+                    items_guardados.append(item_orden)
+                    if item.talle:
+                        item.talle.stock = max(0, item.talle.stock - item.cantidad)
+                        item.talle.save()
+
+                if metodo_pago != 'mercadopago':
+                    queue_initial(orden)
+
+                items.delete()
+
+            remember_checkout(request, orden)
 
             if metodo_pago == 'efectivo':
                 return redirect('confirmacion', pk=orden.pk)
@@ -345,7 +351,9 @@ def checkout(request):
 
 
 def confirmacion(request, pk):
-    orden = get_object_or_404(Orden, pk=pk)
+    orden = Orden.objects.filter(pk=pk).first()
+    if orden is None or not can_access_order(request, orden):
+        return redirect('seguir_pedido')
     if orden.metodo_pago == 'mercadopago' and not orden.pagado:
         return render(request, 'tienda/pago_mp.html', {
             'orden': orden,
@@ -356,12 +364,16 @@ def confirmacion(request, pk):
 
 
 def confirmacion_transferencia(request, pk):
-    orden = get_object_or_404(Orden, pk=pk)
+    orden = Orden.objects.filter(pk=pk).first()
+    if orden is None or not can_access_order(request, orden):
+        return redirect('seguir_pedido')
     return render(request, 'tienda/confirmacion_transferencia.html', {'orden': orden})
 
 
 def pago_mp(request, pk):
-    orden = get_object_or_404(Orden, pk=pk)
+    orden = Orden.objects.filter(pk=pk).first()
+    if orden is None or not can_access_order(request, orden):
+        return redirect('seguir_pedido')
 
     if orden.metodo_pago != 'mercadopago':
         return redirect('confirmacion', pk=orden.pk)
@@ -424,52 +436,38 @@ def pago_mp(request, pk):
 
 def _confirmar_pago_mercadopago(payment_id):
     """Confirma la orden solo con los datos obtenidos de la API de Mercado Pago."""
+    if not str(payment_id).isascii() or not str(payment_id).isdigit() or len(str(payment_id)) > 100:
+        return None
     sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
     payment_response = sdk.payment().get(str(payment_id))
+    api_status = payment_response.get('status', 0)
+    if api_status == 429 or (isinstance(api_status, int) and api_status >= 500):
+        # The SDK returns HTTP failures as data rather than always raising.
+        # Let the webhook return 503 so Mercado Pago retries the verification.
+        raise RuntimeError('Mercado Pago no está disponible temporalmente.')
     if payment_response.get('status') != 200:
         return None
 
     payment = payment_response.get('response', {})
-    if payment.get('status') != 'approved' or payment.get('currency_id') != 'ARS':
+    if (str(payment.get('id')) != str(payment_id) or payment.get('status') != 'approved'
+            or payment.get('currency_id') != 'ARS'):
         return None
 
     try:
         orden_pk = int(payment.get('external_reference'))
-        monto_pagado = Decimal(str(payment.get('transaction_amount'))).quantize(Decimal('0.01'))
+        monto_pagado = Decimal(str(payment.get('transaction_amount')))
     except (TypeError, ValueError, InvalidOperation):
         return None
 
-    enviar_emails = False
-    with transaction.atomic():
-        try:
-            orden = Orden.objects.select_for_update().get(
-                pk=orden_pk,
-                metodo_pago='mercadopago',
-            )
-        except Orden.DoesNotExist:
-            return None
-
-        if monto_pagado != orden.total:
-            return None
-
-        if not orden.pagado:
-            orden.pagado = True
-            orden.save(update_fields=['pagado'])
-            enviar_emails = True
-
-    if enviar_emails:
-        items = list(orden.itemorden_set.select_related('producto', 'color', 'talle'))
-        try:
-            enviar_notificacion_tienda(orden, items)
-            enviar_comprobante_cliente(orden)
-        except Exception:
-            pass
-
-    return orden
+    if not monto_pagado.is_finite():
+        return None
+    return confirm_verified_payment(orden_pk, str(payment_id), monto_pagado)
 
 
 def mercadopago_retorno(request, pk):
-    orden = get_object_or_404(Orden, pk=pk, metodo_pago='mercadopago')
+    orden = Orden.objects.filter(pk=pk, metodo_pago='mercadopago').first()
+    if orden is None or not can_access_order(request, orden):
+        return redirect('seguir_pedido')
     payment_id = request.GET.get('payment_id') or request.GET.get('collection_id')
     orden_confirmada = None
     if payment_id:
@@ -498,8 +496,11 @@ def mercadopago_webhook(request):
     except (TypeError, ValueError, json.JSONDecodeError):
         payload = {}
 
+    if not isinstance(payload, dict):
+        payload = {}
+    data = payload.get('data') if isinstance(payload.get('data'), dict) else {}
     topic = request.GET.get('type') or payload.get('type')
-    payment_id = request.GET.get('data.id') or payload.get('data', {}).get('id')
+    payment_id = request.GET.get('data.id') or data.get('id')
     if topic != 'payment' or not payment_id:
         return JsonResponse({'ok': True})
 

@@ -19,14 +19,13 @@ body:has(.home-page)>nav{display:none}
 .home-page .hero-social svg{width:20px;height:20px;transition:transform .35s}.home-page .hero-social:first-child:hover,.home-page .hero-social:last-child:hover{background:var(--rose-light)}.home-page .hero-social:hover{background:var(--rose-light)}
 .home-page .hero-nav-pills a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 clamp(12px,1.35vw,22px);border:1px solid rgba(255,245,241,.7);border-radius:100px;color:var(--cream);font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;transition:transform .35s,background .25s,color .25s}.home-page .hero-nav-pills a:hover{transform:translateY(-3px) scale(1.03);background:var(--cream);color:var(--wine-dark)}
 .home-page .hero-cart svg{width:19px;height:19px}.home-page .hero-cart-count{position:absolute;top:-5px;right:-4px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:50%;background:var(--wine-dark);color:var(--cream);font-size:9px;letter-spacing:0}
-.home-page .hero-shop{display:inline-flex;align-items:center;gap:12px;height:44px;padding:4px 24px 4px 4px;border-radius:100px;background:var(--cream);color:var(--wine-dark);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;transition:transform .35s,background .25s}.home-page .hero-shop:hover{background:var(--rose-light)}
-.home-page .hero-shop-arrow{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:var(--wine-dark);color:var(--cream);font-size:21px;line-height:1}
 .home-page .hero-bottomline{position:absolute;bottom:22px;left:3%;right:3%;z-index:12;display:flex;justify-content:space-between;align-items:center;color:var(--cream);font-size:10px;letter-spacing:.18em;text-transform:uppercase}.home-page .hero-bottomline a{display:inline-flex;align-items:center;gap:14px;color:var(--cream)}.home-page .scroll-arrow{display:inline-block;font-size:17px;line-height:1}
 @media(max-width:1199px){.home-page .hero-nav{gap:8px}.home-page .hero-nav-pills a{padding:0 12px;font-size:10px}}
 @media(max-width:991px) and (min-width:768px){.home-page .hero-nav{height:106px;grid-template-columns:1fr auto}.home-page .hero-nav-pills{grid-column:1/-1;grid-row:2}}
-@media(max-width:767px){.home-page .hero-nav{position:relative;inset:auto;order:0;display:flex;justify-content:space-between;gap:10px;height:auto;min-height:68px;padding:15px clamp(14px,4vw,22px)}.home-page .hero-nav-pills{display:none}.home-page .hero-socials,.home-page .hero-nav-actions{gap:6px}.home-page .hero-social,.home-page .hero-cart{width:36px;height:36px}.home-page .hero-social svg{width:18px;height:18px}.home-page .hero-shop{height:38px;gap:6px;padding:4px 12px 4px 4px;font-size:10px}.home-page .hero-shop-arrow{width:30px;height:30px;font-size:18px}
+@media(max-width:767px){.home-page .hero-nav{position:relative;inset:auto;order:0;display:flex;justify-content:space-between;gap:10px;height:auto;min-height:68px;padding:15px clamp(14px,4vw,22px)}.home-page .hero-nav-pills{display:none}.home-page .hero-socials,.home-page .hero-nav-actions{gap:6px}.home-page .hero-social,.home-page .hero-cart{width:36px;height:36px}.home-page .hero-social svg{width:18px;height:18px}
 }
-@media(max-width:340px){.home-page .hero-social,.home-page .hero-cart{width:33px;height:33px}.home-page .hero-shop{padding-right:9px;font-size:9px}}
+
+@media(max-width:340px){.home-page .hero-social,.home-page .hero-cart{width:33px;height:33px}}
 
 .home-page .campaign-hero :where(:not(.home-outro, .home-outro *)){font-family:'Coolvetica Rg',sans-serif}
 /* La burbuja rosa queda sin wordmark central. */
@@ -34,10 +33,6 @@ body:has(.home-page)>nav{display:none}
 @media(min-width:768px){
   .home-page .hero-bottomline{display:none}
 }
-/* Two independent bubbles swap places without changing the link's footprint. */
-.home-page .hero-shop.misso-pill-button{width:148px;height:44px;padding:0;background:transparent}
-.home-page .hero-shop.misso-pill-button:hover{background:transparent}
-.home-page .hero-nav .hero-shop,.home-page .hero-nav .hero-shop:hover,.home-page .hero-nav .hero-shop:focus-visible{color:var(--wine-dark)}
 .home-page .intro-info-button.misso-pill-button{width:min(260px,100%);height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;--pill-hover-label:var(--blush)}
 .home-page .intro-info-button .misso-pill-arrow{width:48px}
 .home-page .intro-info-button .misso-pill-label{width:calc(100% - 56px)}
@@ -45,8 +40,10 @@ body:has(.home-page)>nav{display:none}
 .home-page .outro-catalog-link.misso-pill-button{width:min(320px,calc(100vw - 32px));height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .home-page .outro-catalog-link .misso-pill-arrow{width:48px}
 .home-page .outro-catalog-link .misso-pill-label{width:calc(100% - 56px)}
+.home-page .outro-catalog-mobile{display:none}
+@media(max-width:767px){.home-page .outro-catalog-desktop{display:none}.home-page .outro-catalog-mobile{display:block}}
 .home-page .hero-social:focus-visible{outline:2px solid var(--cream);outline-offset:4px}
-@media(max-width:767px){.home-page .hero-shop.misso-pill-button{width:112px;height:38px}.home-page .hero-shop .misso-pill-arrow{width:38px}.home-page .hero-shop .misso-pill-label{width:calc(100% - 44px)}}
+@media(max-width:767px){}
 /* Stable social hit area: the animated bubble never moves the link itself. */
 .home-page .hero-social{background:transparent;transition:none}
 .home-page .hero-social:first-child:hover,.home-page .hero-social:last-child:hover,.home-page .hero-social:hover{background:transparent}
@@ -67,23 +64,20 @@ body:has(.home-page)>nav{display:none}
 .home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:38px;height:38px}
 .home-page .hero-nav .hero-social-bubble{inset:0}
 .home-page .hero-nav .hero-nav-pills a{min-height:38px;padding:0 clamp(10px,1vw,16px)}
-.home-page .hero-nav .hero-shop.misso-pill-button{height:38px}
-.home-page .hero-nav .hero-shop .misso-pill-arrow{width:38px;height:38px}
-.home-page .hero-nav .hero-shop .misso-pill-label{width:calc(100% - 46px)}
-@media(min-width:768px) and (max-width:991px){.home-page .hero-nav{top:10px;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);height:58px;padding:7px 13px;border-radius:999px;row-gap:0}.home-page .hero-nav .hero-nav-pills{grid-column:auto;grid-row:auto;gap:5px}.home-page .hero-nav .hero-nav-pills a{min-height:36px;padding:0 8px;font-size:9px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:36px;height:36px}.home-page .hero-nav .hero-shop.misso-pill-button{width:112px;height:36px}.home-page .hero-nav .hero-shop .misso-pill-arrow{width:36px;height:36px}.home-page .hero-nav .hero-shop .misso-pill-label{width:calc(100% - 44px)}}
-@media(max-width:767px){.home-page .hero-nav{top:auto;display:flex;justify-content:space-between;align-items:center;column-gap:8px;height:50px;min-height:0;margin:8px auto 0;padding:6px 10px}.home-page .hero-nav .hero-socials,.home-page .hero-nav .hero-nav-actions{height:auto}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:34px;height:34px}.home-page .hero-nav .hero-shop.misso-pill-button{width:110px;height:34px}.home-page .hero-nav .hero-shop .misso-pill-arrow{width:34px;height:34px}.home-page .hero-nav .hero-shop .misso-pill-label{width:calc(100% - 42px)}}
-@media(max-width:340px){.home-page .hero-nav{height:46px;padding:5px 8px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:32px;height:32px}.home-page .hero-nav .hero-shop.misso-pill-button{width:105px;height:32px}.home-page .hero-nav .hero-shop .misso-pill-arrow{width:32px;height:32px}.home-page .hero-nav .hero-shop .misso-pill-label{width:calc(100% - 40px)}}
+@media(min-width:768px) and (max-width:991px){.home-page .hero-nav{top:10px;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);height:58px;padding:7px 13px;border-radius:999px;row-gap:0}.home-page .hero-nav .hero-nav-pills{grid-column:auto;grid-row:auto;gap:5px}.home-page .hero-nav .hero-nav-pills a{min-height:36px;padding:0 8px;font-size:9px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:36px;height:36px}}
+@media(max-width:767px){.home-page .hero-nav{top:auto;display:flex;justify-content:space-between;align-items:center;column-gap:8px;height:50px;min-height:0;margin:8px auto 0;padding:6px 10px}.home-page .hero-nav .hero-socials,.home-page .hero-nav .hero-nav-actions{height:auto}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:34px;height:34px}}
+@media(max-width:340px){.home-page .hero-nav{height:46px;padding:5px 8px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:32px;height:32px}}
 /* Exact shared centerline for all three navigation groups. */
 .home-page .hero-nav{display:block;height:58px;padding:0}
 .home-page .hero-nav .hero-socials,.home-page .hero-nav .hero-nav-pills,.home-page .hero-nav .hero-nav-actions{position:absolute;top:50%;display:flex;height:auto;align-items:center;justify-content:center;gap:8px;margin:0;line-height:1;transform:translateY(-50%)}
 .home-page .hero-nav .hero-socials{left:18px}
 .home-page .hero-nav .hero-nav-pills{left:50%;transform:translate(-50%,-50%)}
 .home-page .hero-nav .hero-nav-actions{right:18px}
-.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-nav-pills a,.home-page .hero-nav .hero-shop.misso-pill-button{flex:none;align-self:center;height:38px;min-height:38px;margin:0}
+.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-nav-pills a{flex:none;align-self:center;height:38px;min-height:38px;margin:0}
 .home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:38px}
-@media(min-width:768px) and (max-width:991px){.home-page .hero-nav{height:56px}.home-page .hero-nav .hero-socials{left:12px}.home-page .hero-nav .hero-nav-actions{right:12px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-nav-pills a,.home-page .hero-nav .hero-shop.misso-pill-button{height:36px;min-height:36px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:36px}}
-@media(max-width:767px){.home-page .hero-nav{height:48px;min-height:48px}.home-page .hero-nav .hero-socials{left:9px}.home-page .hero-nav .hero-nav-actions{right:9px}.home-page .hero-nav .hero-nav-pills{display:none}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-shop.misso-pill-button{height:34px;min-height:34px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:34px}}
-@media(max-width:340px){.home-page .hero-nav{height:44px;min-height:44px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-shop.misso-pill-button{height:32px;min-height:32px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:32px}}
+@media(min-width:768px) and (max-width:991px){.home-page .hero-nav{height:56px}.home-page .hero-nav .hero-socials{left:12px}.home-page .hero-nav .hero-nav-actions{right:12px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart,.home-page .hero-nav .hero-nav-pills a{height:36px;min-height:36px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:36px}}
+@media(max-width:767px){.home-page .hero-nav{height:48px;min-height:48px}.home-page .hero-nav .hero-socials{left:9px}.home-page .hero-nav .hero-nav-actions{right:9px}.home-page .hero-nav .hero-nav-pills{display:none}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{height:34px;min-height:34px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:34px}}
+@media(max-width:340px){.home-page .hero-nav{height:44px;min-height:44px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{height:32px;min-height:32px}.home-page .hero-nav .hero-social,.home-page .hero-nav .hero-cart{width:32px}}
 /* Moving product ribbon in the final scene. */
 .home-page .home-outro{gap:28px;padding:90px 0 80px}
 .home-page .home-outro>.eyebrow,.home-page .home-outro>h2,.home-page .home-outro>.outro-catalog-link{position:relative;z-index:2}
@@ -464,3 +458,7 @@ body:has(.home-page){
   html.misso-intro-pending .home-page.outro-hero .campaign-hero::before,
   html.misso-intro-running .home-page.outro-hero .campaign-hero::before{display:block}
 }
+@media(min-width:1024px){.home-page #intro-title em{white-space:nowrap}}
+@media(min-width:1024px){.home-page #intro-title .intro-title-first-line{white-space:nowrap}}
+@media(min-width:1024px){.home-page .intro-copy-description{margin-top:clamp(90px,7vw,120px)}}
+.home-page .intro-copy-star{display:inline-block;margin-inline:.3em;color:var(--rose-dark);font-size:.82em;vertical-align:.08em}

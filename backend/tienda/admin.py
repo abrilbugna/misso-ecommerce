@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, OpcionEnvio, ColorProducto, TalleProducto, ImagenProducto, VideoProducto, CodigoPromocional, NewsletterContacto
-from .email_utils import enviar_comprobante_cliente
+from django.db import transaction
+from django.urls import reverse
+from django.utils.html import format_html
+from .panel_forms import OrdenForm
+from .order_services import update_order
 
 class TalleProductoInline(admin.TabularInline):
     model = TalleProducto
@@ -28,6 +32,9 @@ class ItemOrdenInline(admin.TabularInline):
     extra = 0
     readonly_fields = ['producto', 'color', 'talle', 'cantidad', 'precio']
     can_delete = False
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 @admin.register(ColorProducto)
 class ColorProductoAdmin(admin.ModelAdmin):
@@ -74,35 +81,34 @@ class NewsletterContactoAdmin(admin.ModelAdmin):
 
 @admin.register(Orden)
 class OrdenAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'nombre', 'email', 'subtotal', 'descuento', 'total', 'codigo_promo', 'metodo_pago', 'estado', 'pagado', 'creado']
+    form = OrdenForm
+    list_display = ['pk', 'nombre', 'total', 'metodo_pago', 'estado', 'pagado', 'pago_origen', 'codigo_seguimiento', 'creado']
     list_filter = ['estado', 'metodo_pago', 'pagado']
-    list_editable = ['estado', 'pagado']
-    readonly_fields = ['nombre', 'email', 'telefono', 'direccion', 'subtotal', 'descuento', 'codigo_promo', 'total', 'envio', 'metodo_pago', 'creado']
+    readonly_fields = ['nombre', 'email', 'telefono', 'direccion', 'subtotal', 'descuento', 'codigo_promo', 'total', 'envio', 'metodo_pago', 'creado', 'pago_origen', 'pago_confirmado_at', 'mp_payment_id', 'despachado_at', 'entregado_at', 'finalizado_historico', 'gestion_notificaciones']
+    fields = [*readonly_fields, 'estado', 'pagado', 'transportista', 'codigo_seguimiento', 'plazo_dias_habiles', 'confirmar', 'revision']
     inlines = [ItemOrdenInline]
 
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description='Notificaciones')
+    def gestion_notificaciones(self, obj):
+        return format_html('<a href="{}">Gestionar correos en el panel de MISSO</a>', reverse('panel:pedido_editar', args=[obj.pk]))
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        # Lock before validation so a concurrent change becomes a normal form
+        # error, not a save_model exception after the form was accepted.
+        with transaction.atomic():
+            if request.method == 'POST' and object_id and object_id.isdecimal():
+                Orden.objects.select_for_update().filter(pk=int(object_id)).first()
+            return super().changeform_view(request, object_id, form_url, extra_context)
+
     def save_model(self, request, obj, form, change):
-        if change and 'estado' in form.changed_data:
-            anterior = Orden.objects.get(pk=obj.pk)
-
-            if obj.estado == 'cancelado' and anterior.estado != 'cancelado':
-                for item in obj.itemorden_set.all():
-                    if item.talle:
-                        item.talle.stock += item.cantidad
-                        item.talle.save()
-
-            elif anterior.estado == 'cancelado' and obj.estado == 'en_proceso':
-                for item in obj.itemorden_set.all():
-                    if item.talle:
-                        item.talle.stock = max(0, item.talle.stock - item.cantidad)
-                        item.talle.save()
-
-            elif obj.estado == 'finalizado' and anterior.estado != 'finalizado':
-                try:
-                    enviar_comprobante_cliente(obj)
-                except Exception as e:
-                    self.message_user(request, f"Pedido guardado, pero hubo un error al enviar el mail: {e}", level='warning')
-
-        super().save_model(request, obj, form, change)
+        saved = update_order(obj.pk, form.cleaned_data)
+        obj.__dict__.update(saved.__dict__)
 
 @admin.register(OpcionEnvio)
 class OpcionEnvioAdmin(admin.ModelAdmin):

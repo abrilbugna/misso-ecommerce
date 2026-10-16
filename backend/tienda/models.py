@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+import uuid
 import cloudinary.models
 
 CATEGORIA_ROPA_DEPORTIVA = 'ropa-deportiva'
@@ -168,7 +170,9 @@ METODOS_PAGO = [
 
 ESTADOS_ORDEN = [
     ('en_proceso', 'En proceso'),
-    ('finalizado', 'Finalizado'),
+    ('confirmado', 'Confirmado'),
+    ('en_envio', 'En envío'),
+    ('entregado', 'Entregado'),
     ('cancelado', 'Cancelado'),
 ]
 
@@ -186,9 +190,68 @@ class Orden(models.Model):
     creado = models.DateTimeField(auto_now_add=True)
     pagado = models.BooleanField(default=False)
     estado = models.CharField(max_length=20, choices=ESTADOS_ORDEN, default='en_proceso')
+    version = models.PositiveIntegerField(default=0, editable=False)
+    seguimiento_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    dni_hash = models.CharField(max_length=67, blank=True, default='', editable=False)
+    pago_origen = models.CharField(max_length=20, blank=True, editable=False, choices=[
+        ('manual', 'Confirmación manual'), ('mercadopago', 'Verificado por Mercado Pago'),
+        ('historico', 'Pago histórico (origen no registrado)'),
+    ])
+    pago_confirmado_at = models.DateTimeField(null=True, blank=True, editable=False)
+    mp_payment_id = models.CharField(max_length=100, null=True, blank=True, unique=True, editable=False)
+    transportista = models.CharField(max_length=30, blank=True, choices=[
+        ('correo_argentino', 'Correo Argentino'), ('retiro', 'Retiro'), ('otro', 'Otro / entrega sin tracking postal'),
+    ])
+    codigo_seguimiento = models.CharField(max_length=40, blank=True)
+    plazo_dias_habiles = models.PositiveSmallIntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(90)])
+    despachado_at = models.DateTimeField(null=True, blank=True, editable=False)
+    entregado_at = models.DateTimeField(null=True, blank=True, editable=False)
+    finalizado_historico = models.BooleanField(default=False, editable=False)
+    emails_iniciales_preexistentes = models.BooleanField(default=False, editable=False)
 
     def __str__(self):
         return f'Orden {self.pk} - {self.nombre}'
+
+
+class EmailOrden(models.Model):
+    """Durable, immutable delivery attempts; a resend is an explicit new record."""
+    orden = models.ForeignKey(Orden, on_delete=models.PROTECT, related_name='emails')
+    tipo = models.CharField(max_length=20, choices=[('inicial', 'Pedido recibido'), ('admin', 'Aviso a MISSO'), ('despacho', 'Despacho'), ('acceso', 'Enlace de seguimiento solicitado')])
+    secuencia = models.PositiveIntegerField(default=1)
+    clave = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    payload = models.JSONField(default=dict)
+    creado = models.DateTimeField(auto_now_add=True)
+    primer_intento_at = models.DateTimeField(null=True, blank=True)
+    enviado_at = models.DateTimeField(null=True, blank=True)
+    proximo_intento_at = models.DateTimeField(null=True, blank=True)
+    retirado_at = models.DateTimeField(null=True, blank=True)
+    intentos = models.PositiveIntegerField(default=0)
+    proveedor_id = models.CharField(max_length=100, blank=True)
+    error = models.CharField(max_length=200, blank=True)
+    revision_manual = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['orden', 'tipo', 'secuencia'], name='unique_order_email_sequence')]
+        ordering = ['creado', 'pk']
+
+    @property
+    def estado_envio(self):
+        if self.retirado_at:
+            return 'Reemplazado / detenido'
+        if self.enviado_at:
+            return 'Enviado'
+        if self.revision_manual:
+            return 'Requiere revisión en Resend'
+        if self.error:
+            return 'Falló · reintento pendiente'
+        return 'Pendiente'
+
+
+class IntentoSeguimiento(models.Model):
+    """Shared rate limits across workers, with no raw IPs or emails stored."""
+    clave = models.CharField(max_length=64, unique=True)
+    inicio = models.DateTimeField()
+    intentos = models.PositiveIntegerField(default=0)
 
 class ItemOrden(models.Model):
     orden = models.ForeignKey(Orden, on_delete=models.CASCADE)

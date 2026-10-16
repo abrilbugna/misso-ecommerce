@@ -31,6 +31,11 @@ class PublicStorefrontTests(TestCase):
                     email='cliente@example.test', telefono='123', destino='mismo', talle='90',
                     importe=Decimal('25000'), moneda='ARS')
 
+    def setUp(self):
+        session = self.client.session
+        session['checkout_orders'] = [str(self.order.seguimiento_token)]
+        session.save()
+
     def assert_product_only(self, response):
         self.assertEqual(response.status_code, 200)
         self.assertNotRegex(response.content.decode().lower(),
@@ -41,8 +46,8 @@ class PublicStorefrontTests(TestCase):
         self.assert_product_only(response)
         for content in ('NUEVA', 'COLECCIÓN', 'VER PRODUCTOS', 'Deslizá para más',
                         'img/letram.svg', 'collection-product', 'intro-carousel',
-                        'Nueva línea en camino...', 'Preparamos<br><em>algo nuevo.</em>',
-                        'Muy pronto llega una nueva colección de ropa deportiva a Misso.',
+                        'Diseñados, pensados y confeccionados...', '<span class="intro-title-first-line">Por mujeres</span><br><em>para mujeres</em>',
+                        'Conjuntos cómodos, tabla de talles y la opción de elegir un talle distinto para cada parte en los conjuntos!',
                         'Ver ropa deportiva'):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)
@@ -211,22 +216,20 @@ class NewsletterTests(TestCase):
         return self.client.post(reverse('registrar_newsletter'), data,
                                 HTTP_X_REQUESTED_WITH='XMLHttpRequest', **kwargs)
 
-    def test_saves_consent_and_normalizes_email_without_duplicates(self):
+    def test_saves_consent_without_creating_discount_codes_or_duplicates(self):
         response = self.post({'email': '  HOLA@Example.COM ', 'consentimiento': '1'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['ok'])
+        self.assertEqual(response.json()['message'], '¡Ya estás suscripta! ♡')
         contacto = NewsletterContacto.objects.get()
         self.assertEqual(contacto.email, 'hola@example.com')
         self.assertTrue(contacto.consentimiento_comercial)
         self.assertIsNotNone(contacto.consentimiento_fecha)
-        codigo = contacto.codigo_promocional
-        self.assertIsNotNone(codigo)
-        self.assertEqual(codigo.descuento_porcentaje, Decimal('10.00'))
-        self.assertEqual(codigo.usos_maximos, 1)
-        self.assertIn(codigo.codigo, response.json()['message'])
-        self.post({'email': 'hola@example.com', 'consentimiento': '1'})
+        self.assertIsNone(contacto.codigo_promocional)
+        duplicate = self.post({'email': 'hola@example.com', 'consentimiento': '1'})
+        self.assertEqual(duplicate.json()['message'], '¡Ya estás suscripta! ♡')
         self.assertEqual(NewsletterContacto.objects.count(), 1)
-        self.assertEqual(CodigoPromocional.objects.count(), 1)
+        self.assertEqual(CodigoPromocional.objects.count(), 0)
 
     def test_rejects_invalid_email_missing_consent_and_honeypot(self):
         for data in ({'email': 'incorrecto', 'consentimiento': '1'},
@@ -268,9 +271,9 @@ class NewsletterTests(TestCase):
                                     content_type='application/json')
         self.assertTrue(response.json()['valido'])
         self.assertEqual(response.json()['descuento'], 1200)
-        with patch('tienda.views.enviar_notificacion_tienda'), patch('tienda.views.enviar_comprobante_cliente'):
+        with patch('tienda.order_emails.requests.post'):
             response = self.client.post(reverse('checkout'), {
-                'nombre': 'Cliente', 'email': 'hola@example.com', 'telefono': '3511234567',
+                'nombre': 'Cliente', 'dni': '12345678', 'email': 'hola@example.com', 'telefono': '3511234567',
                 'direccion': 'Córdoba', 'envio': envio.pk, 'metodo_pago': 'transferencia',
             })
         self.assertEqual(response.status_code, 302)

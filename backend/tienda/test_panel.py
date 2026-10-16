@@ -231,7 +231,7 @@ class PanelTests(TestCase):
         self.assertEqual(self.client.post(f'/panel/productos/{self.product.pk}/', data).status_code, 302)
         self.assertFalse(ImagenProducto.objects.filter(pk=image.pk).exists())
 
-    @patch('tienda.panel_views.enviar_comprobante_cliente')
+    @patch('tienda.order_emails.requests.post')
     def test_order_state_stock_and_manual_payment(self, email):
         def post(state, paid=False):
             self.order.refresh_from_db()
@@ -245,10 +245,10 @@ class PanelTests(TestCase):
         self.assertEqual(post('cancelado').status_code, 302)
         self.size.refresh_from_db()
         self.assertEqual(self.size.stock, 3)
-        self.assertEqual(post('finalizado', True).status_code, 302)
+        self.assertEqual(post('confirmado', True).status_code, 302)
         self.size.refresh_from_db()
         self.assertEqual(self.size.stock, 2)
-        email.assert_called_once()
+        email.assert_not_called()
         self.order.refresh_from_db()
         self.assertTrue(self.order.pagado)
 
@@ -278,6 +278,24 @@ class PanelTests(TestCase):
         for url in ['/', '/tienda/', f'/tienda/{self.product.pk}/', '/tienda/carrito/', f'/tienda/talles/{self.color.pk}/']:
             self.assertEqual(self.client.get(url).status_code, 200, url)
         self.assertEqual(self.client.get('/tienda/checkout/').status_code, 302)
+
+    def test_dashboard_operational_counts_and_pending_payment_filter(self):
+        response = self.client.get('/panel/')
+        self.assertContains(response, 'Panel de control')
+        self.assertContains(response, 'Productos')
+        self.assertContains(response, 'Pedidos en proceso')
+        self.assertContains(response, 'Pagos pendientes')
+        self.assertContains(response, 'Ventas cobradas')
+        self.assertContains(response, 'Total histórico')
+        self.assertContains(response, 'Últimos pedidos')
+        self.assertContains(response, 'href="/panel/pedidos/?pagado=0"')
+        self.assertContains(response, 'href="/panel/pedidos/?estado=en_proceso"')
+
+        Orden.objects.create(nombre='Cancelado sin pago', email='cancelado@example.test', telefono='123', direccion='Test', subtotal=10, total=10, estado='cancelado')
+        response = self.client.get('/panel/pedidos/?pagado=0')
+        self.assertNotContains(response, 'Cancelado sin pago')
+        response = self.client.get('/panel/pedidos/?pagado=0&estado=cancelado')
+        self.assertContains(response, 'Cancelado sin pago')
 
     def test_nested_changes_require_child_model_permission(self):
         staff = get_user_model().objects.create_user('catalog-editor', is_staff=True)

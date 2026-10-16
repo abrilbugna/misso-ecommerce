@@ -16,7 +16,6 @@
 </header>
 <div class="panel-layout">
   <aside class="panel-sidebar">
-    <div class="panel-sidebar-caption">EL UNIVERSO MISSO <span aria-hidden="true">✦</span></div>
     <nav class="panel-nav" aria-label="Administración">
       <a href="{% url 'panel:inicio' %}" {% if section == 'inicio' %}aria-current="page"{% endif %}><span>01</span> Inicio <b>↗</b></a>
       {% if perms.tienda.view_producto %}<a href="{% url 'panel:productos' %}" {% if section == 'productos' %}aria-current="page"{% endif %}><span>02</span> Productos <b>↗</b></a>{% endif %}
@@ -24,13 +23,12 @@
       {% if perms.tienda.view_codigopromocional %}<a href="{% url 'panel:promociones' %}" {% if section == 'promociones' %}aria-current="page"{% endif %}><span>04</span> Promociones <b>↗</b></a>{% endif %}
       {% if perms.tienda.view_opcionenvio %}<a href="{% url 'panel:envios' %}" {% if section == 'envios' %}aria-current="page"{% endif %}><span>05</span> Envíos <b>↗</b></a>{% endif %}
       {% if perms.tienda.view_suscripcion %}<a href="{% url 'panel:suscripciones' %}" {% if section == 'suscripciones' %}aria-current="page"{% endif %}><span>06</span> Suscripciones <b>↗</b></a>{% endif %}
+      <a class="panel-nav-technical" href="{% url 'admin:index' %}">Panel técnico ↗</a>
     </nav>
-    <div class="panel-sidebar-note"><img src="{% static 'img/letram.svg' %}" alt="" width="80" height="80"><p>Cada detalle<br><em>cuenta.</em></p><a href="{% url 'admin:index' %}">Panel técnico ↗</a></div>
   </aside>
   <main id="panel-content" class="panel-main">
     {% include 'panel/includes/messages.html' %}
     {% block content %}{% endblock %}
-    <div class="panel-bottom">MISSO <span>Hecho con intención. Gestionado con amor.</span> ✦</div>
   </main>
 </div>
 {% endblock %}

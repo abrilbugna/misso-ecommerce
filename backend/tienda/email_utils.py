@@ -1,5 +1,7 @@
-import requests
 from django.conf import settings
+from django.utils.html import escape
+from django.template.loader import render_to_string
+from .order_access import tracking_url
 
 LOGO_URL = "https://res.cloudinary.com/ddsobe4fw/image/upload/w_280,f_auto,q_auto/v1782404900/phonto_cscttz.jpg"
 
@@ -8,7 +10,7 @@ def _logo():
 
 def _bloque_pago_envio(orden):
     metodo_pago = orden.metodo_pago
-    envio_nombre = str(orden.envio) if orden.envio else "A confirmar"
+    envio_nombre = escape(str(orden.envio)) if orden.envio else "A confirmar"
 
     if metodo_pago == "transferencia":
         bloque_pago = '''
@@ -46,7 +48,7 @@ def _bloque_pago_envio(orden):
 '''
     else:
         bloque_pago = f'''
-      <p style="margin:0;font-size:15px;"><strong>Medio de pago:</strong> {metodo_pago}</p>
+      <p style="margin:0;font-size:15px;"><strong>Medio de pago:</strong> {escape(metodo_pago)}</p>
 '''
 
     return f'''
@@ -66,8 +68,8 @@ def _filas_items(items):
         filas += f'''
         <tr>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;vertical-align:middle;">
-            <span style="display:block;font-size:14px;">{item.cantidad}x {item.producto.nombre}</span>
-            <span style="display:block;font-size:12px;color:#888;margin-top:3px;">Color: {color_txt} &nbsp;|&nbsp; Talle: {talle_txt}</span>
+            <span style="display:block;font-size:14px;">{item.cantidad}x {escape(item.producto.nombre)}</span>
+            <span style="display:block;font-size:12px;color:#888;margin-top:3px;">Color: {escape(color_txt)} &nbsp;|&nbsp; Talle: {escape(talle_txt)}</span>
           </td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${precio_item:,.2f}</td>
         </tr>'''
@@ -80,7 +82,7 @@ def html_comprobante_cliente(orden, items):
     if orden.descuento:
         fila_descuento = f'''
         <tr>
-          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;color:#c0768a;">Descuento ({orden.codigo_promo.codigo if orden.codigo_promo else 'Promo'})</td>
+          <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;font-size:14px;color:#c0768a;">Descuento ({escape(orden.codigo_promo.codigo) if orden.codigo_promo else 'Promo'})</td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;color:#c0768a;">− ${orden.descuento:,.2f}</td>
         </tr>'''
     else:
@@ -94,6 +96,15 @@ def html_comprobante_cliente(orden, items):
     else:
         fila_recargo = ''
 
+    if orden.metodo_pago == 'mercadopago' and orden.pagado:
+        mensaje = 'Tu pago fue confirmado por Mercado Pago.'
+    elif orden.pagado:
+        mensaje = 'Recibimos tu pedido y registramos tu pago.'
+    else:
+        mensaje = 'Recibimos tu pedido y está en proceso. El pago todavía no fue confirmado.'
+    if orden.estado == 'cancelado':
+        mensaje += ' Este pedido figura cancelado; escribinos para revisar su situación.'
+
     return f'''<!DOCTYPE html>
 <html>
 <head>
@@ -105,14 +116,15 @@ def html_comprobante_cliente(orden, items):
 
     {_logo()}
 
-    <h1 style="font-weight:400;font-size:26px;text-align:center;margin-bottom:4px;">¡Hola {orden.nombre}, gracias por tu compra!</h1>
+    <h1 style="font-weight:400;font-size:26px;text-align:center;margin-bottom:4px;">¡Hola {escape(orden.nombre)}, gracias por tu compra!</h1>
     <h3 style="font-weight:400;font-size:18px;text-align:center;color:#888;margin-top:4px;">Orden #{orden.pk}</h3>
 
     <p style="font-size:15px;line-height:1.6;margin-top:24px;">
-      Recibimos tu pedido correctamente. Nos estaremos contactando a tu número <strong>{orden.telefono}</strong> para coordinar los detalles de la venta. ♡
+      {mensaje} Nos estaremos contactando a tu número <strong>{escape(orden.telefono)}</strong> para coordinar los detalles de la venta. ♡
     </p>
 
     {_bloque_pago_envio(orden)}
+    <p style="text-align:center;"><a href="{escape(tracking_url(orden))}" style="color:#4a0d22;">SEGUIR MI PEDIDO ↗</a></p>
 
     <h3 style="font-weight:600;font-size:15px;margin-top:28px;margin-bottom:0;">Detalle de la orden</h3>
     <div style="border:1px solid #E2E6EA;padding:4px 20px;box-sizing:border-box;margin-top:10px;">
@@ -144,25 +156,20 @@ def html_comprobante_cliente(orden, items):
 </body>
 </html>'''
 
-def enviar_comprobante_cliente(orden):
+def payload_comprobante_cliente(orden):
     items = orden.itemorden_set.select_related("producto", "color", "talle").all()
-    html = html_comprobante_cliente(orden, items)
-    requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": "Misso <hola@misso.ar>",
-            "to": [orden.email],
-            "subject": f"Tu pedido #{orden.pk} fue confirmado — Misso",
-            "html": html,
-        },
-        timeout=5,
-    )
+    verified = orden.metodo_pago == 'mercadopago' and orden.pagado
+    return {
+        'from': settings.MISSO_EMAIL_FROM,
+        'to': [orden.email],
+        'subject': (f'Tu pago del pedido #{orden.pk} fue confirmado ♡ — MISSO' if verified
+                    else f'Recibimos tu pedido #{orden.pk} ♡ — MISSO'),
+        'html': html_comprobante_cliente(orden, items),
+    }
 
-def enviar_notificacion_tienda(orden, items):
+
+def payload_notificacion_tienda(orden):
+    items = orden.itemorden_set.select_related("producto", "color", "talle").all()
     filas = ""
     for item in items:
         color_txt = item.color.nombre if item.color else "Sin color"
@@ -180,17 +187,33 @@ def enviar_notificacion_tienda(orden, items):
         f"Método de pago: {orden.metodo_pago}\n"
         f"Total: ${orden.total}\n"
     )
-    requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {settings.RESEND_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": "Misso <hola@misso.ar>",
-            "to": [settings.NOTIFICACION_EMAIL],
-            "subject": f"¡Nuevo pedido #{orden.pk}!",
-            "text": texto,
-        },
-        timeout=5,
-    )
+    return {
+        'from': settings.MISSO_EMAIL_FROM,
+        'to': [settings.MISSO_ADMIN_EMAIL or ''],
+        'subject': f'¡Nuevo pedido #{orden.pk}!',
+        'text': texto,
+    }
+
+
+def payload_despacho(orden):
+    return {
+        'from': settings.MISSO_EMAIL_FROM,
+        'to': [orden.email],
+        'subject': (f'Tu pedido #{orden.pk} está listo para retirar ♡ — MISSO'
+                    if orden.transportista == 'retiro' else f'Tu pedido #{orden.pk} está en camino ♡ — MISSO'),
+        'html': render_to_string('tienda/emails/pedido_despacho.html', {
+            'order': orden, 'logo_url': LOGO_URL, 'tracking_url': tracking_url(orden),
+            'items': orden.itemorden_set.select_related('producto', 'color', 'talle').all(),
+        }),
+    }
+
+
+def payload_acceso_pedido(orden):
+    return {
+        'from': settings.MISSO_EMAIL_FROM,
+        'to': [orden.email],
+        'subject': f'Tu enlace de seguimiento #{orden.pk} — MISSO',
+        'html': render_to_string('tienda/emails/acceso_pedido.html', {
+            'numero': orden.pk, 'logo_url': LOGO_URL, 'tracking_url': tracking_url(orden),
+        }),
+    }

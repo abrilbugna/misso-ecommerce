@@ -655,7 +655,7 @@
         autoRound: false,
       });
     }
-    const slot = autoplay ? 2.2 : 1 / cards.length;
+    const slot = autoplay ? 3.5 : 1 / cards.length;
     const duration = slot * cards.length;
     const updateCount = progress => {
       if (cardCount) cardCount.textContent = String(Math.min(cards.length, Math.floor(progress * cards.length) + 1)).padStart(2, '0');

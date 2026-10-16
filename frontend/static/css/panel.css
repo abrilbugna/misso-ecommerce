@@ -29,3 +29,29 @@
 @media(max-width:430px){.panel-product-grid{grid-template-columns:1fr}.panel-heading h1{font-size:40px}.panel-filters{padding:16px}.panel-filters>.panel-field{flex-basis:100%}.panel-metric{padding:18px 14px}.panel-metric h2{font-size:21px}.panel-metric .panel-eyebrow b{display:none}.panel-metric>strong{font-size:46px}.panel-sales{padding:22px 18px}.panel-sales>span{display:none}.panel-section h2{font-size:27px}.panel-details{grid-template-columns:1fr;gap:5px}.panel-details dd{margin-bottom:12px}.panel-header-actions{flex-direction:column;align-items:flex-end}.panel-totals{font-size:14px}}
 @media(prefers-reduced-motion:no-preference){.panel-heading,.panel-login-card{animation:panel-arrive .35s ease-out both}@keyframes panel-arrive{from{opacity:.55;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 @media(prefers-reduced-motion:reduce){.panel-body *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Compact operational dashboard variant. */
+.panel-dashboard .panel-main{min-height:0}
+.panel-dashboard .panel-heading{margin:0 0 18px;gap:16px}
+.panel-dashboard .panel-heading h1{font-size:clamp(30px,3vw,42px);line-height:1.1;margin:0}
+.panel-dashboard .panel-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.panel-dashboard .panel-metric{padding:18px 20px;border-radius:20px}
+.panel-dashboard .panel-metric .panel-eyebrow{align-items:center;font-size:12px;letter-spacing:.04em}
+.panel-dashboard .panel-metric .panel-eyebrow b{font-size:17px}
+.panel-dashboard .panel-metric>strong{font-size:clamp(36px,3.5vw,48px);line-height:1;margin:12px 0 8px}
+.panel-dashboard .panel-metric p{margin:0;font-size:12px;line-height:1.45}
+.panel-dashboard .panel-sales{padding:14px 20px;margin:16px 0;border-radius:20px}
+.panel-dashboard .panel-sales h2{font-family:'Coolvetica Rg',sans-serif;font-size:clamp(28px,3vw,38px);line-height:1.1;margin:2px 0 0}
+.panel-dashboard .panel-sales-period{font-size:11px;margin:0;color:var(--burgundy)}
+.panel-dashboard .panel-section.panel-recent-orders{padding:18px 22px;margin-bottom:16px}
+.panel-dashboard .panel-recent-orders .panel-section-heading{align-items:center}
+.panel-dashboard .panel-recent-orders .panel-section-heading h2{font-family:'Coolvetica Rg',sans-serif;font-size:21px;line-height:1.2;margin:0}
+.panel-dashboard .panel-order-summary{grid-template-columns:minmax(0,1fr) auto auto auto;gap:16px;padding:12px 0;font-size:13px}
+.panel-dashboard .panel-order-action{font-size:11px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.panel-nav-technical{margin-top:8px;border-top:1px solid var(--borde);padding-top:12px!important;color:var(--burgundy)!important;font-size:11px!important}
+.panel-login{grid-template-columns:minmax(0,1fr);max-width:720px;justify-items:center}
+.panel-login-card{grid-column:1}
+.panel-login-card h1{font-size:clamp(30px,5vw,40px)}
+@media(max-width:1200px){.panel-dashboard .panel-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.panel-dashboard .panel-heading{margin:0 0 16px}.panel-dashboard .panel-heading h1{font-size:34px}.panel-dashboard .panel-metric{padding:16px 14px}.panel-dashboard .panel-metric>strong{font-size:40px}.panel-dashboard .panel-metric .panel-eyebrow{font-size:10px}.panel-dashboard .panel-sales{padding:14px 16px;margin:14px 0}.panel-dashboard .panel-section.panel-recent-orders{padding:16px;margin-bottom:12px}.panel-dashboard .panel-recent-orders .panel-section-heading h2{font-size:19px}.panel-dashboard .panel-order-summary{font-size:12px}.panel-dashboard .panel-order-action{font-size:10px}}
+@media(max-width:360px){.panel-dashboard .panel-metrics{grid-template-columns:1fr}.panel-dashboard .panel-metric{padding:15px 16px}}

@@ -1,7 +1,6 @@
 """Coordinated writes for the panel, without changing the public checkout."""
 import hashlib
 import json
-from collections import Counter
 
 import cloudinary
 import cloudinary.uploader
@@ -126,35 +125,5 @@ class ProductoEditor:
         return product
 
 
-def order_revision(order):
-    return signing.dumps({'pk': order.pk, 'estado': order.estado, 'pagado': order.pagado}, salt='panel.order')
-
-
-@transaction.atomic
-def update_order(pk, cleaned):
-    order = Orden.objects.select_for_update().get(pk=pk)
-    try:
-        old = signing.loads(cleaned['revision'], salt='panel.order')
-    except signing.BadSignature:
-        raise ValidationError('La ficha venció. Recargá el pedido.')
-    if old != {'pk': order.pk, 'estado': order.estado, 'pagado': order.pagado}:
-        raise ValidationError('El pedido cambió mientras lo editabas. Recargá antes de guardar.')
-    new_state = cleaned['estado']
-    delta = (1 if new_state == 'cancelado' else -1) if (order.estado == 'cancelado') != (new_state == 'cancelado') else 0
-    if delta:
-        quantities = Counter()
-        for item in order.itemorden_set.all():
-            if item.talle_id:
-                if item.cantidad <= 0:
-                    raise ValidationError('El pedido tiene cantidades inválidas. Revisalo desde el panel técnico.')
-                quantities[item.talle_id] += item.cantidad
-        for size in TalleProducto.objects.select_for_update().filter(pk__in=quantities).order_by('pk'):
-            stock = size.stock + delta * quantities[size.pk]
-            if stock < 0:
-                raise ValidationError(f'No hay stock suficiente para reactivar {size.color.nombre}, talle {size.talle}.')
-            size.stock = stock
-            size.save(update_fields=['stock'])
-    order.estado = new_state
-    order.pagado = cleaned['pagado']
-    order.save(update_fields=['estado', 'pagado'])
-    return order
+# Compatibility exports; all order rules live in the shared service.
+from .order_services import order_revision, update_order

@@ -1,5 +1,6 @@
 from django import forms
 from .models import OpcionEnvio, TALLES
+from .order_identity import normalize_dni
 
 
 class PreferenciasSuscripcionForm(forms.Form):
@@ -51,6 +52,12 @@ class PreferenciasSuscripcionForm(forms.Form):
         return cleaned
 
 class CheckoutForm(forms.Form):
+    dni = forms.CharField(label='DNI', max_length=10,
+                          widget=forms.PasswordInput(attrs={'inputmode': 'numeric', 'autocomplete': 'off', 'placeholder': 'Tu DNI'}))
+
+    def clean_dni(self):
+        return normalize_dni(self.cleaned_data['dni'])
+
     nombre = forms.CharField(max_length=200, label='Nombre completo')
     email = forms.EmailField(label='Email')
     telefono = forms.CharField(max_length=20, label='Teléfono')

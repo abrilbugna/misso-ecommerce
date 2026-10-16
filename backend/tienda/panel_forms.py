@@ -167,7 +167,40 @@ class OrdenForm(forms.ModelForm):
 
     class Meta:
         model = Orden
-        fields = ['estado', 'pagado']
+        fields = ['estado', 'pagado', 'transportista', 'codigo_seguimiento', 'plazo_dias_habiles']
+        labels = {'codigo_seguimiento': 'Código de seguimiento', 'plazo_dias_habiles': 'Plazo máximo (días hábiles)'}
+        help_texts = {
+            'codigo_seguimiento': 'Copiá el código de la etiqueta de Correo Argentino. Corregirlo no reenvía el email.',
+            'plazo_dias_habiles': 'Obligatorio para despachar por Correo Argentino (1 a 90).',
+            'transportista': 'Para retiro o entrega local no se necesita un código postal.',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .order_services import order_revision, suggested_carrier
+        if self.instance.pk:
+            self.initial.setdefault('revision', order_revision(self.instance))
+            if not self.instance.transportista:
+                self.initial['transportista'] = suggested_carrier(self.instance)
+            if self.instance.metodo_pago == 'mercadopago':
+                self.fields['pagado'].disabled = True
+                self.fields['pagado'].help_text = 'Lo actualiza Mercado Pago al verificar el pago. No se puede cambiar manualmente.'
+
+    def clean(self):
+        data = super().clean()
+        if self.instance.pk and not self.errors:
+            from .order_services import validate_order_update
+            # ModelForm may mutate its instance later; validate against persisted data.
+            current = Orden.objects.get(pk=self.instance.pk)
+            data.update(validate_order_update(current, data))
+        return data
+
+
+class OrderEmailActionForm(forms.Form):
+    revision = forms.CharField(widget=forms.HiddenInput)
+    email_id = forms.IntegerField(min_value=1, widget=forms.HiddenInput)
+    action = forms.ChoiceField(choices=[('retry', 'Reintentar'), ('resend', 'Reenviar')])
+    confirmar = forms.BooleanField(label='Confirmo esta acción de correo.')
 
 
 class PromocionForm(forms.ModelForm):

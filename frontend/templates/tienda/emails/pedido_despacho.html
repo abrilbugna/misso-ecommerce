@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#fff5f1;font-family:Helvetica,Arial,sans-serif;color:#4a0d22;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff5f1;"><tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#fff;">
+<tr><td align="center" style="padding:28px 24px 12px;"><img src="{{ logo_url }}" alt="Misso" width="140" style="display:block;max-width:140px;height:auto;"></td></tr>
+<tr><td style="padding:12px 24px;">
+<h1 style="font-size:26px;font-weight:400;text-align:center;margin:8px 0 24px;">{% if order.transportista == 'retiro' %}¡Tu pedido está listo para retirar!{% else %}¡Tu pedido está en camino!{% endif %}</h1>
+<p style="font-size:15px;line-height:1.6;">Hola, {{ order.nombre }} ♡</p>
+<p style="font-size:15px;line-height:1.6;">{% if order.transportista == 'retiro' %}Preparamos tu pedido con mucho amor. Escribinos para coordinar el retiro.{% else %}Preparamos tu pedido con mucho amor y ya está en camino hacia vos.{% endif %}</p>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f8dce5;border-radius:12px;"><tr><td style="padding:20px;font-size:14px;line-height:1.8;">
+<strong>Pedido #{{ order.pk }}</strong><br>
+{% if order.transportista == 'correo_argentino' %}Empresa: Correo Argentino<br>Código de seguimiento: <strong style="overflow-wrap:anywhere;">{{ order.codigo_seguimiento }}</strong><br>{% else %}Modalidad: {{ order.get_transportista_display }}<br>{% endif %}
+{% if order.transportista == 'retiro' %}Listo para retirar{% else %}Fecha de despacho{% endif %}: {{ order.despachado_at|date:'d/m/Y H:i' }}<br>
+{% if order.plazo_dias_habiles %}Tiempo estimado: hasta {{ order.plazo_dias_habiles }} días hábiles.{% endif %}
+</td></tr></table>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:24px auto;"><tr><td align="center" bgcolor="#4a0d22" style="border-radius:30px;"><a href="{{ tracking_url }}" style="display:inline-block;padding:16px 24px;color:#fff5f1;font-size:13px;text-decoration:none;">SEGUIR MI PEDIDO ↗</a></td></tr></table>
+{% if order.transportista == 'correo_argentino' %}<p style="font-size:13px;line-height:1.6;text-align:center;"><a href="https://www.correoargentino.com.ar/seguimiento-de-envios" style="color:#4a0d22;">También podés consultar tu envío en Correo Argentino.</a><br>Copiá el código de arriba para consultar sus movimientos.</p>{% endif %}
+<h2 style="font-size:16px;margin:28px 0 8px;">Un resumen de tu pedido</h2>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+{% for item in items %}<tr><td style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">{{ item.cantidad }} × {{ item.producto.nombre }}<br><span style="font-size:12px;">{{ item.color.nombre|default:'Sin color' }} · {{ item.talle.talle|default:'Sin talle' }}</span></td><td align="right" style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">${{ item.subtotal|floatformat:'0g' }}</td></tr>{% endfor %}
+<tr><td style="padding:16px 0;"><strong>Total</strong></td><td align="right" style="padding:16px 0;"><strong>${{ order.total|floatformat:'0g' }}</strong></td></tr>
+</table>
+</td></tr>
+<tr><td align="center" style="padding:20px 24px 28px;border-top:1px solid #f0d6da;font-size:13px;line-height:1.8;">Estamos para ayudarte ♡<br><a href="https://wa.me/543517727224" style="color:#4a0d22;">WhatsApp</a> · <a href="https://instagram.com/misso.cba" style="color:#4a0d22;">Instagram</a> · <a href="mailto:missocba@gmail.com" style="color:#4a0d22;">missocba@gmail.com</a><br><a href="https://misso.ar" style="color:#4a0d22;">misso.ar</a></td></tr>
+</table></td></tr></table>
+</body></html>

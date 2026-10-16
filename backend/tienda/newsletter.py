@@ -1,6 +1,4 @@
 import hashlib
-import secrets
-from decimal import Decimal
 
 from django import forms
 from django.contrib import messages
@@ -14,7 +12,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from .models import CodigoPromocional, NewsletterContacto
+from .models import NewsletterContacto
 
 
 class NewsletterForm(forms.Form):
@@ -74,18 +72,4 @@ def registrar_newsletter(request):
                 contacto.consentimiento_comercial = True
                 contacto.consentimiento_fecha = timezone.now()
                 contacto.save(update_fields=['activo', 'consentimiento_comercial', 'consentimiento_fecha'])
-        if not contacto.codigo_promocional_id:
-            codigo = CodigoPromocional.objects.create(
-                codigo=f'MISSO10-{secrets.token_hex(8).upper()}',
-                descuento_porcentaje=Decimal('10.00'),
-                usos_maximos=1,
-                activo=True,
-            )
-            contacto.codigo_promocional = codigo
-            contacto.save(update_fields=['codigo_promocional'])
-        else:
-            codigo = contacto.codigo_promocional
-
-    if codigo.es_valido():
-        return _reply(request, f'Tu código de 10% OFF es {codigo.codigo}. Usalo en el carrito.', ok=True)
-    return _reply(request, 'Tu correo está registrado. El beneficio de 10% ya fue utilizado.', ok=True)
+    return _reply(request, '¡Ya estás suscripta! ♡', ok=True)

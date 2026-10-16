@@ -8,6 +8,8 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
+# Keep stable once orders have a DNI digest. No plaintext document numbers.
+ORDER_DNI_KEY = os.getenv("ORDER_DNI_KEY") or SECRET_KEY
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 

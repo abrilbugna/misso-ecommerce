@@ -4,12 +4,12 @@
 
     const { gsap } = window;
     const buttons = Array.from(document.querySelectorAll(
-      '.home-page .misso-pill-button, .purchase-page .misso-pill-button, .site-footer .misso-pill-button'
+      '.site-bubble-nav .misso-pill-button, .home-page .misso-pill-button, .purchase-page .misso-pill-button, .tracking-page .misso-pill-button, .site-footer .misso-pill-button'
     )).filter(button => !button.dataset.pillMotionReady);
     if (!buttons.length) return;
     buttons.forEach(button => { button.dataset.pillMotionReady = 'true'; });
-    document.querySelector('.home-page, .purchase-page')?.classList.add('pill-motion-ready');
-    document.querySelector('.site-footer')?.classList.add('pill-motion-ready');
+    document.querySelector('.home-page, .purchase-page, .tracking-page')?.classList.add('pill-motion-ready');
+    document.querySelectorAll('.site-footer, .site-bubble-nav').forEach(root => root.classList.add('pill-motion-ready'));
 
     const mm = gsap.matchMedia();
     mm.add({ canHover: '(hover: hover) and (pointer: fine)', mobile: '(max-width: 767px)' }, context => {
