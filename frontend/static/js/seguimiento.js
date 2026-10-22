@@ -7,7 +7,7 @@
   button.addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(code.textContent.trim());
-      status.textContent = 'Código copiado ♡';
+      status.textContent = 'Código copiado.';
     } catch {
       const range = document.createRange();
       range.selectNodeContents(code);

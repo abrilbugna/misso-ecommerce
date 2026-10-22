@@ -1,6 +1,8 @@
 """Limited DNI lookup; postal details require the private link sent by email."""
 from datetime import timedelta
 from time import time
+import re
+from urllib.parse import urlencode
 
 from django import forms
 from django.db import transaction
@@ -16,8 +18,7 @@ from .order_identity import normalize_dni, matches_dni
 from .order_services import suggested_carrier
 
 GENERIC_ERROR = 'No pudimos validar el acceso. Revisá los datos o usá el enlace privado del email de tu compra.'
-# The shorter /seguimiento address currently returns 404; this official page works.
-CORREO_TRACKING_URL = 'https://www.correoargentino.com.ar/seguimiento-de-envios'
+CORREO_TRACKING_URL = 'https://www.correoargentino.com.ar/formularios/e-commerce'
 
 
 class TrackingForm(forms.Form):
@@ -56,8 +57,11 @@ def allow_attempt(request, number=''):
     return allowed
 
 
-def _private(response):
-    response['Referrer-Policy'] = 'no-referrer'
+def _private(response, *, referrer_policy='same-origin'):
+    # A native POST from a no-referrer document can send Origin: null and fail
+    # Django's CSRF check. The canonical form stays same-origin; token URLs
+    # keep no-referrer until the redirect removes the token from the address.
+    response['Referrer-Policy'] = referrer_policy
     response['X-Robots-Tag'] = 'noindex, nofollow, noarchive'
     return response
 
@@ -67,7 +71,8 @@ def _grant(request, order, private=True):
     key = 'tracking_access' if private else 'tracking_summary'
     # DNI access must never authorize checkout/payment or reveal the private token.
     request.session[key] = ({'token': str(order.seguimiento_token)} if private else {'number': order.pk}) | {'expires': time() + 3600}
-    return _private(redirect('seguir_pedido'))
+    return _private(redirect('seguir_pedido'),
+                    referrer_policy='no-referrer' if private else 'same-origin')
 
 
 @never_cache
@@ -124,7 +129,13 @@ def seguir_pedido(request, token=None):
                   ('en_envio', 'Listo para retirar' if public['retiro'] else 'En envío'), ('entregado', 'Entregado')]
         current = next((i for i, (key, _) in enumerate(states) if key == order.estado), -1)
         steps = [{'label': label, 'done': i < current, 'current': i == current} for i, (_, label) in enumerate(states)]
+    referrer_policy = 'no-referrer' if token is not None else 'same-origin'
+    correo_url = CORREO_TRACKING_URL
+    if private and public and public.get('codigo') and re.fullmatch(r'[A-Za-z0-9]{8,40}', public['codigo']):
+        # The public e-commerce form fills its tracking input from the id query parameter.
+        correo_url += '?' + urlencode({'id': public['codigo']})
     return _private(render(request, 'tienda/seguir_pedido.html', {
         'order': public, 'steps': steps, 'form': form, 'access_error': error,
-        'private_access': private, 'correo_tracking_url': CORREO_TRACKING_URL,
-    }, status=status))
+        'private_access': private, 'correo_tracking_url': correo_url,
+        'tracking_referrer_policy': referrer_policy,
+    }, status=status), referrer_policy=referrer_policy)

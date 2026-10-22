@@ -1,0 +1,42 @@
+{% extends 'panel/base.html' %}
+{% load static %}
+{% block title %}Contactos{% endblock %}
+{% block content %}
+<div class="panel-contacts">
+  <div class="panel-heading"><div><h1>Contactos</h1></div></div>
+  <nav class="panel-contact-tabs" aria-label="Tipos de contacto">
+    {% if can_newsletter %}<a href="{% url 'panel:contactos' %}?tipo=novedades" {% if contact_type == 'novedades' %}aria-current="page"{% endif %}>Suscriptos a novedades</a>{% endif %}
+    {% if can_buyers %}<a href="{% url 'panel:contactos' %}?tipo=compradores" {% if contact_type == 'compradores' %}aria-current="page"{% endif %}>Compradores</a>{% endif %}
+  </nav>
+  <div class="panel-contact-toolbar">
+    <form class="panel-filters panel-contact-search" method="get">
+      <input type="hidden" name="tipo" value="{{ contact_type }}">
+      <div class="panel-field"><label for="contact-search">Buscar {% if contact_type == 'novedades' %}correo{% else %}comprador{% endif %}</label><input id="contact-search" type="search" name="q" value="{{ search }}" maxlength="254" placeholder="{% if contact_type == 'novedades' %}Correo electrónico{% else %}Nombre, correo o teléfono{% endif %}"></div>
+      <button class="panel-button small" type="submit">Buscar ↗</button>
+      {% if search %}<a class="panel-link" href="{% url 'panel:contactos' %}?tipo={{ contact_type }}">Limpiar</a>{% endif %}
+    </form>
+    {% if contact_type == 'novedades' %}<button class="panel-button secondary small" type="button" data-copy-all-url="{% url 'panel:contactos_emails_novedades' %}">Copiar todos</button>{% endif %}
+  </div>
+  <p class="panel-contact-feedback" role="status" aria-live="polite" data-copy-feedback></p>
+  {% if contact_type == 'novedades' %}
+    <section aria-labelledby="newsletter-contacts-title">
+      <div class="panel-contact-section-heading"><h2 id="newsletter-contacts-title">Suscriptos a novedades</h2><span>{{ page.paginator.count }} contactos</span></div>
+      <div class="panel-table-wrap"><table class="panel-table"><thead><tr><th>Correo electrónico</th><th>Fecha de suscripción</th><th>Consentimiento</th><th>Acción</th></tr></thead><tbody>
+        {% for contact in page %}<tr><td data-label="Correo electrónico"><strong>{{ contact.email_key }}</strong></td><td data-label="Fecha de suscripción">{{ contact.creado|date:'d/m/Y H:i' }}</td><td data-label="Consentimiento">{% if contact.vigentes %}<span class="panel-tag">Vigente</span>{% if contact.consentimiento_fecha %}<small>Desde {{ contact.consentimiento_fecha|date:'d/m/Y H:i' }}</small>{% endif %}{% else %}<span class="panel-tag warning">Inactivo</span>{% endif %}</td><td data-label="Acción"><button type="button" class="panel-button secondary small" data-copy-email="{{ contact.email_key }}">Copiar email</button></td></tr>
+        {% empty %}<tr><td colspan="4" class="panel-empty">No hay suscriptos para esta búsqueda.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  {% else %}
+    <section aria-labelledby="buyer-contacts-title">
+      <div class="panel-contact-section-heading"><h2 id="buyer-contacts-title">Compradores</h2><span>{{ page.paginator.count }} contactos</span></div>
+      <p class="panel-contact-note">Estos contactos provienen de pedidos. No forman parte de la lista de novedades por comprar.</p>
+      <div class="panel-table-wrap"><table class="panel-table"><thead><tr><th>Comprador</th><th>Correo electrónico</th><th>Teléfono</th><th>Pedidos</th><th>Última compra</th><th>Acción</th></tr></thead><tbody>
+        {% for contact in page %}<tr><td data-label="Comprador"><strong>{{ contact.nombre }}</strong></td><td data-label="Correo electrónico">{{ contact.email_key }}</td><td data-label="Teléfono">{{ contact.telefono|default:'—' }}</td><td data-label="Pedidos">{{ contact.pedidos }}</td><td data-label="Última compra">{{ contact.ultima_compra|date:'d/m/Y H:i' }}</td><td data-label="Acción"><button type="button" class="panel-button secondary small" data-copy-email="{{ contact.email_key }}">Copiar email</button></td></tr>
+        {% empty %}<tr><td colspan="6" class="panel-empty">No hay compradores para esta búsqueda.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  {% endif %}
+  {% include 'panel/includes/pagination.html' %}
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/panel_contacts.js' %}" defer></script>{% endblock %}

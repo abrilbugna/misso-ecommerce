@@ -55,3 +55,21 @@
 @media(max-width:1200px){.panel-dashboard .panel-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:767px){.panel-dashboard .panel-heading{margin:0 0 16px}.panel-dashboard .panel-heading h1{font-size:34px}.panel-dashboard .panel-metric{padding:16px 14px}.panel-dashboard .panel-metric>strong{font-size:40px}.panel-dashboard .panel-metric .panel-eyebrow{font-size:10px}.panel-dashboard .panel-sales{padding:14px 16px;margin:14px 0}.panel-dashboard .panel-section.panel-recent-orders{padding:16px;margin-bottom:12px}.panel-dashboard .panel-recent-orders .panel-section-heading h2{font-size:19px}.panel-dashboard .panel-order-summary{font-size:12px}.panel-dashboard .panel-order-action{font-size:10px}}
 @media(max-width:360px){.panel-dashboard .panel-metrics{grid-template-columns:1fr}.panel-dashboard .panel-metric{padding:15px 16px}}
+
+/* Contacts use the existing panel tables and buttons. */
+.panel-contacts .panel-heading{margin-bottom:18px}
+.panel-contacts .panel-heading h1{margin:0;font-size:clamp(34px,3vw,48px)}
+.panel-body .panel-contact-tabs{position:static;z-index:auto;display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding:0;border:0;background:transparent}
+.panel-body .panel-contact-tabs a{display:inline-flex;align-items:center;min-height:44px;padding:10px 18px;border:1px solid var(--borde);border-radius:100px;color:var(--wine-dark);font-size:13px;letter-spacing:0;text-transform:none}
+.panel-contact-tabs a[aria-current]{background:var(--wine-dark);border-color:var(--wine-dark);color:var(--cream)}
+.panel-contact-tabs a:hover:not([aria-current]){background:var(--blush)}
+.panel-contact-toolbar{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.panel-contact-search{flex:1 1 340px;margin:0}
+.panel-contact-search>.panel-field{flex:1 1 220px;margin:0}
+.panel-contact-toolbar>.panel-button{margin-bottom:10px}
+.panel-contact-feedback{min-height:21px;margin:6px 0;color:var(--burgundy);font-size:12px}
+.panel-contact-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:16px 0}
+.panel-contact-section-heading h2{font-size:clamp(23px,2.6vw,33px);font-weight:400}
+.panel-contact-section-heading span,.panel-contact-note{font-size:12px;color:var(--burgundy)}
+.panel-contact-note{margin:-8px 0 16px}
+@media(max-width:767px){.panel-contact-toolbar{align-items:stretch}.panel-contact-search{flex-basis:100%}.panel-contact-toolbar>.panel-button{align-self:flex-start;margin-bottom:0}}

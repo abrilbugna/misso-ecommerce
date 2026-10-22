@@ -390,7 +390,7 @@ class OrderManagementTests(TestCase):
         for private in [order.direccion, order.telefono, order.email, str(order.seguimiento_token)]:
             self.assertNotContains(response, private)
         self.assertIn('no-store', response['Cache-Control'])
-        self.assertEqual(response['Referrer-Policy'], 'no-referrer')
+        self.assertEqual(response['Referrer-Policy'], 'same-origin')
         self.assertIn('noindex', response['X-Robots-Tag'])
         other = self.order()
         response = self.client.get(url, {'pedido': other.pk})

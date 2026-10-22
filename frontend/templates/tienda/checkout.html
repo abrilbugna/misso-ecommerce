@@ -25,7 +25,6 @@
                 <div class="form-group">
                     <label for="{{ form.dni.id_for_label }}">Tu DNI</label>
                     {{ form.dni }}
-                    <small>Lo usamos para que puedas consultar el estado de tu pedido.</small>
                     {% if form.dni.errors %}<p class="form-error" role="alert">{{ form.dni.errors.0 }}</p>{% endif %}
                 </div>
                 <div class="form-group">

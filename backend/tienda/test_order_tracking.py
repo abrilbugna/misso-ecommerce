@@ -71,17 +71,28 @@ class OrderTrackingTests(TestCase):
         response = self.private()
         self.assertContains(response, self.order.codigo_seguimiento)
         self.assertContains(response, '7 días hábiles')
-        self.assertContains(response, CORREO_TRACKING_URL)
+        self.assertContains(response, f'href="{CORREO_TRACKING_URL}?id={self.order.codigo_seguimiento}"')
+        self.assertNotContains(response, 'Fecha de despacho')
+        self.assertNotContains(response, 'El estado que ves acá lo actualiza MISSO')
+        self.assertNotContains(response, 'Escribinos ↗')
+        self.assertContains(response, 'Escribinos <svg class="misso-icon"')
+        self.assertNotContains(response, '✓')
         self.assertContains(response, 'data-copy-tracking')
         self.assertContains(response, 'data-copy-status')
         self.assertContains(response, 'js/seguimiento.js')
         self.assertEqual(response.redirect_chain[0][0], self.url)
         self.assertNotContains(response, str(self.order.seguimiento_token))
         self.assertIn('no-store', response['Cache-Control'])
-        self.assertEqual(response['Referrer-Policy'], 'no-referrer')
+        self.assertEqual(response['Referrer-Policy'], 'same-origin')
+        self.assertContains(response, '<meta name="referrer" content="same-origin">')
+        token_response = self.client.get(reverse('seguir_pedido_token', args=[self.order.seguimiento_token]))
+        self.assertEqual(token_response.status_code, 302)
+        self.assertEqual(token_response['Referrer-Policy'], 'no-referrer')
         payload = payload_despacho(self.order)
         self.assertIn(reverse('seguir_pedido_token', args=[self.order.seguimiento_token]), payload['html'])
         self.assertNotIn('12345678', payload['html'].replace(self.order.codigo_seguimiento, ''))
+        Orden.objects.filter(pk=self.order.pk).update(codigo_seguimiento='EC987654321AR')
+        self.assertContains(self.client.get(self.url), f'href="{CORREO_TRACKING_URL}?id=EC987654321AR"')
 
     def test_states_and_no_postal_details_for_cancelled_undispatched_or_pickup(self):
         self.private()
@@ -130,6 +141,39 @@ class OrderTrackingTests(TestCase):
         session.save()
         self.assertIsNone(self.client.get(self.url).context['order'])
         self.assertIsNone(Client().get(self.url, {'numero': self.order.pk, 'dni': '12345678'}).context['order'])
+
+    def test_tracking_lookup_accepts_same_origin_csrf_and_rejects_null_origin(self):
+        client = Client(enforce_csrf_checks=True)
+        page = client.get(self.url, HTTP_HOST='testserver')
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page['Referrer-Policy'], 'same-origin')
+        self.assertContains(page, '<meta name="referrer" content="same-origin">')
+        csrf_token = client.cookies['csrftoken'].value
+        lookup_data = {'numero': self.order.pk, 'dni': '12345678', 'csrfmiddlewaretoken': csrf_token}
+
+        response = client.post(self.url, lookup_data, HTTP_HOST='testserver',
+                               HTTP_ORIGIN='http://testserver', follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'Pedido #{self.order.pk}')
+
+        response = client.post(self.url, lookup_data, HTTP_HOST='testserver', HTTP_ORIGIN='null')
+        self.assertEqual(response.status_code, 403)
+
+        response = client.post(self.url, lookup_data, HTTP_HOST='testserver',
+                               HTTP_ORIGIN='https://untrusted.example')
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(ALLOWED_HOSTS=['testserver', 'misso.ar'])
+    def test_tracking_lookup_accepts_https_site_origin(self):
+        client = Client(enforce_csrf_checks=True)
+        page = client.get(self.url, HTTP_HOST='misso.ar', secure=True)
+        self.assertEqual(page.status_code, 200)
+        token = client.cookies['csrftoken'].value
+        response = client.post(self.url, {
+            'numero': self.order.pk, 'dni': '12345678', 'csrfmiddlewaretoken': token,
+        }, HTTP_HOST='misso.ar', HTTP_ORIGIN='https://misso.ar', secure=True, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'Pedido #{self.order.pk}')
 
     def test_checkout_requires_dni_and_footer_navigation_use_existing_routes(self):
         shipping = OpcionEnvio.objects.create(nombre='Retiro', costo=0)

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import panel_views as views, subscription_panel
+from . import panel_views as views, subscription_panel, contacts_panel
 
 app_name = 'panel'
 urlpatterns = [
@@ -8,6 +8,8 @@ urlpatterns = [
     path('login/', views.PanelLoginView.as_view(), name='login'),
     path('logout/', views.cerrar_sesion, name='logout'),
     path('', views.inicio, name='inicio'),
+    path('contactos/', contacts_panel.contactos, name='contactos'),
+    path('contactos/novedades/emails/', contacts_panel.emails_novedades, name='contactos_emails_novedades'),
     path('productos/', views.productos, name='productos'),
     path('productos/nuevo/', views.producto_editar, name='producto_nuevo'),
     path('productos/<int:pk>/', views.producto_editar, name='producto_editar'),

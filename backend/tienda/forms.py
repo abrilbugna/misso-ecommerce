@@ -53,7 +53,7 @@ class PreferenciasSuscripcionForm(forms.Form):
 
 class CheckoutForm(forms.Form):
     dni = forms.CharField(label='DNI', max_length=10,
-                          widget=forms.PasswordInput(attrs={'inputmode': 'numeric', 'autocomplete': 'off', 'placeholder': 'Tu DNI'}))
+                          widget=forms.TextInput(attrs={'inputmode': 'numeric', 'autocomplete': 'off', 'placeholder': 'Tu DNI'}))
 
     def clean_dni(self):
         return normalize_dni(self.cleaned_data['dni'])

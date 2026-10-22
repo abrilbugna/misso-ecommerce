@@ -1,34 +1,32 @@
 {% extends 'tienda/base.html' %}{% load static %}
 {% block title %}Seguir pedido — MISSO{% endblock %}
 {% block navigation %}{% include 'tienda/includes/bubble_nav.html' with nav_class='tracking-nav' nav_show_shop=True %}{% endblock %}
-{% block extra_css %}<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}">{% endblock %}
+{% block extra_css %}<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="{{ tracking_referrer_policy }}"><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}">{% endblock %}
 {% block content %}
 <div class="tracking-page">
-  <header class="tracking-intro"><h1>¿Dónde está <em>tu pedido?</em></h1><p>Consultá el estado de tu compra en MISSO ♡</p></header>
+  <header class="tracking-intro"><h1>¿Dónde está <em>tu pedido?</em></h1><p>Consultá el estado de tu compra en MISSO</p></header>
   {% if order %}
   <section class="tracking-card" aria-labelledby="tracking-title">
     <div class="tracking-heading"><div><h2 id="tracking-title">Pedido #{{ order.numero }}</h2>{% if order.creado %}<p>{{ order.creado|date:'d/m/Y' }}</p>{% endif %}</div><strong class="tracking-status">{% if order.retiro and order.estado == 'en_envio' %}Listo para retirar{% else %}{{ order.estado_label }}{% endif %}</strong></div>
     {% if order.estado == 'cancelado' %}<p class="tracking-notice">Este pedido está cancelado. Si necesitás ayuda, escribinos por WhatsApp.</p>{% else %}
-    <ol class="tracking-progress" aria-label="Progreso del pedido">{% for step in steps %}<li class="{% if step.done %}is-done{% endif %}" {% if step.current %}aria-current="step"{% endif %}><span aria-hidden="true">{% if step.done %}✓{% else %}{{ forloop.counter }}{% endif %}</span>{{ step.label }}</li>{% endfor %}</ol>
+    <ol class="tracking-progress" aria-label="Progreso del pedido">{% for step in steps %}<li class="{% if step.done %}is-done{% endif %}" {% if step.current %}aria-current="step"{% endif %}><span aria-hidden="true">{% if step.done %}{% include 'tienda/includes/icon.html' with icon='check' %}{% else %}{{ forloop.counter }}{% endif %}</span>{{ step.label }}</li>{% endfor %}</ol>
     {% if order.estado == 'entregado' %}<p>{% if order.retiro %}¡Tu pedido ya fue retirado!{% else %}¡Tu pedido ya fue entregado!{% endif %} Gracias por elegir MISSO.{% if order.entregado_at %} <span>{{ order.entregado_at|date:'d/m/Y' }}</span>{% endif %}</p>
-    {% elif order.estado == 'en_envio' %}<p>{% if order.retiro %}Tu pedido está listo para retirar. Escribinos para coordinar.{% else %}¡Tu pedido está en camino! ♡{% endif %}</p>
+    {% elif order.estado == 'en_envio' %}<p>{% if order.retiro %}Tu pedido está listo para retirar. Escribinos para coordinar.{% else %}¡Tu pedido está en camino!{% endif %}</p>
     {% elif order.estado == 'confirmado' %}<p>¡Tu pedido está confirmado! Pronto comenzaremos a prepararlo para {% if order.retiro %}el retiro{% else %}su entrega{% endif %}.</p>
     {% else %}<p>Recibimos tu pedido y estamos revisando los detalles.</p>{% endif %}{% endif %}
     {% if private_access %}
       <p class="tracking-hint">Estado de pago: <strong>{{ order.pagado|yesno:'Pagado,Pendiente de pago' }}</strong></p>
-      {% if order.despachado_at %}<dl class="tracking-details"><dt>Empresa / modalidad</dt><dd>{{ order.transportista_label }}</dd><dt>{% if order.retiro %}Listo para retirar{% else %}Fecha de despacho{% endif %}</dt><dd>{{ order.despachado_at|date:'d/m/Y' }}</dd>{% if order.codigo %}<dt>Código de seguimiento</dt><dd><span class="tracking-code" id="tracking-code">{{ order.codigo }}</span></dd>{% endif %}{% if order.plazo %}<dt>Tiempo estimado</dt><dd>Hasta {{ order.plazo }} días hábiles</dd>{% endif %}</dl>{% endif %}
+      {% if order.despachado_at %}<dl class="tracking-details"><dt>Empresa / modalidad</dt><dd>{{ order.transportista_label }}</dd>{% if order.codigo %}<dt>Código de seguimiento</dt><dd><span class="tracking-code" id="tracking-code">{{ order.codigo }}</span></dd>{% endif %}{% if order.plazo %}<dt>Tiempo estimado</dt><dd>Hasta {{ order.plazo }} días hábiles</dd>{% endif %}</dl>{% endif %}
       {% if order.codigo %}
       <div class="tracking-actions">
         <button type="button" class="tracking-copy" data-copy-tracking hidden>COPIAR CÓDIGO</button>
         <a class="tracking-button misso-pill-button misso-pill-right" href="{{ correo_tracking_url }}" target="_blank" rel="noopener noreferrer"><span class="misso-pill-label">VER EN CORREO ARGENTINO</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
       </div><p data-copy-status class="tracking-copy-status" role="status" aria-live="polite"></p>
-      <p class="tracking-hint">Copiá el código e ingresalo en Correo Argentino para consultar los movimientos del paquete.</p>
       {% endif %}
     {% elif order.estado != 'cancelado' %}
       <p class="tracking-notice">Para ver los datos del despacho, abrí «SEGUIR MI PEDIDO» en el email de tu compra o de envío.</p>
     {% endif %}
-    <p class="tracking-hint">El estado que ves acá lo actualiza MISSO; no es información postal en tiempo real.</p>
-    <a class="tracking-help" href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer">¿Necesitás ayuda? Escribinos ↗</a>
+    <a class="tracking-help" href="https://wa.me/543517727224" target="_blank" rel="noopener noreferrer">¿Necesitás ayuda? Escribinos {% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</a>
   </section>
   {% endif %}
   <section class="tracking-card tracking-lookup" aria-label="Consultar pedido">

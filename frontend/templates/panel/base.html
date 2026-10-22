@@ -22,7 +22,7 @@
       {% if perms.tienda.view_orden %}<a href="{% url 'panel:pedidos' %}" {% if section == 'pedidos' %}aria-current="page"{% endif %}><span>03</span> Pedidos <b>↗</b></a>{% endif %}
       {% if perms.tienda.view_codigopromocional %}<a href="{% url 'panel:promociones' %}" {% if section == 'promociones' %}aria-current="page"{% endif %}><span>04</span> Promociones <b>↗</b></a>{% endif %}
       {% if perms.tienda.view_opcionenvio %}<a href="{% url 'panel:envios' %}" {% if section == 'envios' %}aria-current="page"{% endif %}><span>05</span> Envíos <b>↗</b></a>{% endif %}
-      {% if perms.tienda.view_suscripcion %}<a href="{% url 'panel:suscripciones' %}" {% if section == 'suscripciones' %}aria-current="page"{% endif %}><span>06</span> Suscripciones <b>↗</b></a>{% endif %}
+      {% if perms.tienda.view_newslettercontacto or perms.tienda.view_orden %}<a href="{% url 'panel:contactos' %}" {% if section == 'contactos' %}aria-current="page"{% endif %}><span>06</span> Contactos <b>↗</b></a>{% endif %}
       <a class="panel-nav-technical" href="{% url 'admin:index' %}">Panel técnico ↗</a>
     </nav>
   </aside>
@@ -32,4 +32,5 @@
   </main>
 </div>
 {% endblock %}
+{% block extra_js %}{% endblock %}
 </body></html>
