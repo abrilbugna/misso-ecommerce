@@ -539,7 +539,7 @@ html.misso-intro-pending .home-page .hero-nav{visibility:hidden}
 
 @media(max-width:767px){
   .home-page .hero-nav .hero-nav-pills{display:flex!important}
-  .home-page .hero-nav .hero-nav-pills a.hero-nav-wordmark{
+  .home-page .hero-nav:not(.site-bubble-nav) .hero-nav-pills a.hero-nav-wordmark{
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -562,11 +562,11 @@ html.misso-intro-pending .home-page .hero-nav{visibility:hidden}
   .home-page .hero-nav .hero-nav-actions .hero-shop .misso-pill-label{width:100%;transition:background .25s ease}
   .home-page .hero-nav .hero-shop:hover .misso-pill-label,
   .home-page .hero-nav .hero-shop:focus-visible .misso-pill-label{background:var(--rose-light)}
-  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer{
+  .home-page:not(.nav-is-scrolled) .hero-nav:not(.site-bubble-nav) .shop-brand-shimmer{
     color:var(--cream);
     -webkit-text-fill-color:var(--cream);
   }
-  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer.is-shimmering{
+  .home-page:not(.nav-is-scrolled) .hero-nav:not(.site-bubble-nav) .shop-brand-shimmer.is-shimmering{
     background-image:linear-gradient(110deg,
       var(--cream) 0%,var(--cream) 41%,
       var(--rose-light) 49.5%,#fff 50.5%,var(--rose-light) 54%,
@@ -575,11 +575,11 @@ html.misso-intro-pending .home-page .hero-nav{visibility:hidden}
   }
 }
 @media(max-width:340px){
-  .home-page .hero-nav .hero-nav-pills a.hero-nav-wordmark{height:40px;min-height:40px;font-size:27px}
+  .home-page .hero-nav:not(.site-bubble-nav) .hero-nav-pills a.hero-nav-wordmark{height:40px;min-height:40px;font-size:27px}
   .home-page .hero-nav .hero-nav-actions .hero-shop.misso-pill-button{width:56px}
 }
 @media(max-width:767px) and (prefers-reduced-motion:reduce){
-  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer.is-shimmering{
+  .home-page:not(.nav-is-scrolled) .hero-nav:not(.site-bubble-nav) .shop-brand-shimmer.is-shimmering{
     background:none;
     -webkit-text-fill-color:var(--cream);
   }
