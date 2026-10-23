@@ -33,20 +33,18 @@ body:has(.home-page)>nav{display:none}
 @media(min-width:768px){
   .home-page .hero-bottomline{display:none}
 }
-.home-page .intro-info-button.misso-pill-button{width:min(260px,100%);height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;--pill-hover-label:var(--blush)}
-.home-page .intro-info-button .misso-pill-arrow{width:48px}
-.home-page .intro-info-button .misso-pill-label{width:calc(100% - 56px)}
-.home-page .intro-info-button .misso-pill-label,.home-page .intro-info-button .misso-pill-arrow{background:var(--rose-light)}
 .home-page .outro-catalog-link.misso-pill-button{width:min(320px,calc(100vw - 32px));height:48px;color:var(--wine-dark);font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .home-page .outro-catalog-link .misso-pill-arrow{width:48px}
 .home-page .outro-catalog-link .misso-pill-label{width:calc(100% - 56px)}
 .home-page .outro-catalog-mobile{display:none}
 @media(max-width:767px){.home-page .outro-catalog-desktop{display:none}.home-page .outro-catalog-mobile{display:block}}
 @media(max-width:767px){
+  .home-page{--mobile-products-pink:#f3cbd9}
+  .home-page .outro-catalog-link.misso-pill-button{border-radius:100px;background:var(--mobile-products-pink)}
   .home-page .outro-catalog-link .misso-pill-arrow{display:none}
-  .home-page .outro-catalog-link .misso-pill-label{width:100%;transition:background .25s ease}
+  .home-page .outro-catalog-link .misso-pill-label{width:100%;background:var(--mobile-products-pink);transition:background .25s ease}
   .home-page .outro-catalog-link:hover .misso-pill-label,
-  .home-page .outro-catalog-link:focus-visible .misso-pill-label{background:var(--rose-light)}
+  .home-page .outro-catalog-link:focus-visible .misso-pill-label{background:var(--mobile-products-pink)}
 }
 .home-page .hero-social:focus-visible{outline:2px solid var(--cream);outline-offset:4px}
 @media(max-width:767px){}
@@ -244,6 +242,7 @@ body:has(.home-page){
 .home-page .intro-grid{margin-block:0;row-gap:var(--home-section-space)}
 .home-page .intro-copy .eyebrow{margin-block:0 var(--home-edge-space)}
 .home-page .intro-copy > p:not(.eyebrow){margin-block:var(--home-content-gap)}
+.home-page .intro-copy > p:last-child{margin-bottom:0}
 .home-page .home-outro{gap:var(--home-content-gap)}
 .home-page .benefits-counter{top:var(--home-edge-space)}
 .home-page .benefits-heading{top:var(--home-section-space)}
@@ -364,7 +363,7 @@ body:has(.home-page){
   .home-page .collection-notices,.home-page .collection-notice{display:none}
   /* The original PNG's transparent bottom inset supplies the visual CTA gap. */
   .home-page .collection-actions{grid-area:4 / 1;align-self:start;width:100%;margin:0;gap:0;text-align:center}
-  .home-page .collection-cta.misso-pill-button{width:min(176px,calc(100% - 32px));padding-inline:0}
+  .home-page .collection-cta.misso-pill-button{width:min(176px,calc(100% - 32px));padding-inline:0;border-radius:100px;background:var(--mobile-products-pink)}
   .home-page .collection-cta .misso-pill-arrow{display:none}
   .home-page .hero-bottomline{grid-area:5 / 1;align-self:start;width:100%;margin:var(--hero-gap) 0 0;justify-content:center;font-size:8px;line-height:12px;text-align:center}
   .home-page .hero-bottomline a{flex-direction:column;gap:8px;text-align:center}
@@ -372,7 +371,7 @@ body:has(.home-page){
   @media(prefers-reduced-motion:no-preference){
     .home-page:not(.motion-ready) .scroll-arrow{animation:misso-scroll-arrow 1.15s ease-in-out infinite}
   }
-  .home-page .collection-cta .misso-pill-label{position:relative;width:100%;overflow:visible;color:var(--wine-dark)}
+  .home-page .collection-cta .misso-pill-label{position:relative;width:100%;overflow:visible;background:var(--mobile-products-pink);color:var(--wine-dark)}
   /* Keep the light sweep's speed; trim its off-screen travel between passes. */
   @keyframes missoCtaShimmer{from{background-position:120% 0}to{background-position:-20% 0}}
   .home-page .collection-cta.is-shimmering .misso-pill-label::after{content:attr(data-shimmer-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:transparent;pointer-events:none;background:linear-gradient(110deg,transparent 0%,transparent 42%,var(--cream) 48%,#fff 50%,var(--cream) 56%,transparent 62%,transparent 100%);background-size:250% 100%;background-position:140% 0;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:missoCtaShimmer 1.7s linear infinite}
@@ -466,7 +465,6 @@ body:has(.home-page){
 }
 @media(min-width:1024px){.home-page #intro-title em{white-space:nowrap}}
 @media(min-width:1024px){.home-page #intro-title .intro-title-first-line{white-space:nowrap}}
-@media(min-width:1024px){.home-page .intro-copy-description{margin-top:clamp(90px,7vw,120px)}}
 .home-page .intro-copy-star{display:inline-block;margin-inline:.3em;color:var(--rose-dark);font-size:.82em;vertical-align:.08em}
 
 /* The home bubble sits above the isolated hero and later sections. Keep its
@@ -560,6 +558,11 @@ html.misso-intro-pending .home-page .hero-nav{visibility:hidden}
   .home-page .hero-nav .hero-nav-actions .hero-shop.misso-pill-button{width:64px}
   .home-page .hero-nav .hero-shop .misso-pill-arrow{display:none}
   .home-page .hero-nav .hero-nav-actions .hero-shop .misso-pill-label{width:100%;transition:background .25s ease}
+  .home-page .hero-nav .hero-social-bubble,
+  .home-page .hero-nav .hero-cart,
+  .home-page .hero-nav .hero-cart:hover,
+  .home-page .hero-nav .hero-cart:focus-visible,
+  .home-page .hero-nav .hero-nav-actions .hero-shop .misso-pill-label{background:var(--blush)}
   .home-page .hero-nav .hero-shop:hover .misso-pill-label,
   .home-page .hero-nav .hero-shop:focus-visible .misso-pill-label{background:var(--rose-light)}
   .home-page:not(.nav-is-scrolled) .hero-nav:not(.site-bubble-nav) .shop-brand-shimmer{

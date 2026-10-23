@@ -3,7 +3,7 @@ from django.db import transaction
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, CATEGORIA_ROPA_DEPORTIVA, ColorProducto, TalleProducto, CodigoPromocional
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
 from .forms import CheckoutForm
 from .order_identity import dni_digest
 from django.views.decorators.debug import sensitive_post_parameters
@@ -66,7 +66,6 @@ def inicio(request):
     return render(request, 'tienda/inicio.html', {
         'categorias': categorias_con_imagen,
         'productos_inicio': productos_inicio[:12],
-        'sports_category': CATEGORIA_ROPA_DEPORTIVA,
     })
 
 

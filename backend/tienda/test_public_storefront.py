@@ -41,17 +41,16 @@ class PublicStorefrontTests(TestCase):
         self.assertNotRegex(response.content.decode().lower(),
                             r'preapproval|preferencias|25\.000|25k|suscripci[oó]n mensual|/suscripcion/')
 
-    def test_home_preserves_hero_and_videos_with_sports_cta(self):
+    def test_home_preserves_hero_and_videos_without_sports_cta(self):
         response = self.client.get(reverse('inicio'))
         self.assert_product_only(response)
         for content in ('NUEVA', 'COLECCIÓN', 'VER PRODUCTOS', 'Deslizá para más',
                         'img/letram.svg', 'collection-product', 'intro-carousel',
                         'Diseñados, pensados y confeccionados...', '<span class="intro-title-first-line">Por mujeres</span><br><em>para mujeres</em>',
-                        'Conjuntos cómodos, tabla de talles y la opción de elegir un talle distinto para cada parte en los conjuntos!',
-                        'Ver ropa deportiva'):
+                        'Conjuntos cómodos, tabla de talles y la opción de elegir un talle distinto para cada parte en los conjuntos!'):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)
-        self.assertContains(response, f'href="{reverse("catalogo")}?categoria={CATEGORIA_ROPA_DEPORTIVA}"')
+        self.assertNotContains(response, 'Ver ropa deportiva')
         self.assertContains(response, '<h2>Suscribite para novedades</h2>')
         self.assertContains(response, 'type="submit" name="consentimiento" value="1"')
         self.assertNotContains(response, 'Quiero recibir novedades')

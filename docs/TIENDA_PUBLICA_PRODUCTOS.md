@@ -13,8 +13,8 @@ Pago de compras normales. No modifica contratos existentes en Mercado Pago.
   responsive del hero.
 - Videos: conservados los tres videos, stack, controles y animaciones. Nuevo
   texto: «Nueva línea en camino…», «Preparamos / algo nuevo.» y «Muy pronto llega
-  una nueva colección de ropa deportiva a Misso.». CTA «Ver ropa deportiva».
-  Solo se amplió el botón para alojar el nuevo texto con el estilo existente.
+  una nueva colección de ropa deportiva a Misso.». El CTA «Ver ropa deportiva»
+  se retiró después para compactar el bloque de presentación de la portada.
 - Tienda: retirada la tarjeta de suscripción que aparecía tras el cuarto
   producto («La sorpresa mensual», preferencias, «$25.000 / mes» y enlace).
   Eliminados su CSS, selector y animación GSAP exclusiva. Los filtros, blob y
