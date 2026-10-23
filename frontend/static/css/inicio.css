@@ -42,6 +42,12 @@ body:has(.home-page)>nav{display:none}
 .home-page .outro-catalog-link .misso-pill-label{width:calc(100% - 56px)}
 .home-page .outro-catalog-mobile{display:none}
 @media(max-width:767px){.home-page .outro-catalog-desktop{display:none}.home-page .outro-catalog-mobile{display:block}}
+@media(max-width:767px){
+  .home-page .outro-catalog-link .misso-pill-arrow{display:none}
+  .home-page .outro-catalog-link .misso-pill-label{width:100%;transition:background .25s ease}
+  .home-page .outro-catalog-link:hover .misso-pill-label,
+  .home-page .outro-catalog-link:focus-visible .misso-pill-label{background:var(--rose-light)}
+}
 .home-page .hero-social:focus-visible{outline:2px solid var(--cream);outline-offset:4px}
 @media(max-width:767px){}
 /* Stable social hit area: the animated bubble never moves the link itself. */
@@ -462,3 +468,119 @@ body:has(.home-page){
 @media(min-width:1024px){.home-page #intro-title .intro-title-first-line{white-space:nowrap}}
 @media(min-width:1024px){.home-page .intro-copy-description{margin-top:clamp(90px,7vw,120px)}}
 .home-page .intro-copy-star{display:inline-block;margin-inline:.3em;color:var(--rose-dark);font-size:.82em;vertical-align:.08em}
+
+/* The home bubble sits above the isolated hero and later sections. Keep its
+   viewport position independent of the transform animated by GSAP. */
+.home-page .hero-nav{
+  position:fixed;
+  top:12px;
+  left:0;
+  right:0;
+  z-index:100;
+  width:94%;
+  margin:0 auto;
+  border:1px solid transparent;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+.home-page.nav-scroll-ready .hero-nav{
+  transition:top .55s cubic-bezier(.2,.7,.2,1),
+    width .55s cubic-bezier(.2,.7,.2,1),
+    border-radius .55s cubic-bezier(.2,.7,.2,1),
+    background-color .55s cubic-bezier(.2,.7,.2,1),
+    border-color .55s cubic-bezier(.2,.7,.2,1),
+    box-shadow .55s cubic-bezier(.2,.7,.2,1),
+    -webkit-backdrop-filter .55s cubic-bezier(.2,.7,.2,1),
+    backdrop-filter .55s cubic-bezier(.2,.7,.2,1);
+}
+.home-page.nav-is-scrolled .hero-nav{
+  width:min(86%,1160px);
+  background-color:rgba(239,182,200,.72);
+  background-color:color-mix(in srgb,var(--rose-light) 72%,transparent);
+  border-color:rgba(255,245,241,.48);
+  box-shadow:0 8px 28px rgba(74,13,34,.16);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+}
+html.misso-intro-pending .home-page .hero-nav{visibility:hidden}
+@media(min-width:768px) and (max-width:991px){
+  .home-page .hero-nav{top:10px}
+  .home-page.nav-is-scrolled .hero-nav{width:89%}
+}
+@media(max-width:767px){
+  .home-page .hero-nav{
+    top:calc(env(safe-area-inset-top,0px) + 8px);
+    width:100%;
+    height:48px;
+    min-height:48px;
+    margin:0 auto;
+    border-radius:0;
+    background-color:var(--wine-dark);
+    box-shadow:none;
+  }
+  .home-page .hero-nav-space{
+    grid-area:1 / 1;
+    height:var(--hero-header-height);
+    margin-top:8px;
+  }
+  .home-page.nav-is-scrolled .hero-nav{
+    top:calc(max(8px,env(safe-area-inset-top,0px)) + 16px);
+    width:calc(100% - 40px);
+    border-radius:999px;
+  }
+}
+@media(max-width:340px){
+  .home-page .hero-nav{height:44px;min-height:44px}
+  .home-page.nav-is-scrolled .hero-nav{width:calc(100% - 24px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .home-page.nav-scroll-ready .hero-nav{transition:none}
+}
+
+@media(max-width:767px){
+  .home-page .hero-nav .hero-nav-pills{display:flex!important}
+  .home-page .hero-nav .hero-nav-pills a.hero-nav-wordmark{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:44px;
+    min-height:44px;
+    margin:0;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:var(--cream);
+    font-family:'Romantic',serif;
+    font-size:clamp(27px,8vw,32px);
+    font-weight:400;
+    line-height:1;
+    letter-spacing:.02em;
+    text-transform:none;
+  }
+  .home-page .hero-nav .hero-nav-actions .hero-shop.misso-pill-button{width:64px}
+  .home-page .hero-nav .hero-shop .misso-pill-arrow{display:none}
+  .home-page .hero-nav .hero-nav-actions .hero-shop .misso-pill-label{width:100%;transition:background .25s ease}
+  .home-page .hero-nav .hero-shop:hover .misso-pill-label,
+  .home-page .hero-nav .hero-shop:focus-visible .misso-pill-label{background:var(--rose-light)}
+  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer{
+    color:var(--cream);
+    -webkit-text-fill-color:var(--cream);
+  }
+  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer.is-shimmering{
+    background-image:linear-gradient(110deg,
+      var(--cream) 0%,var(--cream) 41%,
+      var(--rose-light) 49.5%,#fff 50.5%,var(--rose-light) 54%,
+      var(--cream) 59%,var(--cream) 100%);
+    -webkit-text-fill-color:transparent;
+  }
+}
+@media(max-width:340px){
+  .home-page .hero-nav .hero-nav-pills a.hero-nav-wordmark{height:40px;min-height:40px;font-size:27px}
+  .home-page .hero-nav .hero-nav-actions .hero-shop.misso-pill-button{width:56px}
+}
+@media(max-width:767px) and (prefers-reduced-motion:reduce){
+  .home-page:not(.nav-is-scrolled) .hero-nav .shop-brand-shimmer.is-shimmering{
+    background:none;
+    -webkit-text-fill-color:var(--cream);
+  }
+}

@@ -10,7 +10,7 @@
 </script>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
-<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=products-only-20260930-1">
+<link rel="stylesheet" href="{% static 'css/catalogo.css' %}?v=catalog-search-20261023-1">
 {% endblock %}
 {% block content %}
 <div class="home-page catalog-page">
@@ -19,6 +19,13 @@
   <header class="catalog-heading" aria-labelledby="catalog-title">
     <p class="catalog-eyebrow">Misso / Tienda <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span></p>
     <h1 id="catalog-title"><span class="catalog-title-line"><span>Productos</span></span></h1>
+    <form class="catalog-search" action="{% url 'catalogo' %}" method="get" role="search">
+      {% if categoria_activa %}<input type="hidden" name="categoria" value="{{ categoria_activa }}">{% endif %}
+      <label class="catalog-search-label" for="catalog-search-input">Buscar productos</label>
+      <input id="catalog-search-input" type="search" name="q" value="{{ busqueda }}" placeholder="Buscá tu próximo favorito..." autocomplete="off">
+      {% if busqueda %}<a class="catalog-search-clear" href="{% url 'catalogo' %}{% if categoria_activa %}?categoria={{ categoria_activa|urlencode }}{% endif %}" aria-label="Limpiar búsqueda">{% include 'tienda/includes/icon.html' with icon='close' %}</a>{% endif %}
+      <button class="catalog-search-submit" type="submit" aria-label="Buscar productos">{% include 'tienda/includes/icon.html' with icon='search' %}</button>
+    </form>
   </header>
 
   <section class="catalog-shop" aria-label="Colección de Misso">
@@ -46,10 +53,10 @@
         </a>
       </article>
       {% empty %}
-      <div class="catalog-empty" role="status"><span class="catalog-empty-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span><h2>Todavía no hay<br><em>misso por acá.</em></h2><p>No hay productos en esta categoría todavía.</p><a href="{% url 'catalogo' %}" class="catalog-empty-link">Ver todos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a></div>
+      <div class="catalog-empty" role="status"><span class="catalog-empty-star" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='sparkle' %}</span>{% if busqueda %}<h2>No encontramos<br><em>ese favorito.</em></h2><p>Probá con otro nombre o explorá todos nuestros productos.</p><a href="{% url 'catalogo' %}{% if categoria_activa %}?categoria={{ categoria_activa|urlencode }}{% endif %}" class="catalog-empty-link">Limpiar búsqueda <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>{% else %}<h2>Todavía no hay<br><em>misso por acá.</em></h2><p>No hay productos en esta categoría todavía.</p><a href="{% url 'catalogo' %}" class="catalog-empty-link">Ver todos <span aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>{% endif %}</div>
       {% endfor %}
     </div>
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=products-only-20260930-1" defer></script>{% endblock %}
+{% block extra_js %}<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js" defer></script><script src="{% static 'js/catalogo.js' %}?v=catalog-search-20261023-1" defer></script>{% endblock %}

@@ -1,5 +1,15 @@
 (() => {
   const root = document.querySelector('.home-page');
+  function initFloatingNav() {
+    if (!root?.querySelector('.hero-nav')) return;
+    const update = () => root.classList.toggle('nav-is-scrolled', window.scrollY >= 40);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    window.addEventListener('pageshow', update);
+    requestAnimationFrame(() => root.classList.add('nav-scroll-ready'));
+  }
+  initFloatingNav();
   function initIntroCarousel() {
     const carousel = root?.querySelector('.intro-carousel');
     if (!carousel) return;

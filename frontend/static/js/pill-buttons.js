@@ -16,8 +16,8 @@
       if (!context.conditions.canHover) return;
       const listeners = [];
       buttons.forEach(button => {
-        // The home mobile CTA is a single bubble, with no circle to swap.
-        if (context.conditions.mobile && button.matches('.home-page .collection-cta')) return;
+        // These home mobile CTAs have a single visible bubble, with no circle to swap.
+        if (context.conditions.mobile && button.matches('.home-page .collection-cta, .home-page .hero-nav .hero-shop, .home-page .outro-catalog-link')) return;
         const circle = button.querySelector('.misso-pill-arrow');
         const label = button.querySelector('.misso-pill-label');
         const icon = circle?.querySelector('svg');

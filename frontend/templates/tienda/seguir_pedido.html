@@ -1,10 +1,17 @@
 {% extends 'tienda/base.html' %}{% load static %}
 {% block title %}Seguir pedido — MISSO{% endblock %}
 {% block navigation %}{% include 'tienda/includes/bubble_nav.html' with nav_class='tracking-nav' nav_show_shop=True %}{% endblock %}
-{% block extra_css %}<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="{{ tracking_referrer_policy }}"><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}">{% endblock %}
+{% block extra_css %}<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="{{ tracking_referrer_policy }}"><script>
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('tracking-motion-pending');
+    window.trackingMotionFallback = window.setTimeout(() => {
+      document.documentElement.classList.remove('tracking-motion-pending');
+    }, 1200);
+  }
+</script><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}?v=tracking-motion-20261023-1">{% endblock %}
 {% block content %}
 <div class="tracking-page">
-  <header class="tracking-intro"><h1>¿Dónde está <em>tu pedido?</em></h1><p>Consultá el estado de tu compra en MISSO</p></header>
+  <header class="tracking-intro"><h1><span class="tracking-title-part">¿Dónde está</span> <em class="tracking-title-part">tu pedido?</em></h1><p>Consultá el estado de tu compra en MISSO</p></header>
   {% if order %}
   <section class="tracking-card" aria-labelledby="tracking-title">
     <div class="tracking-heading"><div><h2 id="tracking-title">Pedido #{{ order.numero }}</h2>{% if order.creado %}<p>{{ order.creado|date:'d/m/Y' }}</p>{% endif %}</div><strong class="tracking-status">{% if order.retiro and order.estado == 'en_envio' %}Listo para retirar{% else %}{{ order.estado_label }}{% endif %}</strong></div>
@@ -39,4 +46,4 @@
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}<script src="{% static 'js/seguimiento.js' %}" defer></script>{% endblock %}
+{% block extra_js %}{% include 'tienda/includes/purchase_pill_scripts.html' %}<script src="{% static 'js/seguimiento.js' %}?v=tracking-motion-20261023-1" defer></script>{% endblock %}

@@ -169,6 +169,7 @@
     const eyebrow = root.querySelector('.catalog-eyebrow');
     const lines = [...root.querySelectorAll('.catalog-title-line')];
     const lineText = lines.map(line => line.firstElementChild).filter(Boolean);
+    const search = root.querySelector('.catalog-search');
     const toolbar = root.querySelector('.catalog-toolbar');
     const empty = root.querySelector('.catalog-empty');
 
@@ -188,6 +189,7 @@
     if (cart) intro.to(cart, { autoAlpha: 1, y: 0, duration: .34 }, .11);
     if (eyebrow) intro.from(eyebrow, { autoAlpha: 0, y: 12, duration: .35 }, .27);
     if (lineText.length) intro.to(lineText, { autoAlpha: 1, yPercent: 0, stagger: .09, duration: .55, ease: 'power4.out', onComplete: () => { lines.forEach(line => line.classList.add('reveal-complete')); gsap.set(lines, { overflow: 'visible' }); } }, .38);
+    if (search) intro.from(search, { autoAlpha: 0, y: 12, duration: .5, clearProps: 'transform,opacity,visibility' }, .66);
     if (toolbar) {
       const mobile = window.matchMedia('(max-width: 767px)').matches;
       const children = [root.querySelector('.catalog-sort'), root.querySelector('.catalog-count'), categoryScroller].filter(Boolean);
