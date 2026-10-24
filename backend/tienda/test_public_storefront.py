@@ -46,10 +46,12 @@ class PublicStorefrontTests(TestCase):
         self.assert_product_only(response)
         for content in ('NUEVA', 'COLECCIÓN', 'VER PRODUCTOS', 'Deslizá para más',
                         'img/letram.svg', 'collection-product', 'intro-carousel',
-                        'Diseñados, pensados y confeccionados...', '<span class="intro-title-first-line">Por mujeres</span><br><em>para mujeres</em>',
+                        'Diseñados, pensados y confeccionados...', '<h2 id="intro-title">Para vos</h2>',
                         'Conjuntos cómodos, tabla de talles y la opción de elegir un talle distinto para cada parte en los conjuntos!'):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)
+        self.assertNotContains(response, 'Por mujeres')
+        self.assertNotContains(response, 'para mujeres')
         self.assertNotContains(response, 'Ver ropa deportiva')
         self.assertContains(response, '<h2>Suscribite para novedades</h2>')
         self.assertContains(response, 'type="submit" name="consentimiento" value="1"')

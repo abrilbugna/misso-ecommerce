@@ -387,6 +387,7 @@ body:has(.home-page){
 }
 @media(prefers-reduced-motion:reduce){.home-page .collection-cta.is-shimmering .misso-pill-label::after{animation:none;background:none}}
 @font-face{font-family:'NimbusSanL';src:url('../fonts/NimbusSanL-RegIta.otf') format('opentype');font-style:italic;font-weight:400;font-display:swap}
+@font-face{font-family:'Darling';src:url('../fonts/Darling.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
 @media(prefers-reduced-motion:reduce){.home-page .collection-notice:hover>span{transform:none}}
 
 /* The shared outro keeps its existing desktop composition. */
@@ -402,6 +403,7 @@ body:has(.home-page){
     padding:clamp(24px,4svh,48px) 0;
     gap:clamp(24px,3.5svh,38px);
   }
+  .home-page.outro-hero .home-outro > .eyebrow{margin-bottom:-24px}
   .home-page.outro-hero .home-outro h2{margin:0;font-size:clamp(88px,min(11vw,17svh),192px)}
   .home-page.outro-hero .outro-product{width:clamp(190px,min(19vw,28svh),275px)}
   html.misso-intro-pending .home-page.outro-hero .home-outro{visibility:hidden}
@@ -448,7 +450,7 @@ body:has(.home-page){
     gap:clamp(20px,4svh,32px);
   }
   .home-page.outro-hero .home-outro > .eyebrow{
-    top:auto;width:auto;max-width:calc(100% - 32px);margin:0;padding:0;
+    top:auto;width:auto;max-width:calc(100% - 32px);margin:0 0 -16px;padding:0;
     font-size:clamp(10px,2.5vw,11px);line-height:1.4;
   }
   .home-page.outro-hero .home-outro > h2{
@@ -463,8 +465,8 @@ body:has(.home-page){
   html.misso-intro-pending .home-page.outro-hero .campaign-hero::before,
   html.misso-intro-running .home-page.outro-hero .campaign-hero::before{display:block}
 }
-@media(min-width:1024px){.home-page #intro-title em{white-space:nowrap}}
-@media(min-width:1024px){.home-page #intro-title .intro-title-first-line{white-space:nowrap}}
+.home-page #intro-title{color:var(--rose-dark);font-family:'Darling',serif;font-size:clamp(4.5rem,8vw,8rem);font-style:normal;font-weight:400;letter-spacing:normal;line-height:1.2;white-space:nowrap}
+@media(max-width:767px){.home-page #intro-title{font-size:17vw}}
 .home-page .intro-copy-star{display:inline-block;margin-inline:.3em;color:var(--rose-dark);font-size:.82em;vertical-align:.08em}
 
 /* The home bubble sits above the isolated hero and later sections. Keep its
