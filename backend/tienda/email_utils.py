@@ -61,15 +61,17 @@ def _filas_items(items):
     filas = ""
     subtotal = 0
     for item in items:
-        color_txt = item.color.nombre if item.color else "Sin color"
-        talle_txt = item.talle.talle if item.talle else "Sin talle"
+        color_txt = item.color_compra
+        talle_txt = item.talle_compra
+        details = (f'{escape(item.detalle_superior)}<br>{escape(item.detalle_inferior)}' if item.detalle_superior
+                   else f'Color: {escape(color_txt)} &nbsp;|&nbsp; Talle: {escape(talle_txt)}')
         precio_item = item.precio * item.cantidad
         subtotal += precio_item
         filas += f'''
         <tr>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;vertical-align:middle;">
-            <span style="display:block;font-size:14px;">{item.cantidad}x {escape(item.producto.nombre)}</span>
-            <span style="display:block;font-size:12px;color:#888;margin-top:3px;">Color: {escape(color_txt)} &nbsp;|&nbsp; Talle: {escape(talle_txt)}</span>
+            <span style="display:block;font-size:14px;">{item.cantidad}x {escape(item.nombre_compra)}</span>
+            <span style="display:block;font-size:12px;color:#888;margin-top:3px;">{details}</span>
           </td>
           <td style="border-bottom:1px solid #E2E6EA;padding:14px 0;text-align:right;font-size:14px;">${precio_item:,.2f}</td>
         </tr>'''
@@ -172,9 +174,10 @@ def payload_notificacion_tienda(orden):
     items = orden.itemorden_set.select_related("producto", "color", "talle").all()
     filas = ""
     for item in items:
-        color_txt = item.color.nombre if item.color else "Sin color"
-        talle_txt = item.talle.talle if item.talle else "Sin talle"
-        filas += f"- {item.cantidad}x {item.producto.nombre} | Color: {color_txt} | Talle: {talle_txt} | ${item.precio}\n"
+        color_txt = item.color_compra
+        talle_txt = item.talle_compra
+        details = f'{item.detalle_superior} / {item.detalle_inferior}' if item.detalle_superior else f'Color: {color_txt} | Talle: {talle_txt}'
+        filas += f"- {item.cantidad}x {item.nombre_compra} | {details} | ${item.precio}\n"
 
     texto = (
         f"Nuevo pedido #{orden.pk}\n\n"

@@ -83,7 +83,7 @@ class OrderManagementTests(TestCase):
         session = self.client.session
         session.save()
         cart = Carrito.objects.create(session_key=session.session_key)
-        ItemCarrito.objects.create(carrito=cart, producto=self.product, cantidad=1)
+        ItemCarrito.objects.create(carrito=cart, producto=self.product, color=self.color, talle=self.size, cantidad=1)
         with self.captureOnCommitCallbacks(execute=True):
             response = self.client.post(reverse('checkout'), {'nombre': 'Compradora', 'dni': '12345678', 'email': 'buyer@example.test',
                 'telefono': '3519876543', 'direccion': 'Córdoba', 'envio': self.shipping.pk, 'metodo_pago': 'efectivo'})
@@ -459,13 +459,14 @@ class OrderMigrationTests(TransactionTestCase):
             ids.append(order.pk)
         try:
             executor = MigrationExecutor(connection)
-            executor.migrate([('tienda', '0021_order_tracking_access_email')])
+            executor.migrate([('tienda', '0024_backfill_item_order_history')])
             orders = list(Orden.objects.filter(pk__in=ids).order_by('pk'))
             self.assertEqual([o.estado for o in orders], ['entregado', 'entregado', 'en_proceso', 'cancelado'])
             self.assertEqual([o.pagado for o in orders], [True, False, False, False])
             self.assertEqual(len({o.seguimiento_token for o in orders}), 4)
             self.assertTrue(all(o.dni_hash == '' for o in orders))
             self.assertTrue(all(o.itemorden_set.count() == 1 for o in orders))
+            self.assertTrue(all(o.itemorden_set.get().nombre_historico == 'Histórico' for o in orders))
             self.assertTrue(all(o.despachado_at is None and o.entregado_at is None for o in orders))
             self.assertEqual(orders[0].pago_origen, 'historico')
             self.assertTrue(orders[0].finalizado_historico)
@@ -475,4 +476,4 @@ class OrderMigrationTests(TransactionTestCase):
             response = self.client.get(reverse('seguir_pedido_token', args=[orders[0].seguimiento_token]), follow=True)
             self.assertContains(response, f'Pedido #{orders[0].pk}')
         finally:
-            MigrationExecutor(connection).migrate([('tienda', '0021_order_tracking_access_email')])
+            MigrationExecutor(connection).migrate([('tienda', '0024_backfill_item_order_history')])

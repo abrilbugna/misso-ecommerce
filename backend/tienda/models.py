@@ -74,6 +74,10 @@ class NewsletterContacto(models.Model):
         return self.email
 
 class Producto(models.Model):
+    TIPO_CHOICES = [('individual', 'Producto individual'), ('conjunto', 'Conjunto')]
+    tipo = models.CharField(max_length=12, choices=TIPO_CHOICES, default='individual')
+    parte_superior = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='conjuntos_superiores')
+    parte_inferior = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='conjuntos_inferiores')
     nombre = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
@@ -81,6 +85,24 @@ class Producto(models.Model):
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='otros')
     creado = models.DateTimeField(auto_now_add=True)
     destacado = models.BooleanField(default=False)
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.tipo == 'conjunto':
+            if self.pk and (self.conjuntos_superiores.exists() or self.conjuntos_inferiores.exists()):
+                raise ValidationError('Esta prenda integra otros conjuntos y debe seguir siendo individual.')
+            if not self.parte_superior_id or not self.parte_inferior_id:
+                raise ValidationError('Elegí una prenda superior y una inferior.')
+            if self.pk and self.pk in (self.parte_superior_id, self.parte_inferior_id):
+                raise ValidationError('Un conjunto no puede incluirse a sí mismo.')
+            if self.parte_superior_id == self.parte_inferior_id:
+                raise ValidationError('Elegí dos prendas diferentes.')
+            if self.parte_superior.tipo != 'individual' or self.parte_inferior.tipo != 'individual':
+                raise ValidationError('Las partes del conjunto deben ser productos individuales.')
+            if self.pk and self.colores.exists():
+                raise ValidationError('Un conjunto no puede tener variantes de inventario propias.')
+        elif self.parte_superior_id or self.parte_inferior_id:
+            raise ValidationError('Solo los conjuntos pueden vincular prendas.')
 
     def __str__(self):
         return self.nombre
@@ -96,10 +118,16 @@ class ColorProducto(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='colores')
     nombre = models.CharField(max_length=50)
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.producto_id and self.producto.tipo == 'conjunto':
+            raise ValidationError('Los conjuntos usan los colores y el stock de sus prendas.')
+
     def __str__(self):
         return f'{self.producto.nombre} — {self.nombre}'
 
 TALLES = [
+    ('XS', 'XS'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL'),
     ('85', '85'),
     ('90', '90'),
     ('95', '95'),
@@ -151,6 +179,7 @@ class ItemCarrito(models.Model):
     cantidad = models.IntegerField(default=1)
     color = models.ForeignKey(ColorProducto, on_delete=models.SET_NULL, null=True, blank=True)
     talle = models.ForeignKey(TalleProducto, on_delete=models.SET_NULL, null=True, blank=True)
+    talle_inferior = models.ForeignKey(TalleProducto, on_delete=models.SET_NULL, null=True, blank=True, related_name='items_carrito_inferiores')
 
     def subtotal(self):
         return self.producto.precio * self.cantidad
@@ -255,11 +284,29 @@ class IntentoSeguimiento(models.Model):
 
 class ItemOrden(models.Model):
     orden = models.ForeignKey(Orden, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.IntegerField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     color = models.ForeignKey(ColorProducto, on_delete=models.SET_NULL, null=True, blank=True)
-    talle = models.ForeignKey(TalleProducto, on_delete=models.SET_NULL, null=True, blank=True)
+    talle = models.ForeignKey(TalleProducto, on_delete=models.PROTECT, null=True, blank=True)
+    talle_inferior = models.ForeignKey(TalleProducto, on_delete=models.PROTECT, null=True, blank=True, related_name='items_orden_inferiores')
+    nombre_historico = models.CharField(max_length=200, blank=True)
+    color_historico = models.CharField(max_length=50, blank=True)
+    talle_historico = models.CharField(max_length=10, blank=True)
+    detalle_superior = models.CharField(max_length=300, blank=True)
+    detalle_inferior = models.CharField(max_length=300, blank=True)
+
+    @property
+    def nombre_compra(self):
+        return self.nombre_historico or self.producto.nombre
+
+    @property
+    def color_compra(self):
+        return self.color_historico or (self.color.nombre if self.color else 'Sin color')
+
+    @property
+    def talle_compra(self):
+        return self.talle_historico or (self.talle.talle if self.talle else 'Sin talle')
 
     def subtotal(self):
         return self.precio * self.cantidad

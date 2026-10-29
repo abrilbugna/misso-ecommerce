@@ -8,7 +8,7 @@
       document.documentElement.classList.remove('tracking-motion-pending');
     }, 1200);
   }
-</script><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}?v=tracking-motion-20261023-1">{% endblock %}
+</script><link rel="stylesheet" href="{% static 'css/seguimiento.css' %}?v=tracking-motion-20261023-2">{% endblock %}
 {% block content %}
 <div class="tracking-page">
   <header class="tracking-intro"><h1><span class="tracking-title-part">¿Dónde está</span> <em class="tracking-title-part">tu pedido?</em></h1><p>Consultá el estado de tu compra en MISSO</p></header>
@@ -23,6 +23,7 @@
     {% else %}<p>Recibimos tu pedido y estamos revisando los detalles.</p>{% endif %}{% endif %}
     {% if private_access %}
       <p class="tracking-hint">Estado de pago: <strong>{{ order.pagado|yesno:'Pagado,Pendiente de pago' }}</strong></p>
+      {% if order.items %}<div class="tracking-purchase"><h3>Tu compra</h3>{% for item in order.items %}<p><strong>{{ item.cantidad }} × {{ item.nombre }}</strong> · ${{ item.precio|floatformat:'0g' }}<br>{% if item.superior %}{{ item.superior }}<br>{{ item.inferior }}{% else %}{{ item.color }} · {{ item.talle }}{% endif %}</p>{% endfor %}</div>{% endif %}
       {% if order.despachado_at %}<dl class="tracking-details"><dt>Empresa / modalidad</dt><dd>{{ order.transportista_label }}</dd>{% if order.codigo %}<dt>Código de seguimiento</dt><dd><span class="tracking-code" id="tracking-code">{{ order.codigo }}</span></dd>{% endif %}{% if order.plazo %}<dt>Tiempo estimado</dt><dd>Hasta {{ order.plazo }} días hábiles</dd>{% endif %}</dl>{% endif %}
       {% if order.codigo %}
       <div class="tracking-actions">

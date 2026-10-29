@@ -29,7 +29,7 @@
                     {% if item.color %}
                         <p class="item-precio">Color: {{ item.color.nombre }}</p>
                     {% endif %}
-                    {% if item.talle %}<p class="item-precio">Talle: {{ item.talle.talle }}</p>{% endif %}
+                    {% if item.producto.tipo == 'conjunto' %}<p class="item-precio">{{ item.producto.parte_superior.nombre }} · talle {{ item.talle.talle }}</p><p class="item-precio">{{ item.producto.parte_inferior.nombre }} · talle {{ item.talle_inferior.talle }}</p>{% elif item.talle %}<p class="item-precio">Talle: {{ item.talle.talle }}</p>{% endif %}
                     <p class="item-precio">{{ item.cantidad }} × ${{ item.producto.precio|floatformat:"0g" }}</p>
                 </div>
                 <a href="/tienda/carrito/eliminar/{{ item.pk }}/" class="eliminar" aria-label="Eliminar {{ item.producto.nombre }}">{% include 'tienda/includes/icon.html' with icon='close' %}</a>

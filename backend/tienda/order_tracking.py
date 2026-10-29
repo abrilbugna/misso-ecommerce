@@ -124,6 +124,10 @@ def seguir_pedido(request, token=None):
                 'plazo': order.plazo_dias_habiles if dispatched else None,
                 'despachado_at': order.despachado_at if dispatched else None,
                 'entregado_at': order.entregado_at if order.estado == 'entregado' else None,
+                'items': [{'nombre': item.nombre_compra, 'cantidad': item.cantidad,
+                           'superior': item.detalle_superior, 'inferior': item.detalle_inferior,
+                           'color': item.color_compra, 'talle': item.talle_compra,
+                           'precio': item.precio} for item in order.itemorden_set.select_related('producto', 'color', 'talle')],
             })
         states = [('en_proceso', 'En proceso'), ('confirmado', 'Confirmado'),
                   ('en_envio', 'Listo para retirar' if public['retiro'] else 'En envío'), ('entregado', 'Entregado')]

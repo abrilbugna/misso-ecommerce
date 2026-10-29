@@ -30,7 +30,7 @@ class VideoProductoInline(admin.TabularInline):
 class ItemOrdenInline(admin.TabularInline):
     model = ItemOrden
     extra = 0
-    readonly_fields = ['producto', 'color', 'talle', 'cantidad', 'precio']
+    readonly_fields = ['producto', 'color', 'talle', 'talle_inferior', 'nombre_historico', 'color_historico', 'talle_historico', 'detalle_superior', 'detalle_inferior', 'cantidad', 'precio']
     can_delete = False
 
     def has_add_permission(self, request, obj=None):
@@ -44,12 +44,17 @@ class ColorProductoAdmin(admin.ModelAdmin):
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'precio', 'activo', 'destacado', 'categoria']
+    list_display = ['nombre', 'tipo', 'precio', 'activo', 'destacado', 'categoria']
     list_editable = ['precio', 'activo', 'destacado']
     search_fields = ['nombre']
     list_filter = ['categoria', 'activo', 'destacado']
-    fields = ['nombre', 'descripcion', 'precio', 'categoria', 'activo', 'destacado']
+    fields = ['tipo', 'nombre', 'descripcion', 'precio', 'categoria', 'parte_superior', 'parte_inferior', 'activo', 'destacado']
     inlines = [ColorProductoInline, ImagenProductoInline, VideoProductoInline]
+
+    def get_inlines(self, request, obj):
+        if (obj and obj.tipo == 'conjunto') or (request.method == 'POST' and request.POST.get('tipo') == 'conjunto'):
+            return [ImagenProductoInline, VideoProductoInline]
+        return self.inlines
 
 @admin.register(Carrito)
 class CarritoAdmin(admin.ModelAdmin):

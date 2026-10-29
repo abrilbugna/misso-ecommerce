@@ -16,4 +16,5 @@ urlpatterns = [
     path('pago/mp/retorno/<int:pk>/', views.mercadopago_retorno, name='mercadopago_retorno'),
     path('pago/mp/webhook/', views.mercadopago_webhook, name='mercadopago_webhook'),
     path('talles/<int:color_id>/', views.talles_por_color, name='talles_por_color'),
+    path('talles-conjunto/<int:pk>/<int:color_id>/', views.talles_conjunto, name='talles_conjunto'),
 ]

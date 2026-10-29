@@ -54,3 +54,6 @@ html.tracking-motion-pending .tracking-card:not(:has([role="alert"])){visibility
 .tracking-page:not(.pill-motion-ready) .tracking-button:hover .misso-pill-label{background:var(--burgundy)}
 
 @media(max-width:767px){.tracking-nav.site-bubble-nav.hero-nav .hero-nav-pills{display:none!important}}
+.tracking-purchase{margin:24px 0;padding:18px 0;border-top:1px solid rgba(117,22,56,.18);border-bottom:1px solid rgba(117,22,56,.18)}
+.tracking-purchase h3{margin:0 0 12px;font-size:1rem}
+.tracking-purchase p{margin:12px 0;line-height:1.5}

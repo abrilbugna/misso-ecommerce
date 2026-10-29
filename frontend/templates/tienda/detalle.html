@@ -4,7 +4,7 @@
 {% block title %}{{ producto.nombre }} — Misso{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/detalle.css' %}">
+<link rel="stylesheet" href="{% static 'css/detalle.css' %}?v=sets-1">
 <link rel="stylesheet" href="{% static 'css/purchase.css' %}">
 {% endblock %}
 
@@ -41,7 +41,17 @@
     {% if producto.descripcion %}
     <p class="detalle-descripcion">{{ producto.descripcion }}</p>
     {% endif %}
-    {% if producto.colores.exists %}
+    {% if producto.tipo == 'conjunto' %}
+    <p class="detalle-option-label">Color del conjunto</p>
+    <div class="cores" role="group" aria-label="Color del conjunto">
+      {% for color in colores_conjunto %}<button type="button" class="cor-btn" data-id="{{ color.pk }}" onclick="setColorConjunto({{ color.pk }}, this)" aria-pressed="false">{{ color.nombre }}</button>{% empty %}<p class="msg-aviso visible">Este conjunto no tiene colores compartidos disponibles.</p>{% endfor %}
+    </div>
+    <div class="set-size-group"><p class="detalle-option-label">01 / Elegí el talle del top</p><div class="talles" id="tallesSuperior" role="group" aria-label="Talle del top"></div></div>
+    <div class="set-size-group"><p class="detalle-option-label">02 / Elegí el talle del short</p><div class="talles" id="tallesInferior" role="group" aria-label="Talle del short"></div></div>
+    <p class="msg-aviso {% if error %}visible{% endif %}" id="msgSet" role="status">{% include 'tienda/includes/icon.html' with icon='alert' %} {% if error == 'stock' %}La combinación elegida se agotó. Probá otros talles.{% else %}Elegí color y talle de ambas prendas.{% endif %}</p>
+    <div class="cantidad-wrap"><label for="cantidad">Cantidad</label><div class="cantidad-controles"><button type="button" class="cantidad-btn" onclick="cambiarCantidad(-1)" aria-label="Restar una unidad">−</button><input class="cantidad-num" id="cantidad" type="number" value="1" min="1" max="99" readonly><button type="button" class="cantidad-btn" onclick="cambiarCantidad(1)" aria-label="Sumar una unidad">+</button></div></div>
+    <a id="addBtn" class="btn misso-pill-button misso-pill-right disabled" href="#" aria-disabled="true" tabindex="-1"><span class="misso-pill-label">Agregar al carrito</span><span class="misso-pill-arrow" aria-hidden="true">{% include 'tienda/includes/icon.html' with icon='arrow-up-right' %}</span></a>
+    {% elif producto.colores.exists %}
     <p class="detalle-option-label">01 / Elegí tu color</p>
     <div class="cores">
       {% for color in producto.colores.all %}
@@ -51,10 +61,7 @@
     <p class="msg-aviso {% if error == 'color' %}visible{% endif %}" id="msgColor">{% include 'tienda/includes/icon.html' with icon='alert' %} Seleccioná un color antes de continuar.</p>
     <p class="detalle-option-label">02 / Elegí tu talle</p>
     <div class="talles" id="tallesContainer">
-      <button class="talle-btn" disabled>85</button>
-      <button class="talle-btn" disabled>90</button>
-      <button class="talle-btn" disabled>95</button>
-      <button class="talle-btn" disabled>100</button>
+      <span>Elegí un color para ver los talles.</span>
     </div>
     <p class="msg-aviso {% if error == 'talle' %}visible{% endif %}" id="msgTalle">{% include 'tienda/includes/icon.html' with icon='alert' %} Seleccioná un talle antes de continuar.</p>
     <p class="msg-aviso {% if error == 'stock' %}visible{% endif %}" id="msgStock">{% include 'tienda/includes/icon.html' with icon='alert' %} Sin stock para este color y talle. Probá otra combinación.</p>
@@ -85,6 +92,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/detalle.js' %}" data-producto-id="{{ producto.pk }}"></script>
+<script src="{% static 'js/detalle.js' %}?v=sets-2" data-producto-id="{{ producto.pk }}" data-tipo="{{ producto.tipo }}"></script>
 {% include 'tienda/includes/purchase_pill_scripts.html' %}
 {% endblock %}

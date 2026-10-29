@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Orden, TalleProducto
+from .models import Orden
+from .inventory import adjust_locked
 
 EDITABLE_FIELDS = ('estado', 'pagado', 'transportista', 'codigo_seguimiento', 'plazo_dias_habiles')
 REVISION_FIELDS = ('estado', 'pagado', 'version', 'pago_origen', 'mp_payment_id',
@@ -84,16 +85,13 @@ def _adjust_stock(order, new_state):
         return
     quantities = Counter()
     for item in order.itemorden_set.all():
+        if item.cantidad <= 0:
+            raise ValidationError('El pedido tiene cantidades inválidas. Revisá sus ítems.')
         if item.talle_id:
-            if item.cantidad <= 0:
-                raise ValidationError('El pedido tiene cantidades inválidas. Revisá sus ítems.')
             quantities[item.talle_id] += item.cantidad
-    for size in TalleProducto.objects.select_for_update().filter(pk__in=quantities).order_by('pk'):
-        stock = size.stock + delta * quantities[size.pk]
-        if stock < 0:
-            raise ValidationError(f'No hay stock suficiente para reactivar {size.color.nombre}, talle {size.talle}.')
-        size.stock = stock
-        size.save(update_fields=['stock'])
+        if item.talle_inferior_id:
+            quantities[item.talle_inferior_id] += item.cantidad
+    adjust_locked(quantities, delta)
 
 
 @transaction.atomic

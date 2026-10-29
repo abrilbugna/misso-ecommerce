@@ -46,7 +46,7 @@ class PublicStorefrontTests(TestCase):
         self.assert_product_only(response)
         for content in ('NUEVA', 'COLECCIÓN', 'VER PRODUCTOS', 'Deslizá para más',
                         'img/letram.svg', 'collection-product', 'intro-carousel',
-                        'Diseñados, pensados y confeccionados...', '<h2 id="intro-title">Para vos</h2>',
+                        'Diseñados, pensados y confeccionados...', '<h2 id="intro-title">Para <em>vos</em></h2>',
                         'Conjuntos cómodos, tabla de talles y la opción de elegir un talle distinto para cada parte en los conjuntos!'):
             self.assertContains(response, content)
         self.assertContains(response, '<video ', count=3)

@@ -66,7 +66,8 @@ def inicio(request):
 @panel_required('tienda.view_producto')
 def productos(request):
     form = ProductoFilterForm(request.GET)
-    products = Producto.objects.prefetch_related('imagenes', 'colores__talles').order_by('-creado')
+    products = Producto.objects.select_related('parte_superior', 'parte_inferior').prefetch_related(
+        'imagenes', 'colores__talles', 'parte_superior__colores__talles', 'parte_inferior__colores__talles').order_by('-creado')
     if form.is_valid():
         data = form.cleaned_data
         if data['q']:
@@ -77,24 +78,30 @@ def productos(request):
         if data['categoria']:
             products = products.filter(categoria=data['categoria'])
         stock = data['stock']
-        if stock == 'zero':
-            products = products.exclude(colores__talles__stock__gt=0).filter(colores__talles__isnull=False)
-        elif stock == 'low':
-            products = products.filter(colores__talles__stock__gt=0, colores__talles__stock__lte=LOW_STOCK_LIMIT)
-        elif stock == 'available':
-            products = products.filter(colores__talles__stock__gt=0)
-        elif stock == 'unconfigured':
-            products = products.exclude(colores__talles__isnull=False)
     else:
         products = products.none()
-    context = page_context(request, products.distinct())
-    for product in context['page']:
+        stock = ''
+    product_list = list(products.distinct())
+    for product in product_list:
         colors = list(product.colores.all())
         sizes = [size for color in colors for size in color.talles.all()]
         product.panel_stock = sum(size.stock for size in sizes)
         product.panel_colors = len(colors)
         product.panel_variants = len(sizes)
+        if product.tipo == 'conjunto' and product.parte_superior_id and product.parte_inferior_id:
+            top = {c.nombre.casefold(): sum(s.stock for s in c.talles.all()) for c in product.parte_superior.colores.all()}
+            bottom = {c.nombre.casefold(): sum(s.stock for s in c.talles.all()) for c in product.parte_inferior.colores.all()}
+            product.panel_stock = sum(min(count, bottom.get(name, 0)) for name, count in top.items())
+            product.panel_colors = len(top.keys() & bottom.keys())
+            product.panel_variants = 0
         product.panel_image = next(iter(product.imagenes.all()), None)
+    if stock:
+        product_list = [p for p in product_list if (
+            (stock == 'zero' and p.panel_colors and p.panel_stock == 0)
+            or (stock == 'low' and 0 < p.panel_stock <= LOW_STOCK_LIMIT)
+            or (stock == 'available' and p.panel_stock > 0)
+            or (stock == 'unconfigured' and not p.panel_colors))]
+    context = page_context(request, product_list)
     return render(request, 'panel/productos.html', {**context, 'filter_form': form, 'section': 'productos'})
 
 

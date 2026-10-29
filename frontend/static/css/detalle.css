@@ -55,3 +55,7 @@
   .cantidad-num { width: 36px; font-size: 13px; height: 32px; }
   .btn { padding: 14px; font-size: 11px; }
 }
+.set-size-group{padding:18px 0;border-top:1px solid rgba(117,22,56,.18)}
+.set-size-group .detalle-option-label{margin:0 0 14px}
+.set-size-group .talles{display:flex;flex-wrap:wrap;gap:10px;min-height:42px}
+.set-size-group .talle-btn:disabled{cursor:not-allowed;opacity:.4}

@@ -18,7 +18,7 @@
 {% if order.transportista == 'correo_argentino' %}<p style="font-size:13px;line-height:1.6;text-align:center;"><a href="https://www.correoargentino.com.ar/seguimiento-de-envios" style="color:#4a0d22;">También podés consultar tu envío en Correo Argentino.</a><br>Copiá el código de arriba para consultar sus movimientos.</p>{% endif %}
 <h2 style="font-size:16px;margin:28px 0 8px;">Un resumen de tu pedido</h2>
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-{% for item in items %}<tr><td style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">{{ item.cantidad }} × {{ item.producto.nombre }}<br><span style="font-size:12px;">{{ item.color.nombre|default:'Sin color' }} · {{ item.talle.talle|default:'Sin talle' }}</span></td><td align="right" style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">${{ item.subtotal|floatformat:'0g' }}</td></tr>{% endfor %}
+{% for item in items %}<tr><td style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">{{ item.cantidad }} × {{ item.nombre_compra }}<br><span style="font-size:12px;">{% if item.detalle_superior %}{{ item.detalle_superior }}<br>{{ item.detalle_inferior }}{% else %}{{ item.color_compra }} · {{ item.talle_compra }}{% endif %}</span></td><td align="right" style="padding:12px 0;border-bottom:1px solid #f0d6da;font-size:14px;">${{ item.subtotal|floatformat:'0g' }}</td></tr>{% endfor %}
 <tr><td style="padding:16px 0;"><strong>Total</strong></td><td align="right" style="padding:16px 0;"><strong>${{ order.total|floatformat:'0g' }}</strong></td></tr>
 </table>
 </td></tr>

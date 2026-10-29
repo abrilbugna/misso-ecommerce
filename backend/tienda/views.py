@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import transaction
+from django.db import transaction, OperationalError
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional
+from .models import Producto, Carrito, ItemCarrito, Orden, ItemOrden, CATEGORIAS, ColorProducto, TalleProducto, CodigoPromocional, OpcionEnvio
 from .forms import CheckoutForm
 from .order_identity import dni_digest
 from django.views.decorators.debug import sensitive_post_parameters
@@ -14,6 +14,8 @@ from .order_access import remember_checkout, can_access_order
 import mercadopago
 from django.conf import settings
 from django.http import JsonResponse
+from django.core.exceptions import ValidationError
+from .inventory import requirements, adjust_locked
 import json
 
 
@@ -100,9 +102,15 @@ def detalle(request, pk):
         pk=pk
     )
     error = request.GET.get('error', '')
+    colores_conjunto = []
+    if producto.tipo == 'conjunto' and producto.parte_superior_id and producto.parte_inferior_id:
+        top_colors = ColorProducto.objects.filter(producto=producto.parte_superior).prefetch_related('talles')
+        bottom_names = {c.casefold() for c in ColorProducto.objects.filter(producto=producto.parte_inferior).values_list('nombre', flat=True)}
+        colores_conjunto = [c for c in top_colors if c.nombre.casefold() in bottom_names]
     return render(request, 'tienda/detalle.html', {
         'producto': producto,
-        'error': error
+        'error': error,
+        'colores_conjunto': colores_conjunto,
     })
 
 
@@ -115,17 +123,61 @@ def talles_por_color(request, color_id):
     return JsonResponse({'talles': talles})
 
 
+def talles_conjunto(request, pk, color_id):
+    producto = get_object_or_404(Producto, pk=pk, tipo='conjunto', activo=True)
+    top_color = get_object_or_404(ColorProducto, pk=color_id, producto_id=producto.parte_superior_id)
+    bottom_color = ColorProducto.objects.filter(producto_id=producto.parte_inferior_id, nombre__iexact=top_color.nombre).first()
+    if bottom_color is None:
+        return JsonResponse({'superior': [], 'inferior': []})
+    def sizes(color):
+        return [{'id': size.pk, 'talle': size.talle, 'stock': size.stock} for size in color.talles.order_by('talle')]
+    return JsonResponse({'superior': sizes(top_color), 'inferior': sizes(bottom_color)})
+
+
+@transaction.atomic
 def agregar_carrito(request, pk):
-    producto = get_object_or_404(Producto, pk=pk)
+    producto = get_object_or_404(Producto, pk=pk, activo=True)
 
     color_id = request.GET.get('color')
     talle_id = request.GET.get('talle')
-    cantidad = int(request.GET.get('cantidad', 1))
+    try:
+        cantidad = int(request.GET.get('cantidad', 1))
+    except (ValueError, TypeError):
+        cantidad = 0
+    if not 1 <= cantidad <= 99:
+        return redirect(f'/tienda/{pk}/?error=cantidad')
 
     if not request.session.session_key:
         request.session.create()
 
     carrito, _ = Carrito.objects.get_or_create(session_key=request.session.session_key)
+    carrito = Carrito.objects.select_for_update().get(pk=carrito.pk)
+
+    if producto.tipo == 'conjunto':
+        bottom_id = request.GET.get('talle_inferior')
+        if not color_id or not talle_id or not bottom_id:
+            return redirect(f'/tienda/{pk}/?error=talle')
+        top_color = get_object_or_404(ColorProducto, pk=color_id, producto_id=producto.parte_superior_id)
+        top = get_object_or_404(TalleProducto, pk=talle_id, color=top_color)
+        bottom = get_object_or_404(TalleProducto, pk=bottom_id, color__producto_id=producto.parte_inferior_id,
+                                  color__nombre__iexact=top_color.nombre)
+        item, created = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto, color=top_color,
+                                                          talle=top, talle_inferior=bottom)
+        wanted = item.cantidad + cantidad if not created else cantidad
+        if top.stock < wanted or bottom.stock < wanted:
+            if created:
+                item.delete()
+            return redirect(f'/tienda/{pk}/?error=stock')
+        item.cantidad = wanted
+        item.save(update_fields=['cantidad'])
+        if not _cart_has_stock(carrito):
+            if created:
+                item.delete()
+            else:
+                item.cantidad -= cantidad
+                item.save(update_fields=['cantidad'])
+            return redirect(f'/tienda/{pk}/?error=stock')
+        return redirect(f'/tienda/{pk}/?agregado=1')
 
     if not producto.colores.exists():
         item, creado = ItemCarrito.objects.get_or_create(
@@ -138,6 +190,8 @@ def agregar_carrito(request, pk):
             item.cantidad += cantidad
         else:
             item.cantidad = cantidad
+        if item.cantidad > 99:
+            return redirect(f'/tienda/{pk}/?error=cantidad')
         item.save()
         return redirect('ver_carrito')
 
@@ -150,7 +204,7 @@ def agregar_carrito(request, pk):
     color = get_object_or_404(ColorProducto, pk=color_id, producto=producto)
     talle = get_object_or_404(TalleProducto, pk=talle_id, color=color)
 
-    if talle.stock <= 0:
+    if talle.stock < cantidad:
         return redirect(f'/tienda/{pk}/?error=stock&color={color_id}&talle={talle_id}')
 
     item, creado = ItemCarrito.objects.get_or_create(
@@ -163,9 +217,30 @@ def agregar_carrito(request, pk):
         item.cantidad += cantidad
     else:
         item.cantidad = cantidad
+    if item.cantidad > talle.stock or item.cantidad > 99:
+        if creado:
+            item.delete()
+        return redirect(f'/tienda/{pk}/?error=stock&color={color_id}&talle={talle_id}')
     item.save()
+    if not _cart_has_stock(carrito):
+        if creado:
+            item.delete()
+        else:
+            item.cantidad -= cantidad
+            item.save(update_fields=['cantidad'])
+        return redirect(f'/tienda/{pk}/?error=stock&color={color_id}&talle={talle_id}')
 
     return redirect(f'/tienda/{pk}/?agregado=1')
+
+
+def _cart_has_stock(carrito):
+    try:
+        quantities = requirements(ItemCarrito.objects.select_related(
+            'producto', 'talle__color', 'talle_inferior__color').filter(carrito=carrito))
+    except ValidationError:
+        return False
+    stocks = dict(TalleProducto.objects.filter(pk__in=quantities).values_list('pk', 'stock'))
+    return all(stocks.get(pk, -1) >= count for pk, count in quantities.items())
 
 
 def ver_carrito(request):
@@ -238,8 +313,12 @@ def eliminar_codigo(request):
     return redirect('ver_carrito')
 
 
+@transaction.atomic
 def eliminar_carrito(request, pk):
-    item = get_object_or_404(ItemCarrito, pk=pk)
+    if not request.session.session_key:
+        return redirect('ver_carrito')
+    carrito = get_object_or_404(Carrito.objects.select_for_update(), session_key=request.session.session_key)
+    item = get_object_or_404(ItemCarrito, pk=pk, carrito=carrito)
     item.delete()
     return redirect('ver_carrito')
 
@@ -277,54 +356,92 @@ def checkout(request):
         if form.is_valid():
             envio = form.cleaned_data['envio']
             metodo_pago = form.cleaned_data['metodo_pago']
-            total_sin_recargo = subtotal - descuento + envio.costo
-            total = (
-                _total_mercadopago(total_sin_recargo)
-                if metodo_pago == 'mercadopago'
-                else total_sin_recargo
-            )
-
-            with transaction.atomic():
-                orden = Orden.objects.create(
-                    nombre=form.cleaned_data['nombre'],
-                    email=form.cleaned_data['email'],
-                    telefono=form.cleaned_data['telefono'],
-                    direccion=form.cleaned_data['direccion'],
-                    envio=envio,
-                    metodo_pago=metodo_pago,
-                    subtotal=subtotal,
-                    descuento=descuento,
-                    codigo_promo=codigo_obj,
-                    total=total,
-                    estado='en_proceso',
-                )
-                orden.dni_hash = dni_digest(form.cleaned_data['dni'], orden.seguimiento_token)
-                orden.save(update_fields=['dni_hash'])
-
-                if codigo_obj:
-                    codigo_obj.usos_actuales += 1
-                    codigo_obj.save()
-                    del request.session['codigo_promo']
-
-                items_guardados = []
-                for item in items:
-                    item_orden = ItemOrden.objects.create(
-                        orden=orden,
-                        producto=item.producto,
-                        cantidad=item.cantidad,
-                        precio=item.producto.precio,
-                        color=item.color,
-                        talle=item.talle,
+            try:
+                with transaction.atomic():
+                    Carrito.objects.select_for_update().get(pk=carrito.pk)
+                    product_ids = set(ItemCarrito.objects.filter(carrito=carrito).values_list('producto_id', flat=True))
+                    links = Producto.objects.filter(pk__in=product_ids).values('tipo', 'parte_superior_id', 'parte_inferior_id')
+                    component_ids = {pk for link in links if link['tipo'] == 'conjunto'
+                                     for pk in (link['parte_superior_id'], link['parte_inferior_id']) if pk}
+                    # One sorted lock pass avoids opposite lock orders in mixed carts.
+                    lock_ids = product_ids | component_ids
+                    locked_products = list(Producto.objects.select_for_update().filter(pk__in=lock_ids).order_by('pk'))
+                    if any(p.tipo == 'conjunto' and not {p.parte_superior_id, p.parte_inferior_id} <= lock_ids
+                           for p in locked_products if p.pk in product_ids):
+                        raise ValidationError('La composición del conjunto cambió. Revisá tu carrito antes de confirmar.')
+                    locked_items = list(ItemCarrito.objects.select_for_update(of=('self',)).select_related(
+                        'producto', 'producto__parte_superior', 'producto__parte_inferior',
+                        'color', 'talle__color', 'talle_inferior__color').filter(carrito=carrito).order_by('pk'))
+                    if not locked_items:
+                        raise ValidationError('Tu carrito está vacío. Volvé a elegir los productos.')
+                    envio = OpcionEnvio.objects.select_for_update().filter(pk=envio.pk).first()
+                    if not envio:
+                        raise ValidationError('La opción de envío ya no está disponible. Elegí otra antes de confirmar.')
+                    subtotal = sum(item.subtotal() for item in locked_items)
+                    if codigo_obj:
+                        codigo_obj = CodigoPromocional.objects.select_for_update().filter(pk=codigo_obj.pk).first()
+                        if not codigo_obj or not codigo_obj.es_valido():
+                            raise ValidationError('El código promocional ya no está disponible. Revisá el total antes de confirmar.')
+                        descuento = codigo_obj.calcular_descuento(subtotal)
+                    total_sin_recargo = subtotal - descuento + envio.costo
+                    total = _total_mercadopago(total_sin_recargo) if metodo_pago == 'mercadopago' else total_sin_recargo
+                    quantities = requirements(locked_items)
+                    adjust_locked(quantities, -1)
+                    orden = Orden.objects.create(
+                        nombre=form.cleaned_data['nombre'],
+                        email=form.cleaned_data['email'],
+                        telefono=form.cleaned_data['telefono'],
+                        direccion=form.cleaned_data['direccion'],
+                        envio=envio,
+                        metodo_pago=metodo_pago,
+                        subtotal=subtotal,
+                        descuento=descuento,
+                        codigo_promo=codigo_obj,
+                        total=total,
+                        estado='en_proceso',
                     )
-                    items_guardados.append(item_orden)
-                    if item.talle:
-                        item.talle.stock = max(0, item.talle.stock - item.cantidad)
-                        item.talle.save()
+                    orden.dni_hash = dni_digest(form.cleaned_data['dni'], orden.seguimiento_token)
+                    orden.save(update_fields=['dni_hash'])
 
-                if metodo_pago != 'mercadopago':
-                    queue_initial(orden)
+                    if codigo_obj:
+                        codigo_obj.usos_actuales += 1
+                        codigo_obj.save()
 
-                items.delete()
+                    for item in locked_items:
+                        details = {}
+                        if item.producto.tipo == 'conjunto':
+                            details = {
+                                'detalle_superior': f'{item.producto.parte_superior.nombre} — {item.talle.color.nombre} — {item.talle.talle}',
+                                'detalle_inferior': f'{item.producto.parte_inferior.nombre} — {item.talle_inferior.color.nombre} — {item.talle_inferior.talle}',
+                            }
+                        ItemOrden.objects.create(
+                            orden=orden,
+                            producto=item.producto,
+                            cantidad=item.cantidad,
+                            precio=item.producto.precio,
+                            color=item.color,
+                            talle=item.talle,
+                            talle_inferior=item.talle_inferior,
+                            nombre_historico=item.producto.nombre,
+                            color_historico=item.color.nombre if item.color else '',
+                            talle_historico=item.talle.talle if item.talle else '',
+                            **details,
+                        )
+
+                    if metodo_pago != 'mercadopago':
+                        queue_initial(orden)
+
+                    items.delete()
+                if codigo_obj:
+                    request.session.pop('codigo_promo', None)
+            except (ValidationError, OperationalError) as exc:
+                form.add_error(None, exc if isinstance(exc, ValidationError) else
+                               'No pudimos reservar el stock en este momento. Volvé a intentar.')
+                return render(request, 'tienda/checkout.html', {
+                    'form': form, 'items': items, 'subtotal': subtotal, 'descuento': descuento,
+                    'total_con_descuento': subtotal - descuento, 'codigo_aplicado': codigo_aplicado,
+                    'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
+                })
 
             remember_checkout(request, orden)
 

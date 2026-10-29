@@ -33,9 +33,24 @@ class ProductoForm(forms.ModelForm):
 
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'categoria', 'activo', 'destacado']
+        fields = ['tipo', 'nombre', 'descripcion', 'precio', 'categoria', 'parte_superior', 'parte_inferior', 'activo', 'destacado']
         labels = {'descripcion': 'Descripción', 'categoria': 'Categoría'}
         widgets = {'descripcion': forms.Textarea(attrs={'rows': 4})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tipo'].required = False
+        candidates = Producto.objects.filter(tipo='individual').order_by('nombre')
+        if self.instance.pk:
+            candidates = candidates.exclude(pk=self.instance.pk)
+        for field in ('parte_superior', 'parte_inferior'):
+            self.fields[field].queryset = candidates
+            self.fields[field].required = False
+        self.fields['parte_superior'].label = 'Parte superior (top)'
+        self.fields['parte_inferior'].label = 'Parte inferior (short)'
+
+    def clean_tipo(self):
+        return self.cleaned_data.get('tipo') or self.instance.tipo or 'individual'
 
 
 class ColorForm(forms.ModelForm):
@@ -47,7 +62,8 @@ class ColorForm(forms.ModelForm):
     def clean_nombre(self):
         name = self.cleaned_data['nombre'].strip()
         if self.instance.pk and name != self.instance.nombre:
-            if self.instance.itemorden_set.exists() or TalleProducto.objects.filter(color=self.instance, itemorden__isnull=False).exists():
+            if (self.instance.itemorden_set.exists() or TalleProducto.objects.filter(color=self.instance, itemorden__isnull=False).exists()
+                    or TalleProducto.objects.filter(color=self.instance, items_orden_inferiores__isnull=False).exists()):
                 raise forms.ValidationError('Este color está utilizado en pedidos. Conservá su nombre histórico y agregá otro color.')
         return name
 
@@ -61,7 +77,7 @@ class TalleForm(forms.ModelForm):
 
     def clean_talle(self):
         value = self.cleaned_data['talle']
-        if self.instance.pk and value != self.instance.talle and self.instance.itemorden_set.exists():
+        if self.instance.pk and value != self.instance.talle and (self.instance.itemorden_set.exists() or self.instance.items_orden_inferiores.exists()):
             raise forms.ValidationError('Este talle está utilizado en pedidos. Agregá una variante nueva.')
         return value
 
@@ -151,7 +167,7 @@ class VideoForm(MediaFormMixin, forms.ModelForm):
 
 
 ColorFormSet = inlineformset_factory(Producto, ColorProducto, form=ColorForm, formset=ColorFormSetBase, extra=0, can_delete=False, max_num=50, validate_max=True, absolute_max=60)
-TalleFormSet = inlineformset_factory(ColorProducto, TalleProducto, form=TalleForm, formset=ScopedInlineFormSet, extra=0, can_delete=False, max_num=4, validate_max=True, absolute_max=8)
+TalleFormSet = inlineformset_factory(ColorProducto, TalleProducto, form=TalleForm, formset=ScopedInlineFormSet, extra=0, can_delete=False, max_num=12, validate_max=True, absolute_max=16)
 ImagenFormSet = inlineformset_factory(Producto, ImagenProducto, form=ImagenForm, formset=ScopedInlineFormSet, extra=0, can_delete=True, max_num=50, validate_max=True, absolute_max=60)
 VideoFormSet = inlineformset_factory(Producto, VideoProducto, form=VideoForm, formset=ScopedInlineFormSet, extra=0, can_delete=True, max_num=20, validate_max=True, absolute_max=25)
 

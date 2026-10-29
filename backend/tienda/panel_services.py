@@ -57,6 +57,10 @@ class ProductoEditor:
             if any(f.has_changed() for f in group['sizes']) and not group['form'].cleaned_data.get('nombre'):
                 group['form'].add_error('nombre', 'Nombrá el color de estas variantes.')
                 valid.append(False)
+        if self.form.cleaned_data.get('tipo') == 'conjunto':
+            if any(g['form'].has_changed() or any(f.has_changed() for f in g['sizes']) for g in self.groups):
+                self.form.add_error(None, 'El conjunto usa el inventario de las prendas vinculadas. No agregues colores ni stock propios.')
+                valid.append(False)
         if self.images.deleted_forms or self.videos.deleted_forms:
             if not self.confirm.cleaned_data.get('confirm_delete'):
                 self.confirm.add_error('confirm_delete', 'Confirmá la eliminación de los archivos marcados.')
@@ -82,8 +86,10 @@ class ProductoEditor:
     @transaction.atomic
     def save(self, user):
         self.check_permissions(user)
+        lock_ids = {pk for pk in (self.instance.pk, self.instance.parte_superior_id,
+                                 self.instance.parte_inferior_id) if pk}
+        locked = {p.pk: p for p in Producto.objects.select_for_update().filter(pk__in=lock_ids).order_by('pk')}
         if self.instance.pk:
-            Producto.objects.select_for_update().get(pk=self.instance.pk)
             list(TalleProducto.objects.select_for_update().filter(color__producto=self.instance).order_by('pk'))
         try:
             revision = signing.loads(self.confirm.cleaned_data['revision'], salt='panel.product')
@@ -91,6 +97,15 @@ class ProductoEditor:
             raise ValidationError('La ficha venció. Recargá antes de guardar.')
         if revision != {'pk': self.instance.pk, 'digest': fingerprint(self.instance)}:
             raise ValidationError('El producto o su stock cambió mientras editabas. Recargá la ficha para evitar sobrescribirlo.')
+        # ModelForm validation happened before acquiring locks. Refresh linked
+        # products so a concurrent edit cannot create a nested/circular set.
+        for field in ('parte_superior', 'parte_inferior'):
+            pk = getattr(self.instance, field + '_id')
+            if pk:
+                if pk not in locked:
+                    raise ValidationError('Una prenda vinculada ya no está disponible. Recargá la ficha.')
+                setattr(self.instance, field, locked[pk])
+        self.instance.full_clean()
         product = self.form.save()
         saved_colors = {}
         for group in self.groups:
